@@ -163,6 +163,10 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Herb of Paris (Paris quadrifolia): 1
 - Mugwort: 1
 - Mimosa pudica (sensitive plant): 1
+- Henbane (species unspecified): 1
+- Butcher's Button (common name, botanical identity to verify): 1
+- Foxglove (species unspecified): 1
+- Anise (Pimpinella anisum): 1
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
