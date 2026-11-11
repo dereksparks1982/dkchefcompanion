@@ -166,7 +166,9 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Henbane (species unspecified): 1
 - Butcher's Button (common name, botanical identity to verify): 1
 - Foxglove (species unspecified): 1
-- Anise (Pimpinella anisum): 1
+- Green Anise (Pimpinella anisum): 1
+- Florence Fennel: 2
+- Bronze Fennel: 1
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
