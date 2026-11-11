@@ -210,6 +210,10 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Unidentified Wheat (variety unknown): 1 seed lot
 - Winter Rye: 2 commercial packets
 - Bio Bio Quinoa (spelled B-I-O B-I-O; also sounded like 'Bobo'): 1 packet
+- Mint Vanilla Quinoa: 1 packet
+- Bronze Amaranth: 1 packet
+- Green Garnet Amaranth: 1 packet
+- Red Garnet Amaranth: 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
