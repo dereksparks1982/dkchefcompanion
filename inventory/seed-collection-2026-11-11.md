@@ -214,6 +214,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Bronze Amaranth: 1 packet
 - Green Garnet Amaranth: 1 packet
 - Red Garnet Amaranth: 1 packet
+- Blue Fescue: 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
