@@ -162,6 +162,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Rue: 1
 - Herb of Paris (Paris quadrifolia): 1
 - Mugwort: 1
+- Mimosa pudica (sensitive plant): 1
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
