@@ -169,6 +169,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Green Anise (Pimpinella anisum): 1
 - Florence Fennel: 2
 - Bronze Fennel: 1
+- Deadly Nightshade / Belladonna (Atropa belladonna): 1
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
