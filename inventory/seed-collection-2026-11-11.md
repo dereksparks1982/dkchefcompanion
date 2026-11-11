@@ -177,6 +177,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Dill Banquet: 1 commercial packet
 - Dill Mammoth: 1 commercial packet
 - Dill Bouquet: 1 commercial packet
+- Sweet Marjoram (Origanum majorana): 2 commercial packets
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
