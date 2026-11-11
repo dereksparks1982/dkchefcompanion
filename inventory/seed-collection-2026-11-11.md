@@ -203,7 +203,22 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Summer Savory: 1 commercial packet
 - Big Italy Parsley (packet name as spoken): 1 commercial packet
 
-### Grains and grasses
+## Alliums: chives, onions and leeks
+- Garlic Chives (white flowers): 1 commercial packet
+- Regular Chives (pink flowers): 2 commercial packets
+- Yellow Sweet Spanish Long Day Onion: 1 commercial packet
+- Sweet Spanish Yellow Utah Jumbo Onion: 1 commercial packet
+- Evergreen Bunching Onion: 2 commercial packets
+- Granex Yellow Hybrid Onion: 1 commercial packet
+- Red Burgundy Short Day Onion: 1 commercial packet
+- Texas Early Grano Onion: 1 commercial packet
+- Crystal White Wax Onion: 1 commercial packet
+- Tokyo Long White Scallion Onion: 1 commercial packet
+- Red Creole Onion: 1 commercial packet
+- American Flag Leek: 2 commercial packets
+- Giant Musselburgh Leek: 1 commercial packet (spoken as “Giant muscle bur”)
+
+## Grains and grasses
 - Common Cat Grass (species unspecified): 1 commercial packet
 - Black Ornamental Wheat / Black Night Wheat: 1 commercial packet
 - Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 seed lot
