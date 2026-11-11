@@ -208,6 +208,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Black Ornamental Wheat / Black Night Wheat: 1 commercial packet
 - Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 seed lot
 - Unidentified Wheat (variety unknown): 1 seed lot
+- Winter Rye: 2 commercial packets
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
