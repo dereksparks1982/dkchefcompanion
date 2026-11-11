@@ -125,6 +125,19 @@ const referenceGuides={
 const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Fiber and historical crops":"🌱"};
 const checkedPhotoCatalog=window.DKSeedBankVarietyImages||{};
 const photoPreferenceKey="dk-seedbank-photo-view-v2";
+const remoteImageStorageKey="dk-seedbank-remote-image-urls-v1";
+let remoteImageUrls=field(remoteImageStorageKey,{});
+if(!remoteImageUrls||typeof remoteImageUrls!=="object"||Array.isArray(remoteImageUrls))remoteImageUrls={};
+function validImageLink(value){
+ if(typeof value!=="string"||value.length>2048)return false;
+ try{const url=new URL(value);return (url.protocol==="https:"||url.protocol==="http:")&&!url.username&&!url.password;}
+ catch(e){return false;}
+}
+function savedImageLink(p,kind){
+ const urls=remoteImageUrls[p.key];
+ return urls&&validImageLink(urls[kind])?urls[kind]:null;
+}
+function saveImageLinks(){return save(remoteImageStorageKey,remoteImageUrls);}
 let photoPreferences=field(photoPreferenceKey,{});
 const plants=new Map();
 const wikiCache=new Map();
@@ -185,6 +198,10 @@ function tagContent(card){
   '<div class="seed-photo-tools" aria-label="Your photos">'+
    '<label>📷 Add / replace plant photo<input class="upload-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace plant photo of '+esc(name)+'"></label>'+
    '<label>📦 Add / replace packet photo<input class="upload-packet-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace packet photo of '+esc(name)+'"></label></div>'+
+   '<div class="photo-url-tools" aria-label="Pictures from the web">'+
+   '<div class="photo-url-field" data-kind="plant"><label>Plant picture web address<input class="remote-photo-input" type="url" maxlength="2048" placeholder="https://example.org/variety.jpg" aria-label="Plant picture URL for '+esc(name)+'"></label><div class="photo-url-actions"><button type="button" class="preview-photo-url">Preview plant image</button><button type="button" class="save-photo-url">Save plant URL</button><button type="button" class="delete-photo-url" hidden>Remove plant URL</button></div><img class="remote-photo-preview" alt="Preview of plant image" hidden><p class="remote-photo-feedback" role="status" aria-live="polite">Paste a direct picture link, not a webpage address.</p></div>'+
+   '<div class="photo-url-field" data-kind="packet"><label>Seed-packet picture web address<input class="remote-photo-input" type="url" maxlength="2048" placeholder="https://example.org/packet.jpg" aria-label="Seed packet picture URL for '+esc(name)+'"></label><div class="photo-url-actions"><button type="button" class="preview-photo-url">Preview packet image</button><button type="button" class="save-photo-url">Save packet URL</button><button type="button" class="delete-photo-url" hidden>Remove packet URL</button></div><img class="remote-photo-preview" alt="Preview of seed packet image" hidden><p class="remote-photo-feedback" role="status" aria-live="polite">You do not have to download the picture first.</p></div>'+
+   '</div>'+
    '<div class="photo-switcher" aria-label="Choose which photo appears on card">'+
    '<button type="button" class="photo-mode-button" data-photo-mode="variety" hidden>Show sourced image</button>'+
    '<button type="button" class="photo-mode-button" data-photo-mode="plant" hidden>Show my plant</button>'+
@@ -276,12 +293,12 @@ search.addEventListener("input",()=>{queueMicrotask(applyExtraFilters);});
 const clearOriginal=document.getElementById("reset");
 clearOriginal.addEventListener("click",()=>{growFilter.value="";photoFilter.value="";queueMicrotask(applyExtraFilters);});
 document.querySelectorAll("[data-jump]").forEach(j=>j.addEventListener("click",()=>{growFilter.value="";photoFilter.value="";queueMicrotask(applyExtraFilters);}));
-const planner=document.createElement("section");planner.id="growPlanner";
-planner.innerHTML='<h2>🌱 Growing Planner</h2><p>Choose a region and growing setup. Alaska varies enormously from town to town; planting dates depend on your actual frost dates and greenhouse heating.</p>'+
+const planner=document.createElement("details");planner.id="growPlanner";
+planner.innerHTML='<summary>🌱 Growing Planner</summary><div class="planner-body"><p>Choose a region and growing setup. Alaska varies enormously from town to town; planting dates depend on your actual frost dates and greenhouse heating.</p>'+
 '<div class="planner-controls"><label>Growing region<select id="regionSelect"><option value="alaska">Alaska (location TBD)</option><option value="kansas">Kansas</option><option value="custom">Other location</option></select></label>'+
 '<label>Growing space<select id="envSelect"><option value="outdoors">Outdoor garden</option><option value="unheated">Unheated greenhouse</option><option value="heated">Heated greenhouse</option><option value="indoors">Indoors / grow lights</option></select></label>'+
 '<label>Expected last spring frost<input id="frostDate" type="date" aria-label="Estimated last spring frost date"></label></div><div class="journal-toolbar"><button class="journal-btn" id="plantNow" type="button">🌱 What could I plant now?</button></div><div id="plantNowResult" class="plant-now" hidden></div>'+
-'<p id="plannerNotice" role="status">Set your expected last spring frost to calculate approximate sowing windows.</p>';
+'<p id="plannerNotice" role="status">Set your expected last spring frost to calculate approximate sowing windows.</p></div>';
 document.querySelector(".controls").insertAdjacentElement("afterend",planner);
 document.getElementById("regionSelect").value=settings.region;
 document.getElementById("envSelect").value=settings.environment;
@@ -323,7 +340,7 @@ document.getElementById("plantNow").addEventListener("click",()=>{
   esc(isProtected?"Heated and indoor growing also requires enough light, warmth and space. This is a starter shortlist, not a guarantee.":"These are rough schedule matches. Check soil temperature, weather, species and the actual microclimate before planting.")+"</p>"+
   (relevant.length?"<ul>"+relevant.map(p=>"<li>"+esc(p.name)+" · "+esc(p.guide.depth)+" deep</li>").join("")+"</ul>":"<p>No reliable outdoor sowing matches for this date and setup. Try a greenhouse option or adjust your frost date.</p>");
 });
-const section=document.createElement("details");section.id="seedJournal";section.open=true;
+const section=document.createElement("details");section.id="seedJournal";
 section.innerHTML='<summary>📔 Planting Journal · <span id="journalCount">8 recorded plantings</span></summary>'+
 '<div class="journal-body"><p class="journal-note">Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.</p>'+
 '<div class="journal-toolbar"><button class="journal-btn primary" id="addJournal" type="button">＋ Record planting</button><button class="journal-btn" id="exportJournal" type="button">↓ Export backup (with photos)</button><label class="journal-btn" style="cursor:pointer">↑ Import backup<input id="importJournal" type="file" accept="application/json,.json" hidden></label></div>'+
@@ -406,7 +423,7 @@ function commonsFilePage(meta){return "https://commons.wikimedia.org/wiki/File:"
 function commonsImageUrl(meta){return "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(meta.file.replace(/ /g,"_"))+"?width=560";}
 function availablePhotoUrls(p){
  const match=photoMatch(p);
- return {variety:match?commonsImageUrl(match):null,plant:userPhotos.get(p.key)||null,packet:packetPhotos.get(p.key)||null};
+ return {variety:match?commonsImageUrl(match):null,plant:savedImageLink(p,"plant")||userPhotos.get(p.key)||null,packet:savedImageLink(p,"packet")||packetPhotos.get(p.key)||null};
 }
 function showPhoto(p){
  const img=p.card.querySelector(".seed-thumb img");
@@ -421,7 +438,11 @@ function showPhoto(p){
   const meta=photoMatch(p);
   credit.appendChild(document.createTextNode("Photographer: "+meta.author+" · License: "+meta.license+" · "));
   const a=document.createElement("a");a.href=commonsFilePage(meta);a.target="_blank";a.rel="noopener noreferrer";a.textContent="Original image, source and licensing details";credit.appendChild(a);
- }else credit.textContent="Your photograph is stored on this browser, not on GitHub. Use Export backup to preserve it.";
+ }else if(savedImageLink(p,mode)){
+  const link=document.createElement("a");link.href=savedImageLink(p,mode);link.target="_blank";link.rel="noopener noreferrer";link.textContent="Original image address";
+  credit.appendChild(document.createTextNode("Web picture selected by you. Check the original website for usage rights. "));
+  credit.appendChild(link);
+ }else credit.textContent="Your uploaded photograph is stored on this browser. Export a backup to preserve it.";
  if(typeof photoDialog.showModal==="function")photoDialog.showModal();
  else photoDialog.setAttribute("open","");
 }
@@ -447,8 +468,8 @@ function refreshPhoto(p){
   thumb.title="Enlarge "+(mode==="packet"?"your packet photo":mode==="plant"?"your plant photo":"the sourced variety photo");
  }
  let status="No exact variety photo verified";
- if(mode==="plant")status="Showing your plant photo";
- else if(mode==="packet")status="Showing your packet photo";
+ if(mode==="plant")status=savedImageLink(p,"plant")?"Showing your linked plant photograph":"Showing your plant photo";
+ else if(mode==="packet")status=savedImageLink(p,"packet")?"Showing your linked seed packet photograph":"Showing your packet photo";
  else if(mode==="variety")status=match.level==="cultivar"?"Photo of named cultivar":match.level==="type"?"Matching plant type · strain unverified":match.level==="species"?"Correct species · exact seed strain unknown":"One example of this seed blend";
  p.card.querySelector(".seed-photo-state").textContent=status;
  p.card.dataset.userPhoto=(images.plant||images.packet)?"yes":"no";
@@ -461,8 +482,18 @@ function refreshPhoto(p){
  for(const button of p.card.querySelectorAll("[data-photo-mode]")){
   const kind=button.dataset.photoMode;button.hidden=!images[kind];button.setAttribute("aria-pressed",String(kind===mode));
  }
- p.card.querySelector(".remove-photo").hidden=!images.plant;
- p.card.querySelector(".remove-packet-photo").hidden=!images.packet;
+ p.card.querySelector(".remove-photo").hidden=!userPhotos.has(p.key);
+ p.card.querySelector(".remove-packet-photo").hidden=!packetPhotos.has(p.key);
+ for(const kind of ["plant","packet"]){
+  const control=p.card.querySelector('.photo-url-field[data-kind="'+kind+'"]');
+  const stored=savedImageLink(p,kind);
+  control.querySelector(".delete-photo-url").hidden=!stored;
+  const input=control.querySelector(".remote-photo-input");
+  if(document.activeElement!==input)input.value=stored||"";
+ }
+ if(savedImageLink(p,"plant")||savedImageLink(p,"packet")){
+  credit.appendChild(document.createTextNode(" Linked image addresses are saved in your browser and in exported backups."));
+ }
 }
 function choosePhotoMode(p,mode){
  if(!availablePhotoUrls(p)[mode])return;
@@ -471,7 +502,7 @@ function choosePhotoMode(p,mode){
 }
 function openPhotoTools(p){
  const guide=p.card.querySelector(".seed-details");
- if(!guide.open)guide.querySelector("summary").click();
+ if(!guide.open)guide.open=true;
  guide.querySelector(".seed-photo-tools").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 async function storeUpload(p,kind,input){
@@ -484,6 +515,9 @@ async function storeUpload(p,kind,input){
  const target=kind==="packet"?packetPhotos:userPhotos;
  const prior=target.get(p.key);if(prior)URL.revokeObjectURL(prior);
  target.set(p.key,URL.createObjectURL(file));
+ if(remoteImageUrls[p.key]&&remoteImageUrls[p.key][kind]){
+  delete remoteImageUrls[p.key][kind];saveImageLinks();
+ }
  choosePhotoMode(p,kind);
  requestFiltering();
 }
@@ -499,6 +533,72 @@ async function deleteUpload(p,kind){
  delete photoPreferences[p.key];save(photoPreferenceKey,photoPreferences);
  refreshPhoto(p);requestFiltering();
 }
+
+function photoUrlControl(p,kind){return p.card.querySelector('.photo-url-field[data-kind="'+kind+'"]');}
+function commitPictureLink(p,kind,url){
+ const old=remoteImageUrls[p.key];
+ remoteImageUrls[p.key]={...(old||{}),[kind]:url};
+ if(!saveImageLinks()){
+  if(old)remoteImageUrls[p.key]=old;else delete remoteImageUrls[p.key];
+  alert("Browser storage is unavailable; the image address could not be saved.");return;
+ }
+ photoPreferences[p.key]=kind;save(photoPreferenceKey,photoPreferences);
+ refreshPhoto(p);requestFiltering();
+ photoUrlControl(p,kind).querySelector(".remote-photo-feedback").textContent="Saved. This picture is now selected for the card.";
+}
+function previewPictureLink(p,kind,saveAfter){
+ const control=photoUrlControl(p,kind),input=control.querySelector(".remote-photo-input");
+ const preview=control.querySelector(".remote-photo-preview"),feedback=control.querySelector(".remote-photo-feedback");
+ const url=input.value.trim();
+ if(!validImageLink(url)){
+  preview.hidden=true;feedback.textContent="Enter a complete http:// or https:// direct image address.";input.focus();return;
+ }
+ if(input.dataset.previewedUrl===url&&!preview.hidden){
+  if(saveAfter)commitPictureLink(p,kind,url);return;
+ }
+ input.dataset.previewedUrl="";preview.hidden=true;feedback.textContent="Checking picture address…";
+ const img=new Image();
+ img.onload=()=>{
+  if(input.value.trim()!==url)return;
+  preview.src=url;preview.hidden=false;input.dataset.previewedUrl=url;
+  feedback.textContent="Picture preview loaded. Select Save to use it.";
+  if(saveAfter)commitPictureLink(p,kind,url);
+ };
+ img.onerror=()=>{
+  if(input.value.trim()!==url)return;
+  preview.hidden=true;
+  feedback.textContent="Could not display this picture. Use a direct image address (not a store product page). Some sites block external images.";
+ };
+ img.src=url;
+}
+function deletePictureLink(p,kind){
+ if(!savedImageLink(p,kind))return;
+ if(!window.confirm("Remove the linked "+(kind==="packet"?"seed-packet":"plant")+" picture for "+p.name+"?"))return;
+ const old={...remoteImageUrls[p.key]};
+ delete remoteImageUrls[p.key][kind];
+ if(!Object.keys(remoteImageUrls[p.key]).length)delete remoteImageUrls[p.key];
+ if(!saveImageLinks()){remoteImageUrls[p.key]=old;alert("Browser storage is unavailable.");return;}
+ delete photoPreferences[p.key];save(photoPreferenceKey,photoPreferences);
+ const control=photoUrlControl(p,kind),input=control.querySelector(".remote-photo-input");
+ input.value="";input.dataset.previewedUrl="";
+ control.querySelector(".remote-photo-preview").hidden=true;
+ control.querySelector(".remote-photo-feedback").textContent="Picture URL removed.";
+ refreshPhoto(p);requestFiltering();
+}
+plants.forEach(p=>{
+ for(const kind of ["plant","packet"]){
+  const control=photoUrlControl(p,kind),input=control.querySelector(".remote-photo-input");
+  input.value=savedImageLink(p,kind)||"";
+  input.addEventListener("input",()=>{
+   input.dataset.previewedUrl="";
+   control.querySelector(".remote-photo-preview").hidden=true;
+   control.querySelector(".remote-photo-feedback").textContent="Preview or save this image address.";
+  });
+  control.querySelector(".preview-photo-url").addEventListener("click",()=>previewPictureLink(p,kind,false));
+  control.querySelector(".save-photo-url").addEventListener("click",()=>previewPictureLink(p,kind,true));
+  control.querySelector(".delete-photo-url").addEventListener("click",()=>deletePictureLink(p,kind));
+ }
+});
 plants.forEach(p=>{
  const q=p.name.replace(/\([^)]*\)/g,"").replace(/\b(?:spoken name|verify packet|variety unknown)\b/gi,"").trim();
  const searchUrl="https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search="+encodeURIComponent(q+" "+(p.cat==="Tomatoes"?"tomato":p.cat==="Peppers"?"pepper":p.cat==="Carrots"?"carrot":p.cat==="Grains and grasses"?"corn wheat grain":p.cat==="Alliums: chives, onions and leeks"?"chives onion leek":"plant"));
@@ -535,7 +635,7 @@ function downloadJSON(data){
 document.getElementById("exportJournal").addEventListener("click",async()=>{
  const photos=await dbAll();
  const serialized=await Promise.all(photos.map(async ([key,blob])=>({key,data:await fileToDataURL(blob)})));
- downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photos:serialized.filter(x=>x.data)});
+ downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photos:serialized.filter(x=>x.data)});
 });
 document.getElementById("importJournal").addEventListener("change",async e=>{
  const f=e.target.files&&e.target.files[0];if(!f)return;
@@ -547,6 +647,18 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   journal=data.journal.filter(x=>x&&typeof x.plant==="string"&&typeof x.date==="string").slice(0,3000);
   settings=Object.assign(settings,data.settings||{});
   save(storageKey,journal);save(settingsKey,settings);
+  if(data.photoUrls&&typeof data.photoUrls==="object"&&!Array.isArray(data.photoUrls)){
+   for(const [key,record] of Object.entries(data.photoUrls)){
+    if(!plants.has(key)||!record||typeof record!=="object")continue;
+    for(const kind of ["plant","packet"]){
+     if(validImageLink(record[kind])){
+      if(!remoteImageUrls[key])remoteImageUrls[key]={};
+      remoteImageUrls[key][kind]=record[kind];
+     }
+    }
+   }
+   saveImageLinks();
+  }
   for(const item of data.photos||[]){
    if(!item||typeof item.key!=="string"||!(plants.has(item.key)||item.key.endsWith("|packet")&&plants.has(item.key.slice(0,-7)))||typeof item.data!=="string"||!/^data:image\/(jpeg|png|webp);base64,/.test(item.data))continue;
    const blob=await (await fetch(item.data)).blob();if(blob.size>6000000)continue;
@@ -560,7 +672,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   document.getElementById("regionSelect").value=settings.region;
   document.getElementById("envSelect").value=settings.environment;
   document.getElementById("frostDate").value=settings.lastFrost||"";
-  updatePlanner();renderJournal();requestFiltering();alert("Backup restored on this browser.");
+  plants.forEach(p=>refreshPhoto(p));updatePlanner();renderJournal();requestFiltering();alert("Backup restored on this browser.");
  }catch(err){alert("Could not import this backup: "+err.message);}
  e.target.value="";
 });

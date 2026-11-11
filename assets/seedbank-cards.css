@@ -114,3 +114,26 @@
 .seed-thumb img{width:100%;height:100%;object-fit:cover}
 .seed-actions{display:flex;flex-wrap:wrap;gap:7px}
 .seed-actions button{min-height:39px}
+
+/* Consistent, collapsed-by-default Growing Planner / Planting Journal */
+#growPlanner{padding:0;overflow:hidden}
+#growPlanner>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:17px 20px;min-height:56px;font-size:1.03rem;font-weight:800;background:#e9f2e7;color:#24553b}
+#growPlanner>summary::-webkit-details-marker{display:none}
+#growPlanner>summary:after{content:"⌄";font-size:1.22rem;transition:transform .18s}
+#growPlanner[open]>summary:after{transform:rotate(180deg)}
+#growPlanner>summary:hover,#seedJournal>summary:hover{background:#deebda}
+#growPlanner .planner-body{padding:16px 19px 18px}
+#seedJournal:not([open]),#growPlanner:not([open]){min-height:0}
+.photo-url-tools{display:grid;gap:12px;margin-top:13px}
+.photo-url-field{border:1px solid #d5e3d4;border-radius:10px;padding:12px;background:#f7faf6;min-width:0}
+.photo-url-field>label{display:block;font-size:.8rem;font-weight:750;color:#294e38}
+.photo-url-field input{display:block;width:100%;margin:7px 0 0;border:1px solid #afc6b4;background:#fff;color:#173e2c;border-radius:7px;padding:9px 10px;min-height:42px;font:inherit;font-size:.82rem}
+.photo-url-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.photo-url-actions button{font-size:.8rem;border-radius:7px;border:1px solid #bbd0bc;padding:8px 10px;min-height:37px;background:#fff;color:#244d35;cursor:pointer}
+.photo-url-actions button:hover{background:#eaf3e9}
+.photo-url-actions .save-photo-url{background:#22543b;color:#fff;border-color:#22543b}
+.photo-url-actions .save-photo-url:hover{background:#153e2a}
+.photo-url-actions .delete-photo-url{border-color:#dcaaa7;color:#8b3e39;background:#fff9f7}
+.remote-photo-preview{width:100%;height:auto;max-height:250px;object-fit:contain;border:1px solid #d6e1d7;background:#fff;border-radius:8px;margin-top:11px}
+.remote-photo-feedback{font-size:.76rem;color:#516a57;margin:8px 0 0;line-height:1.45}
+@media(max-width:430px){#growPlanner>summary{padding:14px 15px}#growPlanner .planner-body{padding:12px}}
