@@ -6,7 +6,7 @@ A searchable seed inventory with **201 recorded seed entries**, 14 collapsible c
 
 ## Using the website
 
-- Expand a plant category to view its seed cards and reference images; open a card's **Planting guide & details** for typical depth, spacing, germination, sowing window, greenhouse guidance and source links.
+- Expand a plant category to view its seed cards and reference images. Opening one **Planting guide & details** automatically opens the other visible seed cards in the same row, using the current screen layout. Each card's **× Close planting details** button closes only that individual guide. The summary heading can also close that individual guide. The expanded guides include depth, spacing, germination, sowing window, greenhouse guidance and source links.
 - **Growing Planner** supports Alaska, Kansas or another location, indoors or outdoors. Enter your estimated last frost date for relative planting windows. Alaska conditions vary greatly by town and greenhouse heating, and the guidance is not a forecast.
 - **Planting Journal** initially contains the eight herbs sown November 11, 2026. You can add or edit planting records, record sprouting, and upload personal plant and seed-packet pictures.
 - Journal entries and personal photographs are stored **in your browser**. They are **not uploaded to GitHub**. Use **Export backup (with photos)** and **Import backup** to move them between devices or protect against browser data loss.

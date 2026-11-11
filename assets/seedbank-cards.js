@@ -177,6 +177,7 @@ function tagContent(card){
   '<div class="seed-photo-tools"><label>📷 Add plant photo<input class="upload-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add plant photo of '+esc(name)+'"></label> <label>📦 Add packet photo<input class="upload-packet-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add seed packet photo of '+esc(name)+'"></label></div><div class="plant-links"><button type="button" class="view-reference" hidden>View species reference photo</button><button type="button" class="view-packet" hidden>View my packet photo</button></div>'+
   '<div class="seed-custom-photo" hidden><span>My photo is saved on this device.</span><button class="remove-photo" type="button">Remove photo</button></div>'+
   '<p class="photo-credit">Images from Wikipedia / Wikimedia Commons are species references, not guaranteed photographs of your exact variety. Open the image for credits.</p>'+
+  '<div class="plant-guide-close"><button type="button" class="close-planting-guide" aria-label="Close planting details for '+esc(name)+'">× Close planting details</button></div>'+
   '</details>';
  const thumb='<button type="button" class="seed-thumb" aria-label="View photo for '+esc(name)+'" title="Open plant photo"><span class="seed-illustration">'+(pictureIcons[cat]||"🌱")+'</span></button>';
  const top=card.querySelector(".seed-top");
@@ -190,6 +191,36 @@ function tagContent(card){
  plants.set(key,{key,name:nameText,cat,guide:g,kind,wiki,wikiUrl,card});
 }
 cards.forEach(tagContent);
+
+// Opening a guide expands the visible seed cards sharing its actual CSS-grid row.
+// Closing a guide, via its summary or its Close button, affects only that card.
+// Measure when clicked so search filters, screen width and wrapping are respected.
+function seedCardsInSameVisualRow(selected){
+ const grid=selected.closest(".entries");
+ if(!grid)return [selected];
+ const rowTop=selected.getBoundingClientRect().top;
+ return Array.from(grid.querySelectorAll(".seed")).filter(card=>
+  !card.hidden && card.getClientRects().length>0 &&
+  Math.abs(card.getBoundingClientRect().top-rowTop)<2
+ );
+}
+cards.forEach(card=>{
+ const guide=card.querySelector(".seed-details");
+ const summary=guide.querySelector("summary");
+ summary.addEventListener("click",()=>{
+  if(guide.open)return; // Native summary click will close ONLY this guide.
+  seedCardsInSameVisualRow(card).forEach(peer=>{
+   if(peer!==card){
+    const otherGuide=peer.querySelector(".seed-details");
+    if(otherGuide)otherGuide.open=true;
+   }
+  });
+  // The native summary action opens the selected card.
+ });
+ guide.querySelector(".close-planting-guide").addEventListener("click",()=>{
+  guide.open=false;
+ });
+});
 cats.forEach(section=>section.removeAttribute("open"));
 const box=document.querySelector(".search-wrap");
 const x=document.createElement("button");x.className="clear-search";x.type="button";x.textContent="×";x.title="Clear search";x.setAttribute("aria-label","Clear entire search");

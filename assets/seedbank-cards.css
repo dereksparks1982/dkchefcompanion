@@ -85,3 +85,9 @@
 .plant-now{border:1px solid #d9e4d1;background:#f7faf2;border-radius:10px;margin-top:12px;padding:12px;font-size:.84rem}
 .plant-now p{margin:5px 0!important}.plant-now ul{padding-left:23px;margin:8px 0}
 .seed-photo-tools{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Open all planting guides in one visible grid row; close individually. */
+.plant-guide-close{display:flex;justify-content:flex-end;align-items:center;border-top:1px solid #e0e8dd;margin-top:13px;padding-top:12px}
+.plant-guide-close button{border:1px solid #b9cebc;border-radius:8px;background:#eef5ec;color:#23523b;font-weight:750;font-size:.82rem;line-height:1.25;min-height:40px;padding:9px 12px;cursor:pointer}
+.plant-guide-close button:hover{background:#dcebd9}
+.plant-guide-close button:focus-visible{outline:3px solid #d4a544;outline-offset:2px}
