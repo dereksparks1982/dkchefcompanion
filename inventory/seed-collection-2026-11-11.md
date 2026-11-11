@@ -172,6 +172,11 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Deadly Nightshade / Belladonna (Atropa belladonna): 1
 - Caraway (Carum carvi): 1
 - Dill (Anethum graveolens), harvested from user's own grown plant: 1 loose seed batch (not a commercial packet)
+- Dill, unspecified variety: 1 commercial packet
+- Dill Ducat: 2 commercial packets
+- Dill Banquet: 1 commercial packet
+- Dill Mammoth: 1 commercial packet
+- Dill Bouquet: 1 commercial packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
