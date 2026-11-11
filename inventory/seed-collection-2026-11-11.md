@@ -199,6 +199,9 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Standard Cilantro, unspecified variety: 1 commercial packet
 - Coriandrum sativum Cilantro (species-only label): 1 commercial packet
 - Coriander Cilantro (label as spoken): 1 commercial packet
+- Winter Savory: 1 commercial packet
+- Summer Savory: 1 commercial packet
+- Big Italy Parsley (packet name as spoken): 1 commercial packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
