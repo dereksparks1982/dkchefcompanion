@@ -1,0 +1,87 @@
+
+/* DK Seed Bank: plant cards, growing planner and planting journal */
+.seed{gap:10px}
+.seed-overview{display:grid;grid-template-columns:86px minmax(0,1fr);align-items:start;gap:12px}
+.seed-thumb{display:flex;position:relative;width:86px;height:90px;border-radius:9px;background:linear-gradient(135deg,#edf4e7,#d6e5d6);align-items:center;justify-content:center;overflow:hidden;border:1px solid #dbe7d6;cursor:zoom-in;color:#637b63}
+.seed-thumb img{width:100%;height:100%;object-fit:cover}
+.seed-thumb .seed-illustration{font-size:2.4rem}
+.seed-thumb:focus-visible{outline:3px solid #cc9d35}
+.seed-overview .seed-top{display:block}
+.seed-overview .stock-badge{display:inline-block;margin-top:7px}
+.seed-brief{font-size:.78rem;color:#566b59;line-height:1.5;margin:0}
+.seed-actions{display:flex;flex-wrap:wrap;gap:6px}
+.seed-actions button,.guide-open,.journal-btn{border:1px solid #bfd0bc;color:#26543e;background:#f5faf4;border-radius:8px;padding:7px 10px;font-weight:650;font-size:.8rem;cursor:pointer}
+.seed-actions button:hover,.journal-btn:hover{background:#e2f0e2}
+.seed-details{border-top:1px solid #e0e8dd;margin-top:3px}
+.seed-details>summary{list-style:none;cursor:pointer;padding:10px 2px 2px;color:#22563c;font-weight:750;font-size:.86rem}
+.seed-details>summary::-webkit-details-marker{display:none}
+.seed-details>summary:before{content:"＋";padding-right:7px}
+.seed-details[open]>summary:before{content:"−"}
+.plant-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:11px 0}
+.plant-fact{padding:8px;background:#f5f8f2;border-radius:7px;min-width:0}
+.plant-fact small{display:block;color:#667767;font-size:.71rem}
+.plant-fact strong{display:block;overflow-wrap:anywhere;font-size:.82rem}
+.plant-guide{background:#f9fbf6;border:1px solid #e2e8de;border-radius:10px;padding:12px;margin-top:6px;font-size:.82rem}
+.plant-guide h4{font-size:.9rem;margin:0 0 8px}
+.plant-guide p{margin:7px 0}
+.plant-guide .uncertain{color:#785a31}
+.plant-links{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px}
+.plant-links a{color:#275b42;font-size:.78rem;text-underline-offset:2px}
+.photo-credit{font-size:.71rem;color:#667868;margin-top:4px}
+.photo-credit a{color:#275b42}
+.seed-photo-tools{margin-top:9px}
+.seed-photo-tools label{display:inline-flex;margin:0;border:1px solid #c3d5bf;padding:7px 10px;border-radius:8px;background:#fff;font-size:.78rem;cursor:pointer}
+.seed-photo-tools input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.seed-custom-photo{display:flex;align-items:center;gap:8px;padding-top:7px;font-size:.75rem}
+.seed-custom-photo button{border:0;background:transparent;text-decoration:underline;color:#8b3328}
+.seed-badge-row{display:flex;flex-wrap:wrap;gap:5px}
+.grow-badge{background:#e6f0e3;color:#345b3b;border-radius:999px;padding:3px 7px;font-size:.69rem;font-weight:750}
+.grow-badge.warning{background:#f7e9d9;color:#9c5530}
+.clear-search{position:absolute;right:5px;top:5px;min-width:40px;height:40px;border:0;background:transparent;color:#294f3e;font-size:1.5rem;line-height:1;border-radius:8px;display:grid;place-items:center}
+.clear-search:hover{background:#e5eee5}
+.search-wrap input{padding-right:48px}
+#seedJournal{margin:16px 0 25px;background:white;border:1px solid #d6e2d2;border-radius:15px;overflow:hidden}
+#seedJournal>summary{cursor:pointer;padding:17px 20px;font-weight:800;background:#e9f2e7;list-style:none}
+#seedJournal>summary::-webkit-details-marker{display:none}
+#seedJournal>summary:after{content:"⌄";float:right;font-size:1.1rem}
+#seedJournal[open]>summary:after{transform:rotate(180deg)}
+.journal-body{padding:18px}
+.journal-note{color:#596e60;font-size:.85rem;margin:0 0 13px}
+.journal-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.journal-btn.primary{background:#22543b;color:#fff;border-color:#22543b}
+.journal-card-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+.journal-entry{border:1px solid #dce6d7;padding:13px;border-radius:10px;background:#fffefa}
+.journal-entry h3{margin:0 0 5px;font-size:1rem}
+.journal-entry p{margin:3px 0;font-size:.79rem;color:#425a48}
+.journal-entry .journal-actions{display:flex;gap:7px;margin-top:9px}
+.journal-entry .journal-actions button{font-size:.77rem;border:1px solid #d1ded0;background:white;border-radius:7px;padding:5px 9px}
+.journal-entry .status{font-size:.73rem;border-radius:999px;background:#e2f2dd;color:#356a31;padding:3px 7px;display:inline-block}
+#journalForm{border-top:1px solid #e0e7df;padding-top:16px;margin-top:15px}
+#journalForm[hidden]{display:none}
+#journalForm h3{margin:0 0 10px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}
+.form-grid label{margin:0;font-size:.79rem}
+.form-grid input,.form-grid select,.form-grid textarea{display:block;margin-top:6px;width:100%;border:1px solid #bcccb9;border-radius:8px;background:#fff;padding:9px;font:inherit;min-height:40px}
+.form-grid textarea{min-height:75px;resize:vertical}
+.full-span{grid-column:1/-1}
+#growPlanner{background:#fff;border:1px solid #d5e4d2;border-radius:14px;padding:17px 19px;margin-bottom:15px}
+#growPlanner h2{font-size:1.12rem;margin:0 0 6px}
+#growPlanner p{font-size:.83rem;color:#5d6b60;margin:4px 0 12px}
+.planner-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px}
+.planner-controls label{margin:0}
+.planner-controls input,.planner-controls select{display:block;margin-top:5px;width:100%;min-height:42px;padding:9px;border:1px solid #b9cdb6;border-radius:8px;background:#fff}
+#plannerNotice{font-size:.83rem;background:#f5f9f0;padding:10px;border-radius:8px;margin-top:12px}
+#photoDialog{border:0;padding:0;border-radius:15px;max-width:min(94vw,900px);max-height:92vh;box-shadow:0 20px 60px #0008;background:white;color:#21412e}
+#photoDialog::backdrop{background:#102d1dbd}
+.photo-modal-body{padding:15px;display:flex;flex-direction:column;gap:9px}
+.photo-modal-body img{width:100%;max-height:65vh;object-fit:contain;background:#e9f0e9}
+.photo-modal-header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.photo-modal-header button{font-size:1.4rem;border:1px solid #bed0bd;border-radius:8px;background:white;min-height:40px;min-width:40px}
+.offline-warning{background:#fff5db;color:#71561f;border-radius:8px;padding:8px 10px;font-size:.78rem}
+@media(min-width:850px){.entries{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}}
+@media(max-width:420px){.seed-overview{grid-template-columns:76px minmax(0,1fr)}.seed-thumb{width:76px;height:80px}.journal-body{padding:12px}.plant-facts{gap:6px}}
+
+.plant-links button{font-size:.77rem;background:#f3f8ee;border:1px solid #c0d0be;border-radius:7px;padding:6px 9px;color:#275b42;cursor:pointer}
+.plant-now{border:1px solid #d9e4d1;background:#f7faf2;border-radius:10px;margin-top:12px;padding:12px;font-size:.84rem}
+.plant-now p{margin:5px 0!important}.plant-now ul{padding-left:23px;margin:8px 0}
+.seed-photo-tools{display:flex;flex-wrap:wrap;gap:6px}
