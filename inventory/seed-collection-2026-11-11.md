@@ -209,6 +209,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 seed lot
 - Unidentified Wheat (variety unknown): 1 seed lot
 - Winter Rye: 2 commercial packets
+- Bio Bio Quinoa (spelled B-I-O B-I-O; also sounded like 'Bobo'): 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
