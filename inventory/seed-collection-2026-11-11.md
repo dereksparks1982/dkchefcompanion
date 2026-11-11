@@ -223,6 +223,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Oaxacan Green Indian Corn: 1 packet
 - Blue Hopi Corn: 1 packet
 - Peaches and Cream Sweet Corn: 1 packet
+- Bloody Butcher Ornamental Corn: 4 packets
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
