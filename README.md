@@ -2,7 +2,7 @@
 
 [Open the DK Seed Bank website](https://dereksparks1982.github.io/seedrepo/)
 
-A searchable seed inventory with **201 recorded seed entries**, 14 collapsible categories, pepper Scoville ranges, expandable planting guides, reference photos, educational links and a planting journal.
+A searchable seed inventory with **214 recorded seed entries**, 15 collapsible categories, pepper Scoville ranges, expandable planting guides, reference photos, educational links and a planting journal.
 
 ## Using the website
 
@@ -11,6 +11,10 @@ A searchable seed inventory with **201 recorded seed entries**, 14 collapsible c
 - **Planting Journal** initially contains the eight herbs sown November 11, 2026. You can add or edit planting records, record sprouting, and upload personal plant and seed-packet pictures.
 - Journal entries and personal photographs are stored **in your browser**. They are **not uploaded to GitHub**. Use **Export backup (with photos)** and **Import backup** to move them between devices or protect against browser data loss.
 - Reference images use free-license Wikipedia/Wikimedia Commons thumbnails and show species-level examples, which may not match the exact seed cultivar. Photographers and license details are linked to the Commons image page. Photos may be absent if Wikimedia is unavailable.
+
+## Latest inventory addition
+
+On November 11, 2026, added 16 commercial seed packets representing 13 distinct allium entries: garlic chives (white flowers), regular chives (pink flowers, 2 packets), onions, scallions, and leeks. Evergreen Bunching Onion and American Flag Leek also have 2 packets each. New inventory totals: **214 entries, 286 packets/seed lots, 15 categories**. Packet names remain as dictated where exact cultivar labels have not been independently verified.
 
 ## Records
 
