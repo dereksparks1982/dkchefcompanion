@@ -215,6 +215,10 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Green Garnet Amaranth: 1 packet
 - Red Garnet Amaranth: 1 packet
 - Blue Fescue: 1 packet
+- Glass Gem Corn: 1 packet
+- Country Gentleman Corn: 1 packet
+- Common Plantain (Plantago species; exact species unconfirmed): 1 packet
+- Golden Bantam Corn: 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
