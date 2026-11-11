@@ -206,6 +206,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 ### Grains and grasses
 - Common Cat Grass (species unspecified): 1 commercial packet
 - Black Ornamental Wheat / Black Night Wheat: 1 commercial packet
+- Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 seed lot
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
