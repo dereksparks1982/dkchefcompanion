@@ -154,6 +154,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Cape Forget-Me-Not: 1
 - Barb Skullcap (spoken name, verify): 1
 - Blue Sea Holly (Eryngium planum): 3
+- Zinnia California Giant: 1 commercial packet
 
 ## Herbs and medicinal plants
 - Ashwagandha: 1
