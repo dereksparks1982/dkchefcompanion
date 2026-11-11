@@ -170,6 +170,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Florence Fennel: 2
 - Bronze Fennel: 1
 - Deadly Nightshade / Belladonna (Atropa belladonna): 1
+- Caraway (Carum carvi): 1
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
