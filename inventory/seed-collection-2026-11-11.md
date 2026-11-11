@@ -192,6 +192,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Greek Oregano: 2 commercial packets
 - Oregano, unspecified variety: 1 commercial packet
 - Italian Vulgare Oregano (spoken as 'Italian Volgaire'; label spelling to verify): 1 commercial packet
+- White / Regular Cumin (Cuminum cyminum): 3 commercial packets
+- Black Cumin (botanical species unspecified; verify packet): 1 commercial packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
