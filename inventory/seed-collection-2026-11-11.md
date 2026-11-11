@@ -219,6 +219,9 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Country Gentleman Corn: 1 packet
 - Common Plantain (Plantago species; exact species unconfirmed): 1 packet
 - Golden Bantam Corn: 1 packet
+- Yellow Sweet Corn: 1 packet
+- Oaxacan Green Indian Corn: 1 packet
+- Blue Hopi Corn: 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
