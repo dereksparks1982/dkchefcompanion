@@ -203,6 +203,10 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Summer Savory: 1 commercial packet
 - Big Italy Parsley (packet name as spoken): 1 commercial packet
 
+### Grains and grasses
+- Common Cat Grass (species unspecified): 1 commercial packet
+- Black Ornamental Wheat / Black Night Wheat: 1 commercial packet
+
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
 - Traditional White Cotton: 2
