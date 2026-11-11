@@ -123,6 +123,9 @@ const referenceGuides={
  fennel:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"]
 };
 const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Fiber and historical crops":"🌱"};
+const checkedPhotoCatalog=window.DKSeedBankVarietyImages||{};
+const photoPreferenceKey="dk-seedbank-photo-view-v2";
+let photoPreferences=field(photoPreferenceKey,{});
 const plants=new Map();
 const wikiCache=new Map();
 const userPhotos=new Map();
@@ -163,7 +166,7 @@ function tagContent(card){
  const tip=cat==="Peppers"?"Use the Scoville scale above to compare heat.":"Growing values are general crop guidance unless the actual cultivar is verified.";
  const age=g.days;
  const where=setupDescription(g);
- const quick='<div class="seed-brief">'+esc(g.depth)+' deep · '+esc(g.light)+'</div>';
+ const quick='<div class="seed-brief">'+esc(g.depth)+' deep · '+esc(g.light)+'</div><p class="seed-photo-state" aria-live="polite">Checking photo…</p>';
  const details='<details class="seed-details"><summary>Planting guide &amp; details</summary>'+
   '<div class="plant-facts">'+[
    ["Planting depth",g.depth],["Plant spacing",g.spacing],["Light",g.light],["Germination",g.germ],
@@ -179,9 +182,18 @@ function tagContent(card){
   '<p class="calendar-date" data-method="'+esc(g.mode)+'">Calendar: Choose a last frost date in Growing Planner to get a suggested window.</p>'+
   '<p class="uncertain">General species or crop guidance, not a test of this seed packet. Follow a verified packet label when it differs.</p></div>'+
   '<div class="plant-links">'+links+'</div>'+
-  '<div class="seed-photo-tools"><label>📷 Add plant photo<input class="upload-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add plant photo of '+esc(name)+'"></label> <label>📦 Add packet photo<input class="upload-packet-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add seed packet photo of '+esc(name)+'"></label></div><div class="plant-links"><button type="button" class="view-reference" hidden>View species reference photo</button><button type="button" class="view-packet" hidden>View my packet photo</button></div>'+
-  '<div class="seed-custom-photo" hidden><span>My photo is saved on this device.</span><button class="remove-photo" type="button">Remove photo</button></div>'+
-  '<p class="photo-credit">Images from Wikipedia / Wikimedia Commons are species references, not guaranteed photographs of your exact variety. Open the image for credits.</p>'+
+  '<div class="seed-photo-tools" aria-label="Your photos">'+
+   '<label>📷 Add / replace plant photo<input class="upload-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace plant photo of '+esc(name)+'"></label>'+
+   '<label>📦 Add / replace packet photo<input class="upload-packet-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace packet photo of '+esc(name)+'"></label></div>'+
+   '<div class="photo-switcher" aria-label="Choose which photo appears on card">'+
+   '<button type="button" class="photo-mode-button" data-photo-mode="variety" hidden>Show sourced image</button>'+
+   '<button type="button" class="photo-mode-button" data-photo-mode="plant" hidden>Show my plant</button>'+
+   '<button type="button" class="photo-mode-button" data-photo-mode="packet" hidden>Show my packet</button></div>'+
+   '<div class="photo-delete-controls">'+
+   '<button class="remove-photo" type="button" hidden>Delete my plant photo</button>'+
+   '<button class="remove-packet-photo" type="button" hidden>Delete my packet photo</button></div>'+
+   '<p class="photo-search-link"><a class="find-variety-photo" href="#" rel="noopener noreferrer" target="_blank">Find more photos of this variety on Wikimedia Commons</a></p>'+
+  '<p class="photo-credit">Exact variety image not yet confirmed. You can upload your own.</p>'+
   '<div class="plant-guide-close"><button type="button" class="close-planting-guide" aria-label="Close planting details for '+esc(name)+'">× Close planting details</button></div>'+
   '</details>';
  const thumb='<button type="button" class="seed-thumb" aria-label="View photo for '+esc(name)+'" title="Open plant photo"><span class="seed-illustration">'+(pictureIcons[cat]||"🌱")+'</span></button>';
@@ -191,7 +203,7 @@ function tagContent(card){
  const nameText=top.querySelector(".seed-name").textContent;
  const replacement='<div class="seed-overview">'+thumb+'<div class="seed-text">'+existingTop+quick+'</div></div>';
  top.outerHTML=replacement;
- card.insertAdjacentHTML("beforeend",details+'<div class="seed-actions"><button class="log-planting" type="button">＋ Log planting</button></div>');
+ card.insertAdjacentHTML("beforeend",details+'<div class="seed-actions"><button class="log-planting" type="button">＋ Log planting</button><button class="manage-photos" type="button">📷 Manage photos</button></div>');
  card.dataset.growMode=g.mode;card.dataset.growingSetup=g.setup;card.dataset.userPhoto="no";card.dataset.guideKind=kind;
  plants.set(key,{key,name:nameText,cat,guide:g,kind,wiki,wikiUrl,card});
 }
@@ -388,82 +400,130 @@ const photoDialog=document.createElement("dialog");photoDialog.id="photoDialog";
 document.body.appendChild(photoDialog);
 document.getElementById("closePhoto").addEventListener("click",()=>photoDialog.close());
 photoDialog.addEventListener("click",e=>{if(e.target===photoDialog)photoDialog.close();});
+
+function photoMatch(p){return Object.prototype.hasOwnProperty.call(checkedPhotoCatalog,p.key)?checkedPhotoCatalog[p.key]:null;}
+function commonsFilePage(meta){return "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(meta.file.replace(/ /g,"_"));}
+function commonsImageUrl(meta){return "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(meta.file.replace(/ /g,"_"))+"?width=560";}
+function availablePhotoUrls(p){
+ const match=photoMatch(p);
+ return {variety:match?commonsImageUrl(match):null,plant:userPhotos.get(p.key)||null,packet:packetPhotos.get(p.key)||null};
+}
 function showPhoto(p){
  const img=p.card.querySelector(".seed-thumb img");
- if(!img)return;
- document.getElementById("modalPhotoImage").src=img.src;
- document.getElementById("modalPhotoTitle").textContent=p.name;
+ if(!img)return openPhotoTools(p);
+ const mode=p.currentPhotoMode;
  const credit=document.getElementById("modalPhotoCredit");
+ const title=document.getElementById("modalPhotoTitle");
+ document.getElementById("modalPhotoImage").src=img.src;
+ title.textContent=p.name+(mode==="packet"?" · your packet":mode==="plant"?" · your photo":" · sourced photograph");
  credit.textContent="";
- if(p.card.dataset.userPhoto==="yes"){credit.textContent="Your personal photo, stored locally in this browser.";}
- else if(p.imageFile){const a=document.createElement("a");a.href="https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(p.imageFile.replace(/ /g,"_"));a.target="_blank";a.rel="noopener noreferrer";a.textContent="View photographer, licensing and attribution on Wikimedia Commons";credit.appendChild(a);}
- else credit.textContent="Reference image from Wikipedia. See the linked article for attribution.";
- if(typeof photoDialog.showModal==="function")photoDialog.showModal();else photoDialog.setAttribute("open","");
+ if(mode==="variety"&&photoMatch(p)){
+  const meta=photoMatch(p);
+  credit.appendChild(document.createTextNode("Photographer: "+meta.author+" · License: "+meta.license+" · "));
+  const a=document.createElement("a");a.href=commonsFilePage(meta);a.target="_blank";a.rel="noopener noreferrer";a.textContent="Original image, source and licensing details";credit.appendChild(a);
+ }else credit.textContent="Your photograph is stored on this browser, not on GitHub. Use Export backup to preserve it.";
+ if(typeof photoDialog.showModal==="function")photoDialog.showModal();
+ else photoDialog.setAttribute("open","");
 }
-function setPhoto(p,url,personal){const thumb=p.card.querySelector(".seed-thumb");thumb.innerHTML="";const img=document.createElement("img");img.src=url;img.loading="lazy";img.alt=(personal?"Personal photo":"Reference species photo")+" of "+p.name;thumb.appendChild(img);p.card.dataset.userPhoto=personal?"yes":"no";p.card.querySelector(".seed-custom-photo").hidden=!personal;}
-plants.forEach(p=>{
- p.card.querySelector(".seed-thumb").addEventListener("click",()=>showPhoto(p));
- const uploader=p.card.querySelector(".upload-photo");
- uploader.addEventListener("change",async()=>{
-  const file=uploader.files&&uploader.files[0];if(!file)return;
-  if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>6000000){alert("Choose a PNG, JPG or WebP photo under 6 MB.");return;}
-  if(await dbPut(p.key,file)){const prev=userPhotos.get(p.key);if(prev)URL.revokeObjectURL(prev);const url=URL.createObjectURL(file);userPhotos.set(p.key,url);setPhoto(p,url,true);requestFiltering();}
-  else alert("Photo storage unavailable in this browser. Save a separate copy of your photo.");
- });
- const packetUpload=p.card.querySelector(".upload-packet-photo");
- packetUpload.addEventListener("change",async()=>{
-  const file=packetUpload.files&&packetUpload.files[0];if(!file)return;
-  if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>6000000){alert("Choose a JPG, PNG or WebP photo under 6 MB.");return;}
-  if(await dbPut(p.key+"|packet",file)){const old=packetPhotos.get(p.key);if(old)URL.revokeObjectURL(old);packetPhotos.set(p.key,URL.createObjectURL(file));p.card.querySelector(".view-packet").hidden=false;}
-  else alert("Packet photo storage unavailable in this browser.");
- });
- p.card.querySelector(".view-reference").addEventListener("click",()=>{
-  if(!p.referenceUrl)return;
-  document.getElementById("modalPhotoImage").src=p.referenceUrl;
-  document.getElementById("modalPhotoTitle").textContent="Species reference: "+p.name;
-  const credit=document.getElementById("modalPhotoCredit");credit.textContent="";
-  const a=document.createElement("a");a.href=p.imageFile?"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(p.imageFile.replace(/ /g,"_")):p.wikiUrl;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Image author, source and license details";credit.appendChild(a);
-  if(typeof photoDialog.showModal==="function")photoDialog.showModal();else photoDialog.setAttribute("open","");
- });
- p.card.querySelector(".view-packet").addEventListener("click",()=>{
-  const src=packetPhotos.get(p.key);if(!src)return;
-  document.getElementById("modalPhotoImage").src=src;
-  document.getElementById("modalPhotoTitle").textContent="Your seed packet: "+p.name;
-  document.getElementById("modalPhotoCredit").textContent="Your seed packet photograph, stored in this browser.";
-  if(typeof photoDialog.showModal==="function")photoDialog.showModal();else photoDialog.setAttribute("open","");
- });
- p.card.querySelector(".remove-photo").addEventListener("click",async()=>{await dbDelete(p.key);const prev=userPhotos.get(p.key);if(prev)URL.revokeObjectURL(prev);userPhotos.delete(p.key);p.card.dataset.userPhoto="no";p.card.querySelector(".seed-custom-photo").hidden=true;p.card.querySelector(".seed-thumb").innerHTML='<span class="seed-illustration">'+(pictureIcons[p.cat]||"🌱")+'</span>';if(p.wiki)loadCategoryPhoto(p.cat);requestFiltering();});
-});
-async function loadWikiBatch(titles){
- const missing=titles.filter(t=>!wikiCache.has(t));if(!missing.length)return;
- missing.forEach(t=>wikiCache.set(t,null));
- for(let i=0;i<missing.length;i+=20){
-  const part=missing.slice(i,i+20);
-  try{
-   const query="https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&prop=pageimages&piprop=thumbnail%7Cname&pithumbsize=400&pilicense=free&titles="+encodeURIComponent(part.join("|"))+"&origin=*";
-   const resp=await fetch(query,{mode:"cors"});if(!resp.ok)continue;
-   const data=await resp.json();
-   (data.query&&data.query.pages||[]).forEach(page=>{if(page.title&&page.thumbnail&&page.thumbnail.source){wikiCache.set(page.title,{src:page.thumbnail.source,file:page.pageimage||""});}});
-   (data.query&&data.query.redirects||[]).forEach(red=>{if(wikiCache.has(red.to))wikiCache.set(red.from,wikiCache.get(red.to));});
-  }catch(e){/* Illustrations remain available offline. */}
+function refreshPhoto(p){
+ const match=photoMatch(p), images=availablePhotoUrls(p);
+ let mode=photoPreferences[p.key];
+ if(!images[mode])mode=images.plant?"plant":images.variety?"variety":images.packet?"packet":"none";
+ p.currentPhotoMode=mode;
+ const thumb=p.card.querySelector(".seed-thumb");
+ thumb.textContent="";
+ if(mode==="none"){
+  const icon=document.createElement("span");icon.className="seed-illustration";icon.textContent=pictureIcons[p.cat]||"🌱";thumb.appendChild(icon);
+  thumb.title="No confirmed image yet. Choose Manage photos to add your own.";
+ }else{
+  const image=document.createElement("img");image.src=images[mode];image.alt=(mode==="variety"?"Sourced "+(match.level==="cultivar"?"cultivar":"plant type")+" photo":mode==="plant"?"Your growing plant":"Your seed packet")+" of "+p.name;
+  image.loading="lazy";image.decoding="async";
+  image.addEventListener("error",()=>{
+   if(image.parentNode!==thumb)return;
+   thumb.textContent="";const fallback=document.createElement("span");fallback.className="seed-illustration";fallback.textContent=pictureIcons[p.cat]||"🌱";thumb.appendChild(fallback);
+   p.card.querySelector(".seed-photo-state").textContent="Image unavailable. View source or add your photo.";
+  });
+  thumb.appendChild(image);
+  thumb.title="Enlarge "+(mode==="packet"?"your packet photo":mode==="plant"?"your plant photo":"the sourced variety photo");
  }
+ let status="No exact variety photo verified";
+ if(mode==="plant")status="Showing your plant photo";
+ else if(mode==="packet")status="Showing your packet photo";
+ else if(mode==="variety")status=match.level==="cultivar"?"Photo of named cultivar":match.level==="type"?"Matching plant type · strain unverified":match.level==="species"?"Correct species · exact seed strain unknown":"One example of this seed blend";
+ p.card.querySelector(".seed-photo-state").textContent=status;
+ p.card.dataset.userPhoto=(images.plant||images.packet)?"yes":"no";
+ const credit=p.card.querySelector(".photo-credit");credit.textContent="";
+ if(match){
+  credit.appendChild(document.createTextNode("Sourced photo: "+match.author+" · "+match.license+" · "));
+  const link=document.createElement("a");link.href=commonsFilePage(match);link.target="_blank";link.rel="noopener noreferrer";link.textContent="View original, attribution and reuse license";credit.appendChild(link);
+  if(match.level!=="cultivar")credit.appendChild(document.createTextNode(". This is a type/species/example image, not a guaranteed exact seed-packet cultivar."));
+ }else credit.textContent="No reliable exact-variety photo was found and none has been substituted. Add your own plant or seed-packet picture.";
+ for(const button of p.card.querySelectorAll("[data-photo-mode]")){
+  const kind=button.dataset.photoMode;button.hidden=!images[kind];button.setAttribute("aria-pressed",String(kind===mode));
+ }
+ p.card.querySelector(".remove-photo").hidden=!images.plant;
+ p.card.querySelector(".remove-packet-photo").hidden=!images.packet;
 }
-async function loadCategoryPhoto(cat){
- const list=Array.from(plants.values()).filter(p=>p.cat===cat&&p.wiki);
- await loadWikiBatch([...new Set(list.map(p=>p.wiki))]);
- list.forEach(p=>{
-  const info=wikiCache.get(p.wiki);
-  if(info&&info.src){p.imageFile=info.file;p.referenceUrl=info.src;p.card.querySelector(".view-reference").hidden=false;if(!userPhotos.has(p.key))setPhoto(p,info.src,false);}
- });
+function choosePhotoMode(p,mode){
+ if(!availablePhotoUrls(p)[mode])return;
+ photoPreferences[p.key]=mode;save(photoPreferenceKey,photoPreferences);
+ refreshPhoto(p);
 }
-cats.forEach(section=>{
- const cat=section.dataset.category;
- section.addEventListener("toggle",()=>{if(section.open)loadCategoryPhoto(cat);});
+function openPhotoTools(p){
+ const guide=p.card.querySelector(".seed-details");
+ if(!guide.open)guide.querySelector("summary").click();
+ guide.querySelector(".seed-photo-tools").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+async function storeUpload(p,kind,input){
+ const file=input.files&&input.files[0];input.value="";
+ if(!file)return;
+ if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>6000000){alert("Choose a JPG, PNG or WebP image under 6 MB.");return;}
+ const key=kind==="packet"?p.key+"|packet":p.key;
+ const stored=await dbPut(key,file);
+ if(!stored){alert("This browser could not save the photo. No changes were made. Try freeing storage space or using another browser.");return;}
+ const target=kind==="packet"?packetPhotos:userPhotos;
+ const prior=target.get(p.key);if(prior)URL.revokeObjectURL(prior);
+ target.set(p.key,URL.createObjectURL(file));
+ choosePhotoMode(p,kind);
+ requestFiltering();
+}
+async function deleteUpload(p,kind){
+ const target=kind==="packet"?packetPhotos:userPhotos;
+ if(!target.has(p.key))return;
+ const label=kind==="packet"?"packet":"plant";
+ if(!window.confirm("Delete your uploaded "+label+" photo for "+p.name+" from this browser?"))return;
+ try{await dbDelete(kind==="packet"?p.key+"|packet":p.key);}
+ catch(e){alert("Unable to delete photo from local storage.");return;}
+ const old=target.get(p.key);if(old)URL.revokeObjectURL(old);
+ target.delete(p.key);
+ delete photoPreferences[p.key];save(photoPreferenceKey,photoPreferences);
+ refreshPhoto(p);requestFiltering();
+}
+plants.forEach(p=>{
+ const q=p.name.replace(/\([^)]*\)/g,"").replace(/\b(?:spoken name|verify packet|variety unknown)\b/gi,"").trim();
+ const searchUrl="https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search="+encodeURIComponent(q+" "+(p.cat==="Tomatoes"?"tomato":p.cat==="Peppers"?"pepper":p.cat==="Carrots"?"carrot":p.cat==="Grains and grasses"?"corn wheat grain":p.cat==="Alliums: chives, onions and leeks"?"chives onion leek":"plant"));
+ p.card.querySelector(".find-variety-photo").href=searchUrl;
+ p.card.querySelector(".seed-thumb").addEventListener("click",()=>showPhoto(p));
+ p.card.querySelector(".manage-photos").addEventListener("click",()=>openPhotoTools(p));
+ p.card.querySelector(".upload-photo").addEventListener("change",event=>storeUpload(p,"plant",event.target));
+ p.card.querySelector(".upload-packet-photo").addEventListener("change",event=>storeUpload(p,"packet",event.target));
+ p.card.querySelector(".remove-photo").addEventListener("click",()=>deleteUpload(p,"plant"));
+ p.card.querySelector(".remove-packet-photo").addEventListener("click",()=>deleteUpload(p,"packet"));
+ p.card.querySelectorAll("[data-photo-mode]").forEach(button=>button.addEventListener("click",()=>choosePhotoMode(p,button.dataset.photoMode)));
+ refreshPhoto(p);
 });
+// Variety photo catalog is checked by inventory entry. No Wikipedia species-wide auto-fill is allowed.
+// Unverified varieties deliberately retain a neutral placeholder and a manual photo option.
 async function restorePhotos(){
- for(const pair of await dbAll()){
-  if(pair[0].endsWith("|packet")){const key=pair[0].slice(0,-7),p=plants.get(key);if(!p)continue;packetPhotos.set(key,URL.createObjectURL(pair[1]));p.card.querySelector(".view-packet").hidden=false;continue;}
-  const p=plants.get(pair[0]);if(!p)continue;const url=URL.createObjectURL(pair[1]);userPhotos.set(pair[0],url);setPhoto(p,url,true);
+ for(const [key,blob] of await dbAll()){
+  if(typeof key!=="string")continue;
+  const packet=key.endsWith("|packet");
+  const plantKey=packet?key.slice(0,-7):key,p=plants.get(plantKey);
+  if(!p)continue;
+  const photoUrl=URL.createObjectURL(blob);
+  if(packet){const previous=packetPhotos.get(plantKey);if(previous)URL.revokeObjectURL(previous);packetPhotos.set(plantKey,photoUrl);}
+  else{const previous=userPhotos.get(plantKey);if(previous)URL.revokeObjectURL(previous);userPhotos.set(plantKey,photoUrl);}
+  refreshPhoto(p);
  }
 }
 restorePhotos().then(()=>requestFiltering());
@@ -490,11 +550,13 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   for(const item of data.photos||[]){
    if(!item||typeof item.key!=="string"||!(plants.has(item.key)||item.key.endsWith("|packet")&&plants.has(item.key.slice(0,-7)))||typeof item.data!=="string"||!/^data:image\/(jpeg|png|webp);base64,/.test(item.data))continue;
    const blob=await (await fetch(item.data)).blob();if(blob.size>6000000)continue;
-   await dbPut(item.key,blob);const p=plants.get(item.key);const old=item.key.endsWith("|packet")?packetPhotos.get(item.key.slice(0,-7)):userPhotos.get(item.key);if(old)URL.revokeObjectURL(old);
+   await dbPut(item.key,blob);const isPacket=item.key.endsWith("|packet"),photoKey=isPacket?item.key.slice(0,-7):item.key,p=plants.get(photoKey);const old=isPacket?packetPhotos.get(photoKey):userPhotos.get(photoKey);if(old)URL.revokeObjectURL(old);
    const url=URL.createObjectURL(blob);
-   if(item.key.endsWith("|packet")){const key=item.key.slice(0,-7);packetPhotos.set(key,url);plants.get(key).card.querySelector(".view-packet").hidden=false;}
-   else{userPhotos.set(item.key,url);setPhoto(p,url,true);}
+   if(isPacket){packetPhotos.set(photoKey,url);}
+   else{userPhotos.set(photoKey,url);}
+   if(p)refreshPhoto(p);
   }
+  requestFiltering();
   document.getElementById("regionSelect").value=settings.region;
   document.getElementById("envSelect").value=settings.environment;
   document.getElementById("frostDate").value=settings.lastFrost||"";
