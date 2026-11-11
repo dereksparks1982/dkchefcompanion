@@ -171,6 +171,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Bronze Fennel: 1
 - Deadly Nightshade / Belladonna (Atropa belladonna): 1
 - Caraway (Carum carvi): 1
+- Dill (Anethum graveolens), harvested from user's own grown plant: 1 loose seed batch (not a commercial packet)
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
