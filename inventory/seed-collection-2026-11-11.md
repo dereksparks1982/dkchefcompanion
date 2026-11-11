@@ -194,6 +194,11 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Italian Vulgare Oregano (spoken as 'Italian Volgaire'; label spelling to verify): 1 commercial packet
 - White / Regular Cumin (Cuminum cyminum): 3 commercial packets
 - Black Cumin (botanical species unspecified; verify packet): 1 commercial packet
+- Santo Coriander / Cilantro (spoken once as 'Santa'): 2 commercial packets
+- Slow Bolting Cilantro: 1 commercial packet
+- Standard Cilantro, unspecified variety: 1 commercial packet
+- Coriandrum sativum Cilantro (species-only label): 1 commercial packet
+- Coriander Cilantro (label as spoken): 1 commercial packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
