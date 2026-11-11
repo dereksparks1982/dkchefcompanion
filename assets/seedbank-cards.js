@@ -30,6 +30,9 @@ const guides={
  flower:def("Species-specific; often surface–¼ in","Varies","Full sun to partial shade","7–21+ days","Varies","Spring sowing or frost-based starting, depending on species","Outdoor beds, greenhouse starts for tender species","Keep germinating seed evenly damp","Bloom time varies","unknown","verify","Varies","Mixes contain multiple species with different depth and sun needs."),
  poppy:def("Surface sow; press lightly","6–12 in","Full sun","10–21 days","Cool soil","Direct sow early spring or fall where suitable","Well-drained outdoor bed","Water lightly until established","Seasonal flowering","direct-cool","outdoor","Varies","Poppy seed often needs light to germinate; do not bury deeply."),
  basil:def("¼ in","10–12 in","Full sun","5–10 days","70–85°F","Start indoors 4–6 weeks before last frost; transplant after frost","Warm garden, indoor grow lights or greenhouse","Keep moist but well drained","Harvest leaves repeatedly after establishment","indoor","protected","About 60–90 days","Pinch tips to encourage branching."),
+ onion:def("¼–½ in","4–6 in for bulbs, adjust for cultivar","Full sun","7–14 days","60–75°F","Start indoors 8–12 weeks before spring transplanting or direct sow when suitable","Sunny, well-drained fertile garden bed","Keep soil consistently moist as bulbs develop","Depends on cultivar; often 90–120+ days","indoor","outdoor","Varies","Day length matters: short-day and long-day onions need climates suited to bulbing. Follow variety packet and local extension guidance."),
+ scallion:def("¼ in","2–3 in","Full sun / partial sun","7–14 days","60–75°F","Start indoors or direct sow in cool spring","Garden bed or container with loose, fertile soil","Keep evenly moist","Harvest stems young, often in 60–80 days","direct-cool","outdoor","60–80 days","Bunching and scallion types are grown mainly for edible green stems, not large dry bulbs."),
+ leek:def("¼ in","4–6 in","Full sun","7–14 days","60–75°F","Start indoors 8–12 weeks before last frost; transplant after hardening off","Deep, fertile bed; hill soil gradually if desired","Keep soil evenly moist","Usually a long-season crop, often 100–150 days","indoor","outdoor","100–150 days","Leeks are cool-season plants; maturity varies with variety and growing conditions."),
  chives:def("¼ in","8–12 in","Full sun / partial sun","7–21 days","60–70°F","Start indoors 6–8 weeks before transplant or sow spring","Outdoor herb bed or container","Keep moderately moist","Snip leaves once established","indoor","outdoor","Perennial","Often overwinters in cold climates with suitable conditions."),
  thyme:def("Surface–⅛ in","8–12 in","Full sun","14–28 days","65–75°F","Start indoors 8–10 weeks before frost","Well-drained, not soggy soil; greenhouse or outdoor","Water sparingly once established","Cut sprigs after plants establish","indoor","protected","Perennial","Fine seeds need light or only very light cover."),
  oregano:def("Surface–⅛ in","12–18 in","Full sun","7–14 days","65–75°F","Start indoors 6–10 weeks before last frost","Herb bed, container or greenhouse","Moderate; avoid waterlogging","Harvest before or during flowering","indoor","protected","Perennial","Hardiness varies by oregano type."),
@@ -58,6 +61,7 @@ function resolveGuide(name,cat){
  if(cat==="Flowers and ornamentals")return /poppy/.test(n)?guides.poppy:guides.flower;
  if(cat==="Fiber and historical crops")return /tobacco/.test(n)?guides.tobacco:guides.cotton;
  if(cat==="Grains and grasses")return /corn/.test(n)?guides.corn:guides.grain;
+ if(cat==="Alliums: chives, onions and leeks")return n.includes("chives")?guides.chives:n.includes("leek")?guides.leek:/scallion|bunching/.test(n)?guides.scallion:guides.onion;
  if(cat==="Herbs and medicinal plants"){
   for(const k of ["basil","chives","thyme","oregano","dill","coriander","cilantro","parsley","mint","fennel"])if(n.includes(k))return guides[k==="cilantro"?"coriander":k];
   if(n.includes("marjoram"))return guides.oregano;
@@ -71,7 +75,7 @@ const commonWiki={
  "Eggplant":"Eggplant","Peppers":"Capsicum annuum","Roots and brassicas":"Root vegetable",
  "Pumpkins and melons":"Cucurbitaceae","Gourds and squash":"Squash (plant)",
  "Trees and woody plants":"Tree","Flowers and ornamentals":"Flower",
- "Herbs and medicinal plants":"Herb","Grains and grasses":"Cereal",
+ "Herbs and medicinal plants":"Herb","Alliums: chives, onions and leeks":"Allium","Grains and grasses":"Cereal",
  "Fiber and historical crops":"Fiber crop"
 };
 function wikiFor(name,cat){
@@ -95,6 +99,7 @@ function wikiFor(name,cat){
  if(cat==="Gourds and squash")return n.includes("loofah")?"Luffa aegyptiaca":n.includes("zucchini")?"Zucchini":n.includes("butternut")?"Butternut squash":n.includes("delicata")?"Delicata squash":"Summer squash";
  if(cat==="Trees and woody plants")return n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
  if(cat==="Flowers and ornamentals")return n.includes("rose")?"Rose":n.includes("poppy")?(n.includes("california")?"Eschscholzia californica":"Papaver somniferum"):n.includes("morning glory")?"Ipomoea tricolor":n.includes("sea holly")?"Eryngium planum":n.includes("edelweiss")?"Leontopodium alpinum":n.includes("zinnia")?"Zinnia elegans":n.includes("lily of the valley")?"Convallaria majalis":n.includes("pokeberry")?"Phytolacca americana":n.includes("larkspur")?"Consolida ajacis":n.includes("coleus")?"Coleus":n.includes("celosia")?"Celosia argentea":n.includes("haworthia")?"Haworthia":n.includes("dahlia")?"Dahlia":n.includes("phlox")?"Phlox subulata":n.includes("balsam")?"Impatiens balsamina":n.includes("forget")?"Myosotis":"Flower";
+ if(cat==="Alliums: chives, onions and leeks")return n.includes("garlic chives")?"Allium tuberosum":n.includes("chives")?"Chives":n.includes("leek")?"Leek":/scallion|bunching/.test(n)?"Welsh onion":"Onion";
  if(cat==="Herbs and medicinal plants")return n.includes("dill")?"Dill":n.includes("basil")?(n.includes("tulsi")?"Ocimum tenuiflorum":"Basil"):n.includes("oregano")?"Oregano":n.includes("marjoram")?"Origanum majorana":n.includes("cilantro")||n.includes("coriander")?"Coriander":n.includes("fennel")?"Fennel":n.includes("parsley")?"Parsley":n.includes("ashwagandha")?"Withania somnifera":n.includes("hyssop")?"Hyssopus officinalis":n.includes("wormwood")?"Artemisia absinthium":n.includes("mugwort")?"Artemisia vulgaris":n.includes("rue")?"Ruta graveolens":n.includes("nightshade")?"Atropa belladonna":n.includes("henbane")?"Hyoscyamus":n.includes("foxglove")?"Digitalis":n.includes("caraway")?"Caraway":n.includes("anise")?"Anise":n.includes("cumin")?"Cumin":n.includes("savory")?"Satureja":n.includes("mimosa")?"Mimosa pudica":n.includes("herb of paris")?"Paris quadrifolia":commonWiki[cat];
  if(cat==="Grains and grasses")return n.includes("corn")?"Maize":n.includes("quinoa")?"Quinoa":n.includes("amaranth")?"Amaranth":n.includes("rye")?"Rye":n.includes("wheat")?"Wheat":n.includes("plantain")?"Plantago":n.includes("fescue")?"Festuca glauca":commonWiki[cat];
  if(cat==="Fiber and historical crops")return n.includes("tobacco")?"Nicotiana tabacum":"Gossypium";
@@ -117,7 +122,7 @@ const referenceGuides={
  parsley:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"],
  fennel:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"]
 };
-const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Fiber and historical crops":"🌱"};
+const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Fiber and historical crops":"🌱"};
 const plants=new Map();
 const wikiCache=new Map();
 const userPhotos=new Map();
