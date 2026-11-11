@@ -187,6 +187,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Lemon Basil: 1 commercial packet
 - Spicy Globe Basil: 1 commercial packet
 - Licorice Basil: 1 commercial packet
+- Genovese Basil: 1 commercial packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
