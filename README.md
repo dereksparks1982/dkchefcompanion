@@ -18,3 +18,7 @@ A searchable seed inventory with **201 recorded seed entries**, 14 collapsible c
 - [November 11 planting record](inventory/planting-journal-2026-11-11.md)
 
 The site is served directly from `index.html` with a matching `docs/index.html` fallback. Site assets are in `assets/`. No custom GitHub Actions workflow is required.
+
+## Accuracy and safety
+
+Planting depths, germination periods, greenhouse recommendations and seed images are **general reference information** unless a cultivar-specific source is confirmed. Do not substitute these guides for an original seed packet's instructions. For Alaska, greenhouse heating, soil temperature, daylight and the local last-frost date all matter.
