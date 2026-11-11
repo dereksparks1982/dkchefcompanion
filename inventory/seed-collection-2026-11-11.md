@@ -178,7 +178,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Dill Mammoth: 1 commercial packet
 - Dill Bouquet: 1 commercial packet
 - Sweet Marjoram (Origanum majorana): 2 commercial packets
-- Sweet Basil: 2 confirmed commercial packets; 1 additional mention uncertain (possibly 3 total)
+- Sweet Basil: 3 commercial packets (two initially stated, then one additional)
 - Dark Opal / Purple Dark Opal Basil: 2 commercial packets (same named variety)
 - Lime Basil: 1 commercial packet
 - Thai Basil: 1 commercial packet
