@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v10/);
+ assert.match(source,/dk-seedbank-app-v31/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -366,11 +366,11 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
  assert.doesNotMatch(monastery,/\(watering\|\|workbench/);
  for(const source of [read("index.html"),read("docs/index.html")]){
   assert.match(source,/<details id="recipeGuide" class="recipe-guide">/);
-  assert.match(source,/seedbank-monastery\.js\?v=20261112-standalone1/);
-  assert.match(source,/seedbank-cards\.js\?v=20261112-planner-top2/);
+  assert.match(source,/seedbank-monastery\.js\?v=20261112-titleonly2/);
+  assert.match(source,/seedbank-cards\.js\?v=20261112-finaldata4/);
  }
  const worker=read("sw.js");
- assert.match(worker,/dk-seedbank-app-v27/);
+ assert.match(worker,/dk-seedbank-app-v31/);
 });
 
 test("Monastery Garden displays title only with historical details inside",()=>{
@@ -393,7 +393,7 @@ test("Drive reuse and timestamped private/photo backups remain independent",()=>
  assert.match(sync,/dkDriveLastVisible/);
  assert.match(sync,/saved\.lastVisibleSync=new Date\(\)\.toISOString\(\)/);
  for(const html of [read("index.html"),read("docs/index.html")]){
-  assert.match(html,/seedbank-drive-sync\.js\?v=20261112-history6/);
+  assert.match(html,/seedbank-drive-sync\.js\?v=20261112-finaldata4/);
   assert.match(html,/seedbank-drive-visible\.js\?v=20261112-reusefolder4/);
  }
 });
