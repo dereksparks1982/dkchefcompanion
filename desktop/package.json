@@ -1,7 +1,7 @@
 {
   "name": "dk-seed-bank-desktop",
   "productName": "DK Seed Bank",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "description": "Portable offline seed inventory and planting journal for Linux",
   "main": "main.cjs",
@@ -10,7 +10,7 @@
   "scripts": {
     "prepare:desktop": "node prepare.cjs",
     "test": "node --test test/*.test.cjs",
-    "build:linux": "npm run prepare:desktop && electron-builder --linux AppImage --x64 --publish never"
+    "build:linux": "npm run prepare:desktop && electron-builder --linux --x64 --dir --publish never"
   },
   "devDependencies": {
     "electron": "45.3.1",
@@ -43,28 +43,9 @@
       }
     ],
     "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
       "category": "Office",
       "icon": "build/icons",
-      "executableName": "dk-seed-bank",
-      "artifactName": "DK-Seed-Bank-${version}-linux-${arch}.${ext}"
-    },
-    "toolsets": {
-      "appimage": "1.0.3"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "dereksparks1982",
-        "repo": "seedrepo"
-      }
-    ]
+      "executableName": "dk-seed-bank"
+    }
   }
 }

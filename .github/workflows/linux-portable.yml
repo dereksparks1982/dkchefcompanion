@@ -1,4 +1,4 @@
-name: Portable Linux AppImage
+name: Portable Linux application folder
 
 on:
   push:
@@ -22,11 +22,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up Node
+      - name: Set up Node for building only
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Convert the exact DK green icon for Linux
+      - name: Convert the approved DK icon for the Linux desktop
         run: |
           python3 -m venv "${RUNNER_TEMP}/dk-icon-venv"
           "${RUNNER_TEMP}/dk-icon-venv/bin/pip" install --disable-pip-version-check Pillow
@@ -39,47 +39,58 @@ jobs:
           for size in (64,128,256,512):
               icon.resize((size,size),Image.Resampling.LANCZOS).save(base/f"{size}x{size}.png")
           PY
-      - name: Verify generated icons match the approved DK artwork
+      - name: Verify icon pixels match the approved green DK artwork
         run: |
           "${RUNNER_TEMP}/dk-icon-venv/bin/python" desktop/verify-icons.py
-      - name: Install packaging dependencies on the build runner only
+      - name: Install build tools on GitHub runner only
         working-directory: desktop
         run: npm install --no-audit --no-fund
-      - name: Check the desktop application
+      - name: Check catalog, translations and bundled local assets
         working-directory: desktop
         run: |
           npm run prepare:desktop
           npm test
-      - name: Build the portable AppImage
+      - name: Build unpacked desktop program, not AppImage
         working-directory: desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run build:linux
-      - name: Check packaged desktop startup
+      - name: Compile real ELF launcher and make portable folder
         working-directory: desktop
         run: |
-          xvfb-run -a timeout 45 ./dist/linux-unpacked/dk-seed-bank --no-sandbox --smoke-test
-      - name: Run the portable AppImage itself without FUSE on the CI runner
+          gcc -O2 -Wall -Wextra -Werror launcher.c -o "dist/linux-unpacked/DK Seed Bank"
+          chmod 755 "dist/linux-unpacked/DK Seed Bank" "dist/linux-unpacked/dk-seed-bank"
+          mv dist/linux-unpacked "dist/DK Seed Bank"
+          tar -C dist -czf "dist/DK-Seed-Bank-0.9.2-Linux-x86_64.tar.gz" "DK Seed Bank"
+      - name: Extract as an ordinary user and launch without command-line options
         working-directory: desktop
         run: |
-          xvfb-run -a timeout 90 env APPIMAGE_EXTRACT_AND_RUN=1 ./dist/DK-Seed-Bank-0.9.1-linux-x86_64.AppImage --no-sandbox --smoke-test
-      - name: Preserve the AppImage as a build artifact
+          mkdir -p "${RUNNER_TEMP}/dk-seed-portable-test"
+          tar -C "${RUNNER_TEMP}/dk-seed-portable-test" -xzf "dist/DK-Seed-Bank-0.9.2-Linux-x86_64.tar.gz"
+          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank"
+          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/dk-seed-bank"
+          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/resources/app.asar"
+          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/resources/seedbank/index.html"
+          file "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank" | grep -q 'ELF 64-bit'
+          xvfb-run -a timeout 80 "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank" --smoke-test
+      - name: Upload tested portable archive
         uses: actions/upload-artifact@v4
         with:
-          name: DK-Seed-Bank-Linux-AppImage
-          path: desktop/dist/*.AppImage
+          name: DK-Seed-Bank-Linux-Portable
+          path: desktop/dist/DK-Seed-Bank-0.9.2-Linux-x86_64.tar.gz
           if-no-files-found: error
-      - name: Publish the portable Linux preview
+      - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.9.1-linux-preview
-          name: DK Seed Bank 0.9.1 Linux portable preview
+          tag_name: v0.9.2-linux-portable
+          name: DK Seed Bank 0.9.2 Portable Linux desktop
           prerelease: true
           generate_release_notes: false
-          files: desktop/dist/*.AppImage
+          files: desktop/dist/DK-Seed-Bank-0.9.2-Linux-x86_64.tar.gz
           body: |
-            Portable Linux x86-64 AppImage. No installer or manual dependency download.
-            Includes the full seed catalog and gardening tools for offline use.
-            Web-browser records are not automatically copied into the desktop app. Export a backup in the web app, then import it in the desktop app.
-            Downloaded AppImages may require a one-time "Allow executing file as program" checkbox in File Properties before double-clicking.
-            Personal desktop records remain in your Linux user profile when the AppImage is replaced.
+            Portable Linux desktop application folder for x86-64 Ubuntu and compatible systems.
+            Download the tar.gz archive, extract it using Files/Archive Manager, open the DK Seed Bank folder, and double-click the executable named DK Seed Bank.
+            This is a real Linux ELF executable with its supporting files. No AppImage, installer, Terminal commands, or separate dependency downloads.
+            Keep the bundled files together. Personal records are stored separately in the Linux user profile and persist across app updates.
+            Web-app records do not transfer automatically: export a backup in the browser and import it in the desktop program.
+            The desktop UI and program icon use the approved DK green artwork. Russian language mode uses the approved DK red artwork.
