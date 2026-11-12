@@ -1,6 +1,6 @@
 
 /* DK Seed Bank Garden Workbench and navigation */
-#seedWorkbench{margin:18px 0 24px;border:1px solid #cbdccb;border-radius:14px;background:#fff;overflow:hidden}
+#growPlanner #seedWorkbench{margin:0;border-top:1px solid #dbe6d6;background:#fbfdf9;overflow:visible}
 #seedWorkbench>summary{display:flex;align-items:center;justify-content:space-between;gap:15px;cursor:pointer;background:linear-gradient(120deg,#e5f1df,#eef5e9);color:#254b32;padding:18px 20px;list-style:none;font-weight:800;font-size:1.08rem}
 #seedWorkbench>summary::-webkit-details-marker{display:none}
 #seedWorkbench>summary:after{content:"⌄";font-size:1.2rem;margin-left:auto}
@@ -133,3 +133,11 @@
  .wb-journal-guide-facts{grid-template-columns:1fr}
  .wb-journal-visual{min-height:86px}
 }
+
+/* Garden management is part of the Garden Planner, never a second accordion. */
+#growPlanner #seedWorkbench .wb-inner{padding:16px 19px 20px}
+#growPlanner #seedWorkbench .wb-tools-heading{font-size:1rem;margin:0 0 9px;color:#28573d}
+#growPlanner #seedWorkbench .wb-quick{margin:12px 0}
+#growPlanner #seedWorkbench .wb-panel{max-width:100%}
+html[lang="ru"] #growPlanner #seedWorkbench .wb-tools-heading{color:#8f304b}
+@media(max-width:580px){#growPlanner #seedWorkbench .wb-inner{padding:12px}}
