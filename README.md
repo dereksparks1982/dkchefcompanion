@@ -1,41 +1,47 @@
 # DK Seed Bank
 
-DK Seed Bank is an offline-capable seed collection and gardening recordkeeping application by DK Softworks for serious gardeners and emergency preparedness, available in English and Russian. It runs in a browser or as a portable Linux desktop program.
-
-Organize seed varieties, packets and saved seed lots; view planting guides and reference photos; plan sowing; record plantings, germination, watering and harvests; track storage and seed viability; and export or restore backups.
+**DK Seed Bank** is a local-first seed collection and gardening recordkeeping app by **DK Softworks**, available in English and Russian. It works in a web browser and as a portable Linux desktop application.
 
 **Web app:** https://dereksparks1982.github.io/seedrepo/
 
-**Standalone Linux desktop download:** https://github.com/dereksparks1982/seedrepo/releases/download/v0.9.9-linux-portable/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz
+**Linux portable release:** https://github.com/dereksparks1982/seedrepo/releases/download/v0.9.9-linux-portable/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz
 
-**Sync & Backup (web):** one expandable panel combines Google Drive sync, visible-folder photo export, local backup download/restore/verification, browser storage protection, and offline photo readiness. Select **Connect my Google Drive**, sign into your own Google account, approve access, then select **Sync now**. No OAuth codes or account identifiers are required from website users. Cloud snapshots remain in each authorized user's private app-data area; only a folder explicitly picked by that user is eligible for the additional visible photo export. Google currently restricts the OAuth app to registered test users until the application is published and any required verification is completed. The separate Linux desktop OAuth registration is pending. See [Google Drive sync and privacy](docs/GOOGLE_DRIVE_SYNC.md).
+## Features
 
-**Visible Google Drive folder (web):** after connecting their own Google account, users can choose an existing folder using a Google Picker embedded in a fixed app dialog, preventing document scrolling. **Sync now** then writes readable photograph files and a full JSON backup directly inside that folder. This separate, opt-in visible export does not delete or replace the original hidden app-data sync, which remains the cross-device recovery copy. The Google Picker browser key is restricted to this GitHub Pages origin and the Picker API; each user separately authorizes their own account and chooses their own folder. Google's OAuth application is currently in Testing mode, so only approved test users may sign in until the publisher completes publication requirements. Do not delete existing backups.
+- **Garden Planner:** growing conditions, planting calendar, seed inventory and lots, germination checks, garden beds, harvest records, saved seeds, and optional growth history.
+- **Planting Journal:** dated plantings, photos, notes, measurements, watering observations, and growth charts. Tracking and reminders remain optional.
+- **Sync & Backup:** full JSON backups with verification, restore controls, local/offline storage tools, and opt-in Google Drive synchronization.
+- **Recipe Guide:** personal ingredient checklists and culinary references, separate from the actual seed inventory.
+- **Medieval Monastery Garden:** a standalone historical reference section immediately below Recipe Guide, with its explanatory material inside the section. Garden Planner remains near the top.
+- **Seed Suppliers:** website links to established seed suppliers plus user-added favorite links. No shopping checkout or global seed-variety catalog is built into the app.
 
-**Connection on refresh:** a valid Google access token is kept in browser-tab session storage, so a page refresh keeps its connection until the token expires. Closing the browser or token expiry may require signing in again; truly permanent login requires secure server-side refresh tokens. Disconnect clears the cached token. Google consent is no longer forced every time.
+## Your data and Google Drive
 
-**Troubleshooting:** if the Google Drive panel is missing after a website update, refresh the app so its offline cache installs the current scripts; existing plantings and photos are not deleted by an ordinary refresh.
+Records and uploaded photos are stored locally. On the web, connecting Google Drive is **optional** and always uses the account that the individual user authorizes. Private per-device sync snapshots are stored in that account's Google Drive `appDataFolder`. The visible **DK Seed Bank** folder is a separate, readable copy of photographs and a full JSON backup.
 
-**UI behavior:** The former independent **Backups and offline readiness** and **Google Drive sync** accordion panels now appear as sections inside the single **☁ Sync & Backup** accordion. Offline readiness status is displayed inside the unified panel rather than in the footer. Existing element IDs, backup files, cloud sync snapshots, journal photos, and local storage keys remain unchanged. The seed journal delegates its backup buttons to the unified tools. Google Picker shows a fixed in-app overlay with a Close control, so opening the folder browser does not scroll the seed catalog.
+The app checks for an existing app-accessible DK Seed Bank folder before offering to create one. It reuses a matching folder's **Drive file ID**, rather than relying solely on its name. If the check fails or multiple matching folders exist, new-folder creation is blocked until the user resolves the ambiguity. Google `drive.file` permission cannot discover arbitrary folders that were not created or opened through the app.
 
-**Google Picker access troubleshooting:** the browser API key must allow BOTH **Google Picker API** and **Google Drive API**, and its website referrers must include the DK Seed Bank GitHub Pages origin and `https://docs.google.com/*`. A browser cookie permission prompt alone does not authorize Google Picker API calls. When Google's embedded picker reports access denied, review these key restrictions before changing OAuth accounts or touching any stored photos.
+The app preserves change times and deletion markers for locally edited garden records, watering history, and uploaded plant/packet photos. The verified merged snapshot is uploaded before remote records are applied locally. Full backup files can be downloaded and inspected independently. **Keep a separate backup until you have verified recovery on another device.**
 
-**Garden Planner (web):** The separate Growing Planner and Garden Workbench screens are combined under one **🌱 Garden Planner** panel. The top contains region, growing space, last spring frost date, and the “What could I plant now?” tool. The same panel also holds the monthly calendar, seed inventory editor and lots, viability tests, garden beds/rotation, harvest logs, saved seed records, and printable labels. The former Workbench data storage key `dk-seedbank-workbench-v2` is retained unchanged for compatibility with existing records and backups. Duplicate backup controls from the old Workbench are consolidated into **☁ Sync & Backup**.
+On the web, automatic synchronization operates while the app is open and authorized. Google may request reconnection when the access token expires or the browser session closes. The OAuth app may be limited to approved test users until Google publishing and verification are completed. The portable Linux edition has separate desktop OAuth registration requirements.
 
-**Seed Suppliers:** the 🌱 Seed Suppliers section at the bottom of the collection links to Burpee, Baker Creek, Johnny's Selected Seeds, Seed Savers Exchange, and Territorial Seed Company. Users may add their own HTTPS favorite links, stored locally and included in full backups and Drive sync. No worldwide variety catalog or in-app seed checkout is added.
+Detailed setup, permissions, and troubleshooting: [Google Drive Sync](docs/GOOGLE_DRIVE_SYNC.md).
 
-**Google Picker Access Denied workaround:** use **Create my DK Seed Bank folder** in Sync & Backup, including from inside the folder dialog. The app creates a visible folder under the signed-in user's *own* Google Drive using narrow `drive.file` access, independently of Google's embedded Picker window. Then select **Sync now** to export photos and a full JSON backup. **Forget selected folder** does not delete cloud data. Choosing an existing folder through Google Picker still depends on Google API-key/referrer and OAuth publisher settings. Short-lived browser tokens can require reconnection; the Linux desktop edition requires a separate OAuth client registration.
+## Development and checks
 
-**Medieval Monastery Garden (web):** the historic plant reference is a **standalone, expandable section immediately below Recipe Guide**, while **Garden Planner stays at the top of the app**, immediately beneath the search controls. The monastery section is not nested in Garden Planner. Its existing crop-type reference notes, counts, safety information, and monastery filter are retained unchanged. This navigation-only adjustment does not rename or erase any stored plantings, saved seed lots, or garden records.
+To prepare the desktop bundle and run local Node regression tests:
 
-**Accordion titles:** Medieval Monastery Garden has only its title in the collapsed tab, matching Garden Planner, Planting Journal, Sync & Backup, and Recipe Guide. Historic context remains in the expanded content; the section stays directly after Recipe Guide without moving Garden Planner from the top.
+```sh
+node desktop/prepare.cjs
+node --test desktop/test/*.test.cjs
+```
 
-**Per-account Google Drive folder reuse:** the web app now verifies a remembered folder ID with the current Google account and searches for a unique, app-accessible existing DK Seed Bank folder. It reuses that Drive file ID, hides the Create button, and refuses creation if the check is blocked or ambiguous. Use **Find existing folder** to retry. Folders not created or opened by this app may not be visible under `drive.file`. **Sync & Backup** displays separate last-success times for private cloud sync and actual visible photo-folder export on each device. A timestamp records success on that device only; it is not proof that iPhone and desktop have synchronized until both are tested.
+Packaging the Linux release requires the desktop dependencies and a supported Linux build environment. The project does not automatically start a build or GitHub Actions workflow for every change.
 
-**Backup status safety:** the last successful visible-folder backup label is tied to that folder's unique Drive ID. Choosing a different folder does not incorrectly inherit the previous folder's successful-backup timestamp.
+The web edition includes an offline application shell and optional offline reference-photo caching. Uploaded photos are stored locally; browser storage can still be cleared by the operating system. Full JSON backups remain the portable recovery method.
 
-**Garden Planner initialization repair:** all quick-access buttons now use the collection selector rather than calling `forEach` on a single element. This corrects a runtime exception that previously could prevent final Garden Planner initialization and Back to Top controls from being attached. No stored garden records are changed.
+## Limitations
 
-**Garden record conflict reduction:** current Garden Planner edits, new records, and deletions now carry times or deletion markers in full backups. The Drive merger respects those markers for seed lots, garden beds, harvests, saved seed batches, germination tests, succession plans and deleted custom varieties. It also prefers the latest uploaded image for the same image key. Older backups without the new fields are still supported. Desktop and iPhone must still be checked in person to confirm live synchronization.
+Two-way cross-device sync, iPhone browser behavior, Google account authorization, offline recovery, and portable Linux packaging require checks in their actual environments. Source and simulated tests do not establish that every live Google account or device is working.
 
-**Data-safety completion pass:** actual photo update times and deletion markers now protect uploaded plant/packet images from stale snapshots. Garden Planner and watering deletions also persist between devices. The verified merge is uploaded to Google Drive before local records are replaced, so a failed import still leaves a cloud copy. Regression tests cover stale records, deleted photos, watering deletions, folder reuse and legacy backups. The curated 319-entry seed collection remains unchanged. Live iPhone-to-desktop OAuth and portable Linux packaging still need later real-device verification.
+This repository intentionally contains **application source, documentation, and generic examples**, not any individual's personal seed inventory, photos, private Google Drive data, account identifiers, or access tokens.
