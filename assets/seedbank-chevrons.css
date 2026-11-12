@@ -42,3 +42,10 @@ details:not(.category)[open] > summary::after{
 @media(prefers-reduced-motion:reduce){
   details:not(.category)>summary::after{transition:none}
 }
+
+/* Jump-to-category lives inside the search controls, which have extra right
+   padding and a border. Offset that gutter so its arrow matches other rows. */
+.jumpbox > summary::after{right:-5px !important}
+@media(max-width:760px){
+  .jumpbox > summary::after{right:1px !important}
+}
