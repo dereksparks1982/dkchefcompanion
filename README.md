@@ -35,3 +35,5 @@ Organize seed varieties, packets and saved seed lots; view planting guides and r
 **Backup status safety:** the last successful visible-folder backup label is tied to that folder's unique Drive ID. Choosing a different folder does not incorrectly inherit the previous folder's successful-backup timestamp.
 
 **Garden Planner initialization repair:** all quick-access buttons now use the collection selector rather than calling `forEach` on a single element. This corrects a runtime exception that previously could prevent final Garden Planner initialization and Back to Top controls from being attached. No stored garden records are changed.
+
+**Garden record conflict reduction:** current Garden Planner edits, new records, and deletions now carry times or deletion markers in full backups. The Drive merger respects those markers for seed lots, garden beds, harvests, saved seed batches, germination tests, succession plans and deleted custom varieties. It also prefers the latest uploaded image for the same image key. Older backups without the new fields are still supported. Desktop and iPhone must still be checked in person to confirm live synchronization.

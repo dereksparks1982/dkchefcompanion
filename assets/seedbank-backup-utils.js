@@ -100,6 +100,15 @@ function validate(data){
  for(const key of ["settings","workbench","watering","recipeGuide","photoUrls","photoPreferences"]){
   if(data[key]!=null&&!isObject(data[key]))throw Error("Invalid "+key+" section.");
  }
+ if(data.workbench?.deletedRecords!=null){
+  const deleted=data.workbench.deletedRecords;
+  const sections=new Set(["additions","lots","beds","harvests","savedSeeds","tests","succession"]);
+  if(!Array.isArray(deleted)||deleted.length>3000)throw Error("Invalid inventory deletion history.");
+  for(const record of deleted)if(!isObject(record)||!sections.has(record.section)||
+    typeof record.id!=="string"||record.id.length>200||
+    typeof record.deletedAt!=="string"||Number.isNaN(Date.parse(record.deletedAt)))
+     throw Error("Invalid inventory deletion marker.");
+ }
  for(const key of ["additions","lots","beds","harvests","savedSeeds","tests","succession"]){
   const section=data.workbench?.[key];
   if(section!=null&&(!Array.isArray(section)||section.length>3000||section.some(x=>!isObject(x))))

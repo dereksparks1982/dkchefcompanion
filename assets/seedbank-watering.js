@@ -194,7 +194,7 @@ form.addEventListener("submit",e=>{
  const days=Number(data.get("days")||0),unit=String(data.get("unit")||"gallons");
  const allowed=["watered","checked","rain","skipped"];
  if(!iso(date)||date>today()||!allowed.includes(action)||!Number.isInteger(days)||days<1||days>60||!Number.isFinite(amount)||amount<0||amount>100000||!["gallons","liters","cups","inches"].includes(unit)){feed.textContent="Check date, amount, units and next-check interval.";return;}
- const record={id:editing||newId(),plantingId:String(entry.id),label:formatPlant(entry),date,action,soil:String(data.get("soil")||"unknown"),amount:(action==="watered"||action==="rain")?amount:0,unit,notes:String(data.get("notes")||"").trim().slice(0,500)};
+ const record={id:editing||newId(),updatedAt:new Date().toISOString(),plantingId:String(entry.id),label:formatPlant(entry),date,action,soil:String(data.get("soil")||"unknown"),amount:(action==="watered"||action==="rain")?amount:0,unit,notes:String(data.get("notes")||"").trim().slice(0,500)};
  const existing=state.records.slice(),oldPreferences={...state.preferences};
  if(editing)state.records=state.records.filter(r=>r.id!==editing);
  state.records.push(record);

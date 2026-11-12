@@ -37,7 +37,7 @@ function mergeChild(list,field,removedField){
 function mergeSnapshots(inputs){
  if(!Array.isArray(inputs)||!inputs.length)throw Error("No snapshots available to merge.");
  const snapshots=sortByTime(inputs.map(input=>input.backup||input));
- const local=snapshots[snapshots.length-1];
+ const local=inputs[inputs.length-1].backup||inputs[inputs.length-1];
  const journals=new Map();
  for(const snapshot of snapshots){
   for(const entry of array(snapshot.journal)){
@@ -61,18 +61,45 @@ function mergeSnapshots(inputs){
  journal.sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.id).localeCompare(String(b.id)));
  const workbenches=snapshots.map(s=>object(s.workbench));
  const workbench={...object(local.workbench)};
- for(const key of ["additions","lots","beds","harvests","savedSeeds","tests","succession"]){
-  workbench[key]=mergeRows(workbenches.flatMap(w=>array(w[key])),row=>
-   key==="additions"?String(row.category||"")+"|"+String(row.name||""):String(row.id||""));
-  if(workbench[key].length>3000)throw Error("Cloud inventory section exceeds its safety limit: "+key);
+ const sections=["additions","lots","beds","harvests","savedSeeds","tests","succession"];
+ const byDeletion=new Map();
+ for(const item of workbenches.flatMap(w=>array(w.deletedRecords))){
+  if(!item||!sections.includes(item.section)||typeof item.id!=="string"||
+     typeof item.deletedAt!=="string")continue;
+  const key=item.section+"|"+item.id;
+  if(!byDeletion.has(key)||timestamp(item.deletedAt)>timestamp(byDeletion.get(key).deletedAt))
+   byDeletion.set(key,item);
  }
- workbench.overrides=Object.assign({},...workbenches.map(w=>object(w.overrides)));
+ workbench.deletedRecords=[...byDeletion.values()].slice(-3000);
+ for(const section of sections){
+  const rowId=row=>section==="additions"?String(row.category||"")+"|"+String(row.name||""):String(row.id||"");
+  const rows=mergeRows(workbenches.flatMap(w=>array(w[section])),rowId);
+  workbench[section]=rows.filter(row=>{
+   const removed=byDeletion.get(section+"|"+rowId(row));
+   return !removed||timestamp(row.updatedAt)>timestamp(removed.deletedAt);
+  });
+  if(workbench[section].length>3000)throw Error("Cloud inventory section exceeds its safety limit: "+section);
+ }
+ // Use per-record edit times rather than assuming the most recently exported
+ // snapshot always contains the newest inventory override.
+ workbench.overrides={};
+ for(const w of workbenches)for(const [key,value] of Object.entries(object(w.overrides))){
+  if(!value||typeof value!=="object")continue;
+  const previous=workbench.overrides[key];
+  if(!previous||timestamp(value.updatedAt)>=timestamp(previous.updatedAt))
+   workbench.overrides[key]=value;
+ }
+ for(const removed of workbench.deletedRecords)if(removed.section==="additions"){
+  const patch=workbench.overrides[removed.id];
+  if(patch&&timestamp(patch.updatedAt)<=timestamp(removed.deletedAt))
+   delete workbench.overrides[removed.id];
+ }
  const waterings=snapshots.map(s=>object(s.watering));
  const watering={...object(local.watering)};
  watering.records=mergeRows(waterings.flatMap(w=>array(w.records)),row=>row.id);
  const photoMap=new Map();
  for(const snapshot of snapshots)for(const photo of array(snapshot.photos)){
-  if(photo&&typeof photo.key==="string"&&!photoMap.has(photo.key))photoMap.set(photo.key,photo);
+  if(photo&&typeof photo.key==="string")photoMap.set(photo.key,photo);
  }
  const growthKeys=new Set(journal.flatMap(entry=>array(entry.growthPhotos).map(photo=>
   "journal-photo|"+encodeURIComponent(entry.id)+"|"+photo.id)));
