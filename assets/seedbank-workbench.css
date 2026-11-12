@@ -1,0 +1,95 @@
+
+/* DK Seed Bank Garden Workbench and navigation */
+#seedWorkbench{margin:18px 0 24px;border:1px solid #cbdccb;border-radius:14px;background:#fff;overflow:hidden}
+#seedWorkbench>summary{display:flex;align-items:center;justify-content:space-between;gap:15px;cursor:pointer;background:linear-gradient(120deg,#e5f1df,#eef5e9);color:#254b32;padding:18px 20px;list-style:none;font-weight:800;font-size:1.08rem}
+#seedWorkbench>summary::-webkit-details-marker{display:none}
+#seedWorkbench>summary:after{content:"⌄";font-size:1.2rem;margin-left:auto}
+#seedWorkbench[open]>summary:after{content:"⌃"}
+#seedWorkbench>summary small{display:block;color:#59745f;font-size:.78rem;font-weight:500}
+#seedWorkbench .wb-inner{padding:18px}
+.wb-intro,.wb-note{color:#566b5a;font-size:.86rem;line-height:1.5;margin:0 0 13px}
+.wb-quick{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.wb-quick button,.wb-inline button,.wb-form>button,.wb-small{background:#f0f7ed;border:1px solid #b5cfb7;color:#254f37;font-weight:700;border-radius:8px;cursor:pointer;padding:9px 12px;font-family:inherit;font-size:.82rem}
+.wb-quick button:hover,.wb-inline button:hover,.wb-form>button:hover,.wb-small:hover{background:#ddebda}
+.wb-quick .wb-primary,.wb-form>.wb-primary,.wb-primary{background:#276141;color:white;border-color:#276141}
+.wb-quick .wb-primary:hover,.wb-form>.wb-primary:hover{background:#1b4830}
+.wb-summary{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 15px}
+.wb-summary span{background:#f5f7f0;border:1px solid #e3e9dc;border-radius:9px;padding:7px 10px;font-size:.78rem;color:#566959}
+.wb-summary strong{color:#225237;font-variant-numeric:tabular-nums}
+.wb-panel{border:1px solid #dfebdc;border-radius:10px;margin:10px 0;background:#fff}
+.wb-panel>summary{cursor:pointer;list-style:none;background:#f2f8f0;padding:13px 16px;font-size:.95rem;font-weight:750;color:#2c5539;border-radius:10px}
+.wb-panel>summary::-webkit-details-marker{display:none}
+.wb-panel>summary:after{content:"＋";float:right}
+.wb-panel[open]>summary{border-radius:10px 10px 0 0}
+.wb-panel[open]>summary:after{content:"−"}
+.wb-panel-body{padding:17px;border-top:1px solid #dfebdc}
+.wb-panel-body h3{margin:12px 0;font-size:1rem;color:#2b583d}
+.wb-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0 22px}
+.wb-form>label,.wb-inline label,.wb-panel-body>label{min-width:0;font-size:.84rem;font-weight:700;color:#3f5946}
+.wb-form input:not([type=checkbox]),.wb-form select,.wb-inline input,.wb-inline select,.wb-record select,.wb-panel-body>label>input{width:100%;display:block;margin-top:5px;min-width:0;box-sizing:border-box;border:1px solid #bfd0c0;border-radius:8px;background:#fff;padding:9px 10px;min-height:39px;font-family:inherit;font-size:.83rem;color:#23392d}
+.wb-form fieldset{border:1px solid #dbe9d8;border-radius:9px;padding:10px 12px}
+.wb-form fieldset legend{font-weight:700;font-size:.81rem;color:#345940}
+.wb-form .wb-span{grid-column:1/-1}
+.wb-form button[type=submit]{justify-self:start}
+.wb-form .wb-check{display:flex;align-items:center;gap:7px}
+.wb-roles{display:flex;flex-wrap:wrap;gap:8px}
+.wb-role{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;cursor:pointer}
+.wb-role input{accent-color:#245d3e}
+.wb-role .tag{margin:0}
+.wb-inline{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:10px 0 14px}
+.wb-inline label{flex:1;min-width:180px}
+.wb-inline button{min-height:39px}
+.wb-record{border:1px solid #e0eadc;border-radius:9px;background:#fafcf8;padding:12px 13px;margin:9px 0;font-size:.83rem;line-height:1.5;color:#455d48;overflow-wrap:anywhere}
+.wb-record strong{color:#244d34}
+.wb-record ul{margin:8px 0 0;padding-left:20px}
+.wb-record li{margin:5px 0}
+.wb-record p{margin:6px 0}
+.wb-record .wb-small{padding:4px 8px;font-size:.76rem}
+.wb-empty{font-size:.85rem;color:#67786b}
+.wb-warning{background:#fff5df;color:#69491a;border:1px solid #efdbac;border-radius:7px;padding:9px 11px;font-size:.82rem;line-height:1.4}
+.wb-month-list{padding:0;list-style:none;max-height:350px;overflow-y:auto;margin:12px 0}
+.wb-month-list li{border-bottom:1px solid #e4eadf;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:9px 3px}
+.wb-month-list li>span{display:grid;gap:2px;min-width:0}
+.wb-month-list small{color:#6a786c;font-size:.74rem}
+.wb-month-list button{flex-shrink:0;cursor:pointer;background:#eaf4e8;border:1px solid #cadfcb;border-radius:7px;color:#245a3b;padding:7px 10px}
+.wb-journal-extra{display:flex;align-items:start;gap:10px;padding:8px;margin:6px 0;border-radius:8px;background:#f4f8f2;border:1px solid #e1e9da}
+.wb-journal-extra>img{width:66px;height:69px;border-radius:7px;object-fit:cover;border:1px solid #d7e6d3}
+.wb-journal-extra>div{min-width:0}
+.wb-journal-extra p{margin:4px 0;font-size:.76rem}
+.wb-journal-tags{display:flex;flex-wrap:wrap;gap:4px}
+.wb-journal-tags .tag{font-size:.68rem}
+.wb-label-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;margin-top:12px}
+.wb-print-label{border:1.5px dashed #617962;padding:13px;background:#fff;border-radius:5px;break-inside:avoid;min-height:124px}
+.wb-print-label h3{margin:0 0 6px;font-size:.97rem}
+.wb-print-label p{font-size:.72rem;margin:4px 0}
+.wb-print-label strong{display:block;font-size:.7rem;color:#7f3525}
+.wb-print-label small{display:block;margin-top:7px;font-size:.66rem;color:#6d7669}
+#wbReminderDialog{border:1px solid #bfd5c0;border-radius:15px;padding:0;max-width:min(710px,95vw);max-height:88vh;box-shadow:0 18px 55px rgba(15,49,25,.24)}
+#wbReminderDialog::backdrop{background:rgba(18,37,23,.53)}
+.wb-dialog{padding:22px;overflow:auto;max-height:82vh}
+.wb-dialog h2{color:#27583b;margin:0 0 10px;font-size:1.22rem}
+.wb-dialog p{font-size:.83rem;color:#526e57}
+.wb-back-to-top{appearance:none;display:block;cursor:pointer;background:#ebf3e8;color:#24553c;border:1px solid #bdd3c0;border-radius:8px;padding:10px 16px;font-size:.82rem;font-weight:750;font-family:inherit}
+.wb-back-to-top:hover{background:#d9e8d6}
+.wb-back-to-top:focus-visible{outline:3px solid #aa8936;outline-offset:2px}
+.wb-back-category{margin:13px auto 16px}
+.wb-back-to-top[hidden]{display:none!important}
+.wb-page-top{display:flex;justify-content:center;background:#f7faf4;padding:20px 14px 26px}
+.wb-back-final{min-width:160px}
+@media(max-width:580px){
+ #seedWorkbench>summary{display:block;padding:15px}
+ #seedWorkbench .wb-inner,.wb-panel-body{padding:12px}
+ .wb-form{grid-template-columns:1fr}
+ .wb-form .wb-span{grid-column:1}
+ .wb-quick button,.wb-inline button{flex:1}
+ .wb-month-list li{align-items:start}
+ .wb-month-list button{max-width:115px}
+}
+@media print{
+ body.wb-print-labels *{visibility:hidden!important}
+ body.wb-print-labels #wbLabelSheet,body.wb-print-labels #wbLabelSheet *{visibility:visible!important}
+ body.wb-print-labels #wbLabelSheet{position:absolute;top:0;left:0;width:100%;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0}
+ body.wb-print-labels .wb-print-label{min-height:130px;border:1px dashed black;color:black}
+ body.wb-print-labels .wb-print-label *{color:black!important}
+ @page{margin:10mm}
+}

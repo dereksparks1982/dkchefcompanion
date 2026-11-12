@@ -61,6 +61,7 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 .pepper-explain strong{color:#77401a;font-size:.95rem}.pepper-sources{font-size:.76rem}.pepper-sources a{color:#785022;text-underline-offset:2px}
 </style>
 <link rel="stylesheet" href="assets/seedbank-cards.css?v=20261111-clickable-purpose5">
+<link rel="stylesheet" href="assets/seedbank-workbench.css?v=20261111-workbench9">
 </head>
 <body>
 <header><div class="header-inner"><div class="eyebrow">My seed collection</div>
@@ -339,6 +340,8 @@ function searchText(el){return normalize([el.dataset.name,el.dataset.category,el
 function matchesQuery(el,terms){var txt=searchText(el);return terms.every(function(t){return txt.indexOf(t)!==-1;});}
 var searchIndex=cards.map(function(card){return{card:card,text:searchText(card)};});
 function update(){
+ cards=Array.from(document.querySelectorAll(".seed"));
+ searchIndex=cards.map(function(card){return{card:card,text:searchText(card)};});
  var typed=search.value.trim();
  var terms=normalize(typed).split(/\s+/).filter(Boolean);
  var cat=category.value;
@@ -352,7 +355,7 @@ function update(){
   var number=0;
   section.querySelectorAll(".seed").forEach(function(card){
    var tags=card.dataset.tags.split("|");
-   var matches=matchesQuery(card,terms)&&(!cat||card.dataset.category===cat)&&(!purposeValue||tags.includes(purposeValue))&&
+   var matches=card.dataset.archived!=="yes"&&matchesQuery(card,terms)&&(!cat||card.dataset.category===cat)&&(!purposeValue||tags.includes(purposeValue))&&
       (!sourceValue||card.dataset.source===sourceValue)&&(!quantityValue||(quantityValue==="multiple"?Number(card.dataset.amount)>=2:Number(card.dataset.amount)===1))&&(!heatValue||card.dataset.heatLevel===heatValue);
    card.hidden=!matches;
    if(matches){shown++;number++;totalUnits+=Number(card.dataset.amount);}
@@ -360,6 +363,10 @@ function update(){
   section.hidden=number===0;
   if(number){shownSections++;if(active)section.open=true;}
   section.querySelector(".visible-num").textContent=number;
+  var tally=section.querySelector(".category-count");
+  var totalCards=section.querySelectorAll(".seed").length;
+  var totalPackets=Array.from(section.querySelectorAll(".seed")).reduce(function(sum,c){return sum+Number(c.dataset.amount||0);},0);
+  if(tally&&tally.lastChild&&tally.lastChild.nodeType===3)tally.lastChild.textContent=" / "+totalCards+" entries · "+totalPackets+" total";
  });
  count.textContent="Showing "+shown+" of "+cards.length+" seed entries · "+totalUnits+" recorded packets / lots · "+shownSections+" categories";
  empty.hidden=shown!==0;
@@ -393,5 +400,6 @@ document.querySelectorAll("[data-jump]").forEach(function(button){
 update();
 })();</script>
 <script defer src="assets/seedbank-variety-images.js?v=20261111-expanded-images8"></script>
-<script defer src="assets/seedbank-cards.js?v=20261111-expanded-images8"></script>
+<script defer src="assets/seedbank-cards.js?v=20261111-workbench9"></script>
+<script defer src="assets/seedbank-workbench.js?v=20261111-workbench9"></script>
 </body></html>

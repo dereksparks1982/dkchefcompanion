@@ -1,7 +1,7 @@
 
 (function(){
 "use strict";
-const cards=Array.from(document.querySelectorAll(".seed"));
+let cards=Array.from(document.querySelectorAll(".seed"));
 const cats=Array.from(document.querySelectorAll(".category"));
 const search=document.getElementById("search");
 const storageKey="dk-seed-bank-journal-v1";
@@ -273,7 +273,7 @@ const purposeChips=Array.from(document.querySelectorAll("button[data-purpose-tag
 const knownPurposes=new Set(Array.from(purposeSelect.options).map(option=>option.value).filter(Boolean));
 function syncPurposeChips(){
  const current=purposeSelect.value;
- purposeChips.forEach(chip=>{
+ document.querySelectorAll("button[data-purpose-tag]").forEach(chip=>{
   const active=chip.dataset.purposeTag===current;
   chip.setAttribute("aria-pressed",String(active));
   chip.classList.toggle("is-selected",active);
@@ -421,10 +421,11 @@ function renderJournal(){
    (entry.notes?'<p><strong>Notes:</strong> '+esc(entry.notes)+'</p>':'')+
    '<div class="journal-actions"><button data-edit="'+esc(entry.id)+'" type="button">Edit</button><button data-delete="'+esc(entry.id)+'" type="button">Delete</button></div></article>';
  }).join("");
+ document.dispatchEvent(new CustomEvent("dkseedbank:journal-rendered",{detail:{entries:sorted}}));
 }
 function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
 function openForm(entry){
- section.open=true;journalForm.hidden=false;editId=entry?entry.id:null;
+ section.open=true;journalForm.hidden=false;editId=entry?entry.id:null;journalForm.dataset.seedKey=entry&&entry.seedKey?entry.seedKey:"";
  const obj=entry||{plant:"",date:today(),time:"",minSeeds:"",maxSeeds:"",soakHours:"",medium:"",location:"",status:"Sown",sprouted:"",germinatedCount:"",survivedCount:"",variety:"",notes:""};
  Array.from(journalForm.elements).forEach(el=>{if(el.name)el.value=obj[el.name]==null?"":obj[el.name];});
  document.getElementById("journalFormTitle").textContent=entry?"Edit planting":"Record planting";
@@ -441,7 +442,7 @@ journalList.addEventListener("click",event=>{
 journalForm.addEventListener("submit",event=>{
  event.preventDefault();
  const f=new FormData(journalForm);
- const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),
+ const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),seedKey:journalForm.dataset.seedKey||"",
  plant:String(f.get("plant")||"").trim(),variety:String(f.get("variety")||"").trim(),
  date:String(f.get("date")||""),time:String(f.get("time")||""),approxTime:false,
  minSeeds:Number(f.get("minSeeds")||0),maxSeeds:Number(f.get("maxSeeds")||0),
@@ -453,14 +454,14 @@ journalForm.addEventListener("submit",event=>{
  if(!save(storageKey,journal))alert("This browser blocked local storage. Export a backup to preserve your entries.");
  editId=null;journalForm.hidden=true;renderJournal();
 });
-cards.forEach(card=>card.querySelector(".log-planting").addEventListener("click",()=>openForm({plant:card.dataset.name,variety:card.dataset.name,date:today(),status:"Sown"})));
+cards.forEach(card=>card.querySelector(".log-planting").addEventListener("click",()=>openForm({seedKey:card.dataset.category+"|"+card.dataset.name,plant:card.dataset.name,variety:card.dataset.name,date:today(),status:"Sown"})));
 renderJournal();
 const photoDialog=document.createElement("dialog");photoDialog.id="photoDialog";photoDialog.innerHTML='<div class="photo-modal-body"><div class="photo-modal-header"><strong id="modalPhotoTitle">Plant reference</strong><button id="closePhoto" type="button" aria-label="Close photo">×</button></div><img id="modalPhotoImage" alt="Plant photograph"><p id="modalPhotoCredit" class="photo-credit"></p></div>';
 document.body.appendChild(photoDialog);
 document.getElementById("closePhoto").addEventListener("click",()=>photoDialog.close());
 photoDialog.addEventListener("click",e=>{if(e.target===photoDialog)photoDialog.close();});
 
-function photoMatch(p){return Object.prototype.hasOwnProperty.call(checkedPhotoCatalog,p.key)?checkedPhotoCatalog[p.key]:null;}
+function photoMatch(p){return p.key===p.cat+"|"+p.name&&Object.prototype.hasOwnProperty.call(checkedPhotoCatalog,p.key)?checkedPhotoCatalog[p.key]:null;}
 function commonsFilePage(meta){
  if(meta.url)return meta.source||meta.url;
  return "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(meta.file.replace(/ /g,"_"));
@@ -685,7 +686,7 @@ function downloadJSON(data){
 document.getElementById("exportJournal").addEventListener("click",async()=>{
  const photos=await dbAll();
  const serialized=await Promise.all(photos.map(async ([key,blob])=>({key,data:await fileToDataURL(blob)})));
- downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photos:serialized.filter(x=>x.data)});
+ downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,photos:serialized.filter(x=>x.data)});
 });
 document.getElementById("importJournal").addEventListener("change",async e=>{
  const f=e.target.files&&e.target.files[0];if(!f)return;
@@ -718,6 +719,10 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
    else{userPhotos.set(photoKey,url);}
    if(p)refreshPhoto(p);
   }
+  if(data.photoPreferences&&typeof data.photoPreferences==="object"){
+   photoPreferences=Object.assign(photoPreferences,data.photoPreferences);save(photoPreferenceKey,photoPreferences);
+  }
+  if(data.workbench&&window.DKSeedBankWorkbench)window.DKSeedBankWorkbench.importData(data.workbench);
   requestFiltering();
   document.getElementById("regionSelect").value=settings.region;
   document.getElementById("envSelect").value=settings.environment;
@@ -726,4 +731,86 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
  }catch(err){alert("Could not import this backup: "+err.message);}
  e.target.value="";
 });
+
+
+const seedRoleClasses={"Food crop":"food","Culinary herb":"culinary","Pollinator":"pollinator","Ornamental":"ornamental","Tree / woody":"tree","Grain":"grain","Fiber / heritage":"fiber","Botanical / traditional":"botanical","Caution":"caution"};
+function patchInventoryCard(key,patch){
+ const p=plants.get(key);if(!p)return false;
+ const card=p.card;
+ if(patch.name&&typeof patch.name==="string"){
+  p.name=patch.name.trim().slice(0,140);card.dataset.name=p.name;
+  card.querySelector(".seed-name").textContent=p.name;
+ }
+ const dest=cats.find(s=>s.dataset.category===patch.category);
+ if(dest){p.cat=patch.category;card.dataset.category=p.cat;dest.querySelector(".entries").appendChild(card);}
+ if(Array.isArray(patch.tags)){
+  const names=[...new Set(patch.tags)].filter(v=>Object.hasOwn(seedRoleClasses,v));
+  card.dataset.tags=names.join("|");
+  const area=card.querySelector(".tagline");area.textContent="";
+  names.forEach(v=>{const chip=document.createElement("button");chip.type="button";chip.className="tag tag-"+seedRoleClasses[v]+" purpose-tag";chip.dataset.purposeTag=v;chip.textContent=v;chip.title="Filter by "+v;chip.setAttribute("aria-pressed",String(v===purposeSelect.value));area.appendChild(chip);});
+ }
+ if(Number.isInteger(patch.amount)&&patch.amount>=0&&patch.amount<=999999){
+  card.dataset.amount=String(patch.amount);
+  card.querySelector(".stock-badge").textContent=patch.amount+" "+(patch.amount===1?"packet / lot":"packets / lots");
+ }
+ if(["packet","harvested","unknown"].includes(patch.source))card.dataset.source=patch.source;
+ if(typeof patch.archived==="boolean")card.dataset.archived=patch.archived?"yes":"no";
+ p.guide=resolveGuide(p.name,p.cat);
+ p.kind=Object.keys(guides).find(k=>guides[k]===p.guide)||"generic";
+ card.dataset.growMode=p.guide.mode;card.dataset.growingSetup=p.guide.setup;
+ card.querySelector(".seed-brief").textContent=p.guide.depth+" deep · "+p.guide.light;
+ const values=[p.guide.depth,p.guide.spacing,p.guide.light,p.guide.germ,p.guide.soil,p.guide.days];
+ card.querySelectorAll(".plant-fact strong").forEach((node,i)=>{node.textContent=values[i];});
+ refreshPhoto(p);updatePlanner();requestFiltering();syncPurposeChips();
+ document.dispatchEvent(new Event("dkseedbank:inventorychange"));
+ return true;
+}
+function initializeNewSeedCard(p){
+ const c=p.card,g=c.querySelector(".seed-details");
+ g.querySelector("summary").addEventListener("click",()=>{if(g.open)return;seedCardsInSameVisualRow(c).forEach(other=>{if(other!==c){const x=other.querySelector(".seed-details");if(x)x.open=true;}});});
+ c.querySelector(".close-planting-guide").addEventListener("click",()=>{g.open=false;});
+ c.querySelector(".log-planting").addEventListener("click",()=>openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"}));
+ c.querySelector(".manage-photos").addEventListener("click",()=>openPhotoTools(p));
+ c.querySelector(".seed-thumb").addEventListener("click",()=>showPhoto(p));
+ c.querySelector(".find-variety-photo").href="https://commons.wikimedia.org/wiki/Special:MediaSearch?type=image&search="+encodeURIComponent(p.name+" plant");
+ for(const kind of ["plant","packet"]){
+  const f=photoUrlControl(p,kind),input=f.querySelector(".remote-photo-input");
+  input.value=savedImageLink(p,kind)||"";
+  input.addEventListener("input",()=>{input.dataset.previewedUrl="";f.querySelector(".remote-photo-preview").hidden=true;f.querySelector(".remote-photo-feedback").textContent="Preview or save this image address.";});
+  f.querySelector(".preview-photo-url").addEventListener("click",()=>previewPictureLink(p,kind,false));
+  f.querySelector(".save-photo-url").addEventListener("click",()=>previewPictureLink(p,kind,true));
+  f.querySelector(".delete-photo-url").addEventListener("click",()=>deletePictureLink(p,kind));
+ }
+ c.querySelector(".upload-photo").addEventListener("change",e=>storeUpload(p,"plant",e.target));
+ c.querySelector(".upload-packet-photo").addEventListener("change",e=>storeUpload(p,"packet",e.target));
+ c.querySelector(".remove-photo").addEventListener("click",()=>deleteUpload(p,"plant"));
+ c.querySelector(".remove-packet-photo").addEventListener("click",()=>deleteUpload(p,"packet"));
+ c.querySelectorAll("[data-photo-mode]").forEach(button=>button.addEventListener("click",()=>choosePhotoMode(p,button.dataset.photoMode)));
+ refreshPhoto(p);
+}
+function deleteInventoryCard(key){
+ const p=plants.get(key);if(!p)return false;
+ p.card.remove();plants.delete(key);cards=cards.filter(x=>x!==p.card);
+ requestFiltering();syncPurposeChips();document.dispatchEvent(new Event("dkseedbank:inventorychange"));
+ return true;
+}
+function createInventoryCard(entry){
+ const name=String(entry.name||"").trim(),cat=String(entry.category||"");
+ const section=cats.find(x=>x.dataset.category===cat),key=cat+"|"+name;
+ if(!name||!section||plants.has(key))return null;
+ const card=document.createElement("article");card.className="seed";
+ Object.assign(card.dataset,{name,category:cat,tags:"",source:"packet",amount:"0",archived:"no"});
+ card.innerHTML='<div class="seed-top"><strong class="seed-name">'+esc(name)+'</strong><span class="stock-badge">0 packets</span></div><div class="tagline"></div>';
+ section.querySelector(".entries").appendChild(card);tagContent(card);cards.push(card);
+ const p=plants.get(key);initializeNewSeedCard(p);patchInventoryCard(key,entry);return key;
+}
+window.DKSeedBankCore=Object.freeze({
+ plants:()=>plants,cards:()=>cards.slice(),categories:()=>cats.map(x=>x.dataset.category),
+ journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,
+ patchInventoryCard,createInventoryCard,deleteInventoryCard,refreshFilters:requestFiltering,
+ logPlanting:(key)=>{const p=plants.get(key);if(p)openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"});},
+ showJournal:()=>{section.open=true;section.scrollIntoView({behavior:"smooth",block:"start"});},
+ showPlanner:()=>{planner.open=true;planner.scrollIntoView({behavior:"smooth",block:"start"});}
+});
+
 })();
