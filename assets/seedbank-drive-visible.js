@@ -83,11 +83,6 @@ async function list(token,parent){
  }while(page);
  return all;
 }
-async function createItem(token,name,mimeType,parent){
- const metadata={name,mimeType,parents:[parent]};
- return (await (await request(token,DRIVE+"?fields=id,name,mimeType","POST",
-  JSON.stringify(metadata),"application/json")).json());
-}
 async function write(token,existing,name,mimeType,parent,blob,digest){
  // The upload session keeps binary photo data intact.
  const url=existing?UPLOAD+"/"+encodeURIComponent(existing.id)+"?uploadType=resumable&fields=id,name":
@@ -136,11 +131,8 @@ async function mirror(token,snapshot){
  const existing=await list(token,target); // verifies selected folder is accessible.
  const name="DK Seed Bank - full backup.json";
  const backup=existing.find(f=>f.name===name);
- const photoFolderName="DK Seed Bank Photographs";
- let photoFolder=existing.find(f=>f.name===photoFolderName&&f.mimeType==="application/vnd.google-apps.folder");
- if(!photoFolder)photoFolder=await createItem(token,photoFolderName,"application/vnd.google-apps.folder",target);
- const photoFiles=await list(token,photoFolder.id);
- const photoNames=new Map(photoFiles.map(f=>[f.name,f]));
+ // Place the actual image files directly in the user's selected folder.
+ const photoNames=new Map(existing.filter(f=>f.mimeType?.startsWith("image/")).map(f=>[f.name,f]));
  let saved=0;
  for(const photo of snapshot.photos){
   if(!photo||typeof photo.data!=="string"||typeof photo.key!=="string")continue;
@@ -152,7 +144,7 @@ async function mirror(token,snapshot){
   const prev=photoNames.get(filename);
   // Only skip a photo if the existing file was uploaded by us and matches.
   if(prev?.description==="dk-seedbank-sha256:"+hash){saved++;continue;}
-  await write(token,prev,filename,mime,photoFolder.id,image,hash);
+  await write(token,prev,filename,mime,target,image,hash);
   saved++;
  }
  const data=new Blob([JSON.stringify(snapshot)],{type:"application/json"});
