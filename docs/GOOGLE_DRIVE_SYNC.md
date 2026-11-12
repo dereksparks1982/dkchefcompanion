@@ -19,32 +19,22 @@ choose **Sync now** or opt into automatic synchronization while the app is open.
   clearly asks for permission before connecting, and `Sync now` transfers data to
   the account you authorized.
 
-## One-time Google Cloud setup
+## Connect Google Drive on the website (English and Russian)
 
-DK Seed Bank is currently **bring-your-own-OAuth-client**. The program cannot
-start Google sign-in until its user or distributor configures valid Google OAuth
-client IDs. Client IDs identify an app, **not** a user's Google account. A public
-client ID does not grant access to anyone's Drive without that person's consent.
+1. Open [DK Seed Bank](https://dereksparks1982.github.io/seedrepo/) on your device.
+2. Open **Google Drive sync** and select **Connect my Google Drive**.
+3. Pick your own Google account in Google's sign-in window and approve the requested access.
+4. Select **Sync now** to merge the device's records with that account's hidden DK Seed Bank app data. Or enable optional automatic sync while the app is open.
 
-1. In [Google Cloud Console](https://console.cloud.google.com/), create a project.
-2. Enable the **Google Drive API** for that project.
-3. Configure the Google OAuth consent screen. If using Testing mode, add the
-   Google account(s) that will sign in as test users. Publish and complete any
-   required Google review before distributing broadly.
-4. Create a **Web application** OAuth Client ID. Under Authorized JavaScript
-   origins, add exactly `https://dereksparks1982.github.io`, with no path.
-   Paste that client ID into the **Google Drive sync** section on the iPhone web app.
-5. Create a separate **Desktop app** OAuth Client ID **in the same Google Cloud
-   project**. Paste it into the Linux desktop program's Google Drive sync section.
-6. Select **Connect my Google Drive**, choose and approve your own Google account,
-   then select **Sync now**. On the website, the first tap may load Google's sign-in
-   library; tap Connect again when prompted. The desktop app opens your default browser.
-7. Sign into the **same Google account** in both app versions, then Sync now on
-   each device. You can optionally enable auto-sync while each app is open.
+There is **no client-ID input for website users**. DK Softworks provides the public web OAuth application identifier in the website code. That identifier cannot access anyone's Google Drive by itself. An account grants access only by signing in to Google's own authorization window.
 
-Use the **same Cloud project** for the web and desktop OAuth client IDs: Google
-isolates hidden application data per app and per Google user. Different Google
-Cloud projects do not share the same app-data storage even for the same user.
+### Publisher information and current limits
+
+- The DK Seed Bank web OAuth application, Google Drive API, and `drive.appdata` scope are configured through the developer's Google Cloud project. This is a publisher responsibility, not a user setup step.
+- While the Google OAuth application is in **Testing** status, only accounts added to its test-user list can connect. To offer sign-in to the public, the publisher must switch to production and complete any Google verification required by the requested scope.
+- The **Linux desktop edition uses a different Desktop OAuth client ID**, from the same Google Cloud project. That registration is not configured in the published portable Linux download yet, so do not use the web client ID as the desktop client ID. The existing desktop build may still request its separate client ID until that edition is updated.
+- The web browser and desktop edition need OAuth clients from the same Google Cloud project to see the same Google app-data storage for one signed-in user.
+- A browser pop-up blocker or expired sign-in session may require using Connect again. On iPhone, automatic sync runs only when the website is open.
 
 ## How synchronization works
 
