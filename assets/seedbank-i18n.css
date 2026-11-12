@@ -4,7 +4,7 @@
 .dk-language-bar select{border:1px solid #ffffff6b;border-radius:9px;padding:8px 28px 8px 11px;min-height:39px;color:#173b2b;background:#fff;font:inherit;font-size:.83rem;font-weight:750;cursor:pointer}
 .dk-colour-name{font-size:.71rem;font-weight:650;color:#ffe4eb;white-space:nowrap}
 html[lang="ru"]{--dk-red:#9D1F32;--dk-red-deep:#681422;--dk-red-soft:#F8ECEF;--dk-red-mid:#B52B43;--ink:#3f222b;--muted:#715862;--line:#e6cfd5;--paper:#fbf5f6;--green:#9D1F32;--focus:#9D1F32}
-html[lang="ru"] header{background:linear-gradient(125deg,#681422,#9D1F32 63%,#b9364d)}
+html[lang="ru"] header{background:#000}
 html[lang="ru"] header .eyebrow{color:#ffe1e7}html[lang="ru"] header p{color:#ffedf1}
 html[lang="ru"] .stat{background:#ffffff18;border-color:#ffffff40}html[lang="ru"] .stat span{color:#ffe4ea}
 html[lang="ru"] .dk-language-bar select{border-color:#f8b6c4;color:#681422;background:#fff8fa}
