@@ -1,0 +1,40 @@
+/* Dated planting photographs and iPhone camera controls. */
+.dk-growth{margin:12px 0 15px;padding:13px 14px;border:1px solid #cadfce;border-radius:12px;background:#f8fcf8;color:#254734}
+.dk-growth h4{font-size:.94rem;margin:0 0 12px;color:#285641;font-weight:800;display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.dk-growth h4 small{font-size:.7rem;font-weight:600;color:#57765e}
+.dk-growth-fields{display:grid;grid-template-columns:minmax(120px,1fr) minmax(155px,1.4fr);gap:9px}
+.dk-growth-fields label{display:flex;flex-direction:column;gap:5px;color:#3c654a;font-size:.75rem;font-weight:700;margin:0}
+.dk-growth-fields input,.dk-growth-fields select{width:100%;min-height:42px;border:1px solid #bad1bb;background:#fff;border-radius:8px;padding:8px 9px;color:#1d3d2c;font:inherit;font-size:.85rem}
+.dk-growth-note{grid-column:1/-1}
+.dk-growth-actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.dk-growth-button{display:inline-flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:#e5f4e8;color:#1d5837;border:1px solid #abcbb0;border-radius:9px;min-height:43px;padding:9px 14px;font-size:.85rem;font-weight:750;margin:0;position:relative}
+.dk-growth-button:first-child{background:#245b3c;border-color:#245b3c;color:#fff}
+.dk-growth-button:focus-within{outline:3px solid #d6b157;outline-offset:2px}
+.dk-growth-button input[type=file]{position:absolute;opacity:0;width:1px;height:1px;bottom:0;left:0;pointer-events:none}
+.dk-growth-button:has(input:disabled){opacity:.55;cursor:wait}
+.dk-growth-status{font-size:.77rem;color:#5e7362;margin:7px 0 0}
+.dk-growth-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px;margin-top:12px}
+.dk-growth-item{min-width:0;overflow:hidden;border:1px solid #d6e5d8;border-radius:10px;margin:0;background:#fff}
+.dk-growth-image{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:0;padding:0;cursor:zoom-in;background:#eef2ee;color:#68806e}
+.dk-growth-image img{width:100%;height:100%;object-fit:cover}
+.dk-growth-loading{font-size:.72rem;padding:8px}
+.dk-growth-item figcaption{padding:9px;color:#4c6851;line-height:1.4;font-size:.76rem;overflow-wrap:anywhere}
+.dk-growth-item figcaption strong{color:#294f36}
+.dk-growth-item figcaption p{margin:5px 0 0}
+.dk-growth-remove,.dk-growth-more{border:1px solid #d6c1c1;background:#fff6f5;color:#833d3d;border-radius:7px;padding:6px 8px;margin:9px 0 0;cursor:pointer;font-size:.75rem}
+.dk-growth-more{color:#245b3c;background:#eef8ef;border-color:#b5d7b9}
+.dk-growth-preview{border:0;border-radius:12px;padding:16px;background:#fcfffd;color:#234631;max-width:min(95vw,900px);max-height:92vh}
+.dk-growth-preview::backdrop{background:#111c15d9}
+.dk-growth-preview img{display:block;max-width:100%;max-height:72vh;object-fit:contain;margin:auto}
+.dk-growth-preview p{font-size:.84rem;margin:11px 0 0}
+.dk-growth-preview-close{display:block;margin:0 0 9px auto;background:#ecf3ee;color:#254934;border:1px solid #cad9ce;border-radius:7px;padding:7px 12px;cursor:pointer}
+html[lang="ru"] .dk-growth{border-color:#e1c4ce;background:#fdf8fa}
+html[lang="ru"] .dk-growth-button:first-child{background:#9d1f32;border-color:#9d1f32}
+@media(max-width:510px){
+ .dk-growth{padding:12px 10px}
+ .dk-growth-fields{grid-template-columns:1fr 1fr;gap:8px}
+ .dk-growth-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ .dk-growth-button{padding:8px 6px;font-size:.78rem;text-align:center}
+ .dk-growth-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+}
+@media(max-width:355px){.dk-growth-fields,.dk-growth-actions{grid-template-columns:1fr}}

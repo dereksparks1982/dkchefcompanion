@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v6/);
+ assert.match(source,/dk-seedbank-app-v8/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -101,7 +101,7 @@ test("service worker precaches the entire offline shell and uses a network timeo
 
 test("README stays concise and points at the portable Linux folder",()=>{
  const text=read("README.md");
- assert.ok(text.includes("v0.9.6-linux-portable/DK-Seed-Bank-0.9.6-Linux-x86_64.tar.gz"));
+ assert.ok(text.includes("v0.9.7-linux-portable/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz"));
  assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
  assert.ok(!text.includes("inventory/"));
  assert.ok(!text.includes(".AppImage"));
@@ -174,4 +174,72 @@ test("all expandable headings use a right-hand chevron and have no left triangle
  assert.equal((html.match(/class="category"/g)||[]).length,19);
  assert.equal((html.match(/class="chevron"/g)||[]).length,19);
  assert.doesNotMatch(read("assets/seedbank-recipes.js"),/<summary>＋ Add your own recipe<\/summary>/);
+});
+
+
+test("per-planting growth photos have direct camera and library controls in both web editions",()=>{
+ const html=read("index.html"),mirror=read("docs/index.html");
+ for(const source of [html,mirror]){
+  assert.match(source,/seedbank-growth-photos\.css\?v=20261112-growth1/);
+  assert.match(source,/seedbank-growth-photos\.js\?v=20261112-growth1/);
+  assert.ok(source.indexOf("seedbank-growth-photos.js")>source.indexOf("seedbank-i18n.js"));
+  assert.equal((source.match(/<article class="seed"/g)||[]).length,319);
+ }
+ const script=read("assets/seedbank-growth-photos.js");
+ assert.match(script,/capture="environment"/);
+ assert.match(script,/accept="image\/\*"/);
+ assert.match(script,/data-growth-camera/);
+ assert.match(script,/data-growth-upload/);
+ assert.match(script,/data-growth-date/);
+ assert.match(script,/data-growth-stage/);
+ assert.match(script,/data-growth-note/);
+ assert.match(script,/canvas\.toBlob\(resolve,"image\/jpeg",0\.82\)/);
+ assert.match(script,/async function saveBlob/);
+ assert.match(script,/dkseedbank:journal-rendered/);
+ assert.match(script,/dkseedbank:journal-deleted/);
+ assert.match(script,/Remove photo/);
+ assert.match(script,/Сделать фото/);
+ assert.match(script,/Изменения роста/);
+ assert.match(read("assets/seedbank-growth-photos.css"),/@media\(max-width:510px\)/);
+ assert.match(read("sw.js"),/"assets\/seedbank-growth-photos\.js"/);
+ assert.match(read("sw.js"),/"assets\/seedbank-growth-photos\.css"/);
+});
+
+test("photo timeline stays with its planting through edits and full backup restore",()=>{
+ const cards=read("assets/seedbank-cards.js");
+ assert.match(cards,/item\.growthPhotos=previous\.growthPhotos/);
+ assert.match(cards,/addJournalGrowthPhoto:/);
+ assert.match(cards,/removeJournalGrowthPhoto:/);
+ assert.match(cards,/dkseedbank:journal-deleted/);
+ assert.match(cards,/helper\.isGrowthPhotoKey\(image\.key,data\.journal\)/);
+ assert.match(cards,/if\(helper\.isGrowthPhotoKey\(key,data\.journal\)\)continue/);
+ assert.match(cards,/const growthKeys=window\.DKSeedBankBackup\?\.growthPhotoKeys\(journal\)/);
+ const photo=read("assets/seedbank-growth-photos.js");
+ assert.match(photo,/indexedDB\.open\("dk-seedbank-media",1\)/);
+ assert.match(photo,/backup\.growthPhotoKey\(entryId,meta\.id\)/);
+ assert.match(photo,/core\.addJournalGrowthPhoto\(entryId,meta\)/);
+ assert.match(photo,/core\.removeJournalGrowthPhoto\(entryId,meta\)/);
+});
+
+test("growth photo backups reject incomplete media, malformed stages, and duplicate IDs",()=>{
+ const helper=browserModule("seedbank-backup-utils.js").DKSeedBankBackup;
+ const metadata={id:"photo-20261112",date:"2026-11-12",stage:"seedling",note:"First leaves"};
+ const entry={id:"log-20261111-mint",plant:"Mint",date:"2026-11-11",growthPhotos:[metadata]};
+ const key=helper.growthPhotoKey(entry.id,metadata.id);
+ const backup={format:"dk-seedbank-v1",journal:[entry],photos:[{key,data:"data:image/jpeg;base64,AA=="}]};
+ assert.equal(helper.validate(backup).growthPhotos,1);
+ assert.equal(helper.isGrowthPhotoKey(key,[entry]),true);
+ assert.throws(()=>helper.validate({...backup,photos:[]}),/missing from backup/);
+ assert.throws(()=>helper.validate({...backup,journal:[{...entry,growthPhotos:[{...metadata,stage:"invalid"}]}]}),/photo details/);
+ assert.throws(()=>helper.validate({...backup,journal:[{...entry,growthPhotos:[metadata,metadata]}]}),/Duplicate planting photo/);
+ assert.equal(helper.validate({format:"dk-seedbank-v1",journal:[{plant:"Mint",date:"2026-11-11"}]}).growthPhotos,0);
+});
+
+test("desktop bundle includes photo module, styles and iPhone capture fallback",()=>{
+ const html=fs.readFileSync(path.join(bundle,"index.html"),"utf8");
+ for(const file of ["seedbank-growth-photos.js","seedbank-growth-photos.css"]){
+  assert.ok(fs.existsSync(path.join(bundle,"assets",file)),file+" missing");
+ }
+ assert.ok(html.includes('capture="environment"')===false,"Camera control belongs in the runtime UI, not static HTML");
+ assert.match(html,/seedbank-growth-photos\.js/);
 });

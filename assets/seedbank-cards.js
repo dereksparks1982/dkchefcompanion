@@ -664,6 +664,19 @@ section.innerHTML='<summary>📔 Planting Journal · <span id="journalCount">8 r
 planner.insertAdjacentElement("afterend",section);
 const journalList=document.getElementById("journalEntries"), journalForm=document.getElementById("journalForm");
 let editId=null;
+function updateJournalGrowth(id,photo,remove=false){
+ const index=journal.findIndex(entry=>String(entry.id)===String(id));
+ if(index<0||!photo||typeof photo.id!=="string")return false;
+ const current=journal[index];
+ const existing=Array.isArray(current.growthPhotos)?current.growthPhotos:[];
+ if(!remove&&(existing.length>=200||existing.some(item=>item.id===photo.id)))return false;
+ if(remove&&!existing.some(item=>item.id===photo.id))return false;
+ const growthPhotos=remove?existing.filter(item=>item.id!==photo.id):[...existing,photo];
+ const updated=journal.slice();
+ updated[index]={...current,growthPhotos};
+ if(!save(storageKey,updated))return false;
+ journal=updated;renderJournal();return true;
+}
 function renderJournal(){
  const sorted=journal.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  document.getElementById("journalCount").textContent=journal.length+" recorded plantings";
@@ -699,7 +712,15 @@ document.getElementById("cancelJournal").addEventListener("click",()=>{journalFo
 journalList.addEventListener("click",event=>{
  const edit=event.target.closest("[data-edit]"),del=event.target.closest("[data-delete]");
  if(edit){const item=journal.find(x=>x.id===edit.dataset.edit);if(item)openForm(item);}
- if(del){const item=journal.find(x=>x.id===del.dataset.delete);if(item&&window.confirm("Delete the "+item.plant+" planting record?")){journal=journal.filter(x=>x.id!==item.id);save(storageKey,journal);renderJournal();}}
+ if(del){const item=journal.find(x=>x.id===del.dataset.delete);
+  if(item&&window.confirm("Delete the "+item.plant+" planting record?")){
+   const remaining=journal.filter(x=>x.id!==item.id);
+   if(!save(storageKey,remaining)){alert("Unable to delete planting: local storage is unavailable.");return;}
+   journal=remaining;
+   document.dispatchEvent(new CustomEvent("dkseedbank:journal-deleted",{detail:{entry:item}}));
+   renderJournal();
+  }
+ }
 });
 journalForm.addEventListener("submit",event=>{
  event.preventDefault();
@@ -714,7 +735,11 @@ journalForm.addEventListener("submit",event=>{
  location:String(f.get("location")||"").trim(),status:String(f.get("status")||"Sown"),
  sprouted:String(f.get("sprouted")||""),germinatedCount:f.get("germinatedCount")===""?null:Number(f.get("germinatedCount")),survivedCount:f.get("survivedCount")===""?null:Number(f.get("survivedCount")),notes:String(f.get("notes")||"").trim()};
  if(!item.plant||!item.date||item.maxSeeds&&item.minSeeds>item.maxSeeds){alert("Check the plant name, date and seed count range.");return;}
- if(editId){journal=journal.map(x=>x.id===editId?item:x);}else journal.push(item);
+ if(editId){
+  const previous=journal.find(x=>x.id===editId);
+  if(Array.isArray(previous?.growthPhotos))item.growthPhotos=previous.growthPhotos;
+  journal=journal.map(x=>x.id===editId?item:x);
+ }else journal.push(item);
  if(!save(storageKey,journal))alert("This browser blocked local storage. Export a backup to preserve your entries.");
  editId=null;journalForm.hidden=true;renderJournal();
 });
@@ -946,7 +971,9 @@ function fileToDataURL(blob){return new Promise(resolve=>{const r=new FileReader
 async function createFullBackup(){
  const photos=await dbAll();
  const serialized=[];
+ const growthKeys=window.DKSeedBankBackup?.growthPhotoKeys(journal)||new Set();
  for(const [key,blob] of photos){
+  if(typeof key==="string"&&key.startsWith("journal-photo|")&&!growthKeys.has(key))continue;
   const data=await fileToDataURL(blob);
   if(!data)throw Error("Could not read an uploaded photo. No incomplete backup was downloaded.");
   serialized.push({key,data});
@@ -1023,6 +1050,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
    backupLanguage("Custom varieties: ","Добавленные сорта: ")+summary.addedVarieties+"\n"+
    backupLanguage("Seed lots: ","Партии семян: ")+summary.seedLots+"\n"+
    backupLanguage("Uploaded photos: ","Загруженные фотографии: ")+summary.uploadedPhotos+"\n"+
+   backupLanguage("Growth photos: ","Фотографии роста: ")+summary.growthPhotos+"\n"+
    (integrity.verified?backupLanguage("Integrity check passed.\n","Проверка целостности пройдена.\n"):
     backupLanguage("Older backup without a checksum.\n","Старая копия без контрольной суммы.\n"))+
    backupLanguage("A safety copy of your current records will be downloaded before restoration. Continue?",
@@ -1038,8 +1066,9 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   }
   const photos=[];
   for(const image of data.photos||[]){
+   const growthPhoto=helper.isGrowthPhotoKey(image.key,data.journal);
    const key=image.key.endsWith("|packet")?image.key.slice(0,-7):image.key;
-   if(!keys.has(key))continue;
+   if(!growthPhoto&&!keys.has(key))continue;
    const blob=await (await fetch(image.data)).blob();
    if(blob.size>6000000)throw Error("An uploaded photo exceeds the 6 MB limit.");
    photos.push([image.key,blob]);
@@ -1081,6 +1110,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   for(const url of [...userPhotos.values(),...packetPhotos.values()])URL.revokeObjectURL(url);
   userPhotos.clear();packetPhotos.clear();
   for(const [key,blob] of photos){
+   if(helper.isGrowthPhotoKey(key,data.journal))continue;
    const packet=key.endsWith("|packet"),plantKey=packet?key.slice(0,-7):key,photo=URL.createObjectURL(blob);
    (packet?packetPhotos:userPhotos).set(plantKey,photo);
   }
@@ -1190,6 +1220,8 @@ function setJournalSeedKey(entryId,key){
 window.DKSeedBankCore=Object.freeze({
  plants:()=>plants,cards:()=>cards.slice(),categories:()=>cats.map(x=>x.dataset.category),
  journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,guideFor:resolveGuide,setJournalSeedKey,
+ addJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta),
+ removeJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta,true),
  patchInventoryCard,createInventoryCard,deleteInventoryCard,refreshFilters:requestFiltering,
  logPlanting:(key)=>{const p=plants.get(key);if(p)openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"});},
  showJournal:()=>{section.open=true;section.scrollIntoView({behavior:"smooth",block:"start"});},

@@ -65,7 +65,7 @@ function createWindow(){
    try{
     if(!fs.existsSync(ICON_PATH))throw new Error("Approved DK icon is missing from packaged application");
     const info=await window.webContents.executeJavaScript(`
-      (()=>{
+      (async()=>{
         const logo=document.querySelector(".dk-logo-en");
         const redLogo=document.querySelector(".dk-logo-ru");
         const key="dk-seed-bank-desktop-smoke-check";
@@ -88,7 +88,58 @@ function createWindow(){
           [jumpSummary,backupSummary,panelSummary].every(summary=>
             getComputedStyle(summary,"::after").content.includes("⌄")));
         const seedChevronCount=document.querySelectorAll(".category > summary > .chevron").length;
+        const growth=document.querySelector(".journal-entry .dk-growth");
+        const growthCapture=growth?.querySelector('input[data-growth-camera][type="file"][capture="environment"]');
+        const growthUpload=growth?.querySelector('input[data-growth-upload][type="file"]');
+        const growthDate=growth?.querySelector('input[data-growth-date][type="date"]');
+        const growthStage=growth?.querySelector('select[data-growth-stage]');
+        const growthNotes=growth?.querySelector('input[data-growth-note]');
         if(initial==="ru")i18n?.setLanguage("ru",false);
+        // Exercise the actual gallery upload path with a generated tiny photo.
+        let growthUploadWorks=false;
+        try{
+          const before=window.DKSeedBankCore.journal()[0];
+          const canvas=document.createElement("canvas");
+          canvas.width=12;canvas.height=12;
+          canvas.getContext("2d").fillRect(0,0,12,12);
+          const png=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+          const picked=new File([png],"garden-smoke.png",{type:"image/png"});
+          const chooser=document.querySelector(".journal-entry [data-growth-upload]");
+          const transfer=new DataTransfer();
+          transfer.items.add(picked);chooser.files=transfer.files;
+          chooser.dispatchEvent(new Event("change",{bubbles:true}));
+          let newPhoto=null;
+          for(let i=0;i<80;i++){
+            await new Promise(resolve=>setTimeout(resolve,100));
+            const record=window.DKSeedBankCore.journal().find(item=>item.id===before.id);
+            newPhoto=record?.growthPhotos?.[0]||null;
+            if(newPhoto)break;
+          }
+          if(newPhoto){
+            const mediaKey=window.DKSeedBankBackup.growthPhotoKey(before.id,newPhoto.id);
+            const db=await new Promise(resolve=>{
+              const request=indexedDB.open("dk-seedbank-media",1);
+              request.onsuccess=()=>resolve(request.result);
+              request.onerror=()=>resolve(null);
+            });
+            if(db){
+              const stored=await new Promise(resolve=>{
+                const request=db.transaction("photos","readonly").objectStore("photos").get(mediaKey);
+                request.onsuccess=()=>resolve(request.result);
+                request.onerror=()=>resolve(null);
+              });
+              growthUploadWorks=stored instanceof Blob&&stored.type==="image/jpeg"&&
+                document.querySelector(".journal-entry .dk-growth-gallery .dk-growth-item")!==null;
+              window.DKSeedBankCore.removeJournalGrowthPhoto(before.id,newPhoto);
+              await new Promise(resolve=>{
+                const tx=db.transaction("photos","readwrite");
+                tx.objectStore("photos").delete(mediaKey);
+                tx.oncomplete=resolve;tx.onerror=resolve;
+              });
+              db.close();
+            }
+          }
+        }catch(error){console.error("Growth photo upload smoke failed:",error);}
         return {
           cards:document.querySelectorAll(".seed").length,
           selector:!!document.getElementById("dkLanguageSelect"),
@@ -101,6 +152,14 @@ function createWindow(){
           noCollectionEyebrow:!document.querySelector(".eyebrow"),
           rightSideArrows:arrowVisible,
           categoryArrows:seedChevronCount===19,
+          growthCamera:!!growthCapture,
+          growthUpload:!!growthUpload,
+          growthDate:!!growthDate,
+          growthStage:!!growthStage,
+          growthNotes:!!growthNotes,
+          growthStorageAPI:!!window.DKSeedBankGrowthPhotos,
+          growthJournalAPI:typeof window.DKSeedBankCore?.addJournalGrowthPhoto==="function",
+          growthPhotoRoundtrip:growthUploadWorks,
           exportBackup:!!document.getElementById("exportJournal"),
           importBackup:!!document.getElementById("importJournal"),
           backupValidation:!!window.DKSeedBankBackup,
