@@ -7,11 +7,12 @@ choose **Sync now** or opt into automatic synchronization while the app is open.
 
 - Every user signs into **their own Google account**. No Google account, refresh token,
   folder ID, or password is shipped in DK Seed Bank or stored in the public repository.
-- Authorization requests only the limited `drive.appdata` permission. It cannot browse
-  or edit other files or folders in Google Drive.
-- Google stores the snapshots in a **hidden application-data area** within the
-  authorized user's Drive. You don't need to create a folder and cannot browse these
-  snapshots in the regular Google Drive website.
+- Regular synchronization uses the limited `drive.appdata` permission.
+  A separate visible-folder export requests `drive.file` and writes only to a folder
+  the signed-in user explicitly selects through Google Picker.
+- Google stores normal sync snapshots in a **hidden application-data area** within
+  the authorized user's Drive. The visible-folder export writes readable photograph
+  files and a JSON backup into the chosen ordinary Drive folder.
 - Disconnect removes the local Google authorization (desktop: the local refresh-token
   file; website: the in-memory token). Existing uploaded data remains in the user's
   Google app-data area. Revoke access in Google Account permissions if needed.
