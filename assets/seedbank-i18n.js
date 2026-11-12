@@ -112,6 +112,27 @@ const pairs=[
 for(const [en,ru] of Object.entries(ruCategories))pairs.push([en,ru]);
 for(const [en,ru] of Object.entries(ruRoles))pairs.push([en,ru]);
 const dictionary=new Map(pairs);
+// Pepper heat explanations, source labels, help text and units must localize as complete strings.
+for(const [en,ru] of Object.entries({
+  "🌶 Scoville Heat Units (SHU)": "🌶 Шкала остроты Сковилла",
+  "Scoville Heat Units": "Единицы остроты по шкале Сковилла",
+  "SHU": "ед. Сковилла",
+  "ⓘ Check variety": "ⓘ Уточнить сорт",
+  "Typical heat ranges, not tests of your seeds. Color shows general heat; cultivar, growing conditions and maturity affect the actual result. Entries marked “Check variety” use an approximate or conditional match.": "Указаны типичные диапазоны остроты, а не результаты измерений ваших семян. Цвет обозначает примерный уровень остроты. Фактическая острота зависит от сорта, условий выращивания и зрелости плодов. Для записей с пометкой «Уточнить сорт» диапазон приблизительный или применим только при определённых условиях.",
+  "Iowa State Extension": "Сельскохозяйственная служба Университета штата Айова",
+  "Penn State Extension": "Сельскохозяйственная служба Университета штата Пенсильвания",
+  "Tozer (Count Dracula)": "Tozer (сорт «Граф Дракула»)",
+  "True Leaf Market (specialty habaneros)": "True Leaf Market (особые сорта хабанеро)",
+  "Typical poblano range; saved seeds may vary.": "Типичный диапазон для поблано; растения из сохранённых семян могут отличаться.",
+  "Paprika-type estimate; the specific NuMex cultivar needs confirmation.": "Приблизительная оценка для перца типа паприки; точный сорт NuMex нужно подтвердить.",
+  "Only if this is Count Dracula; verify the variety printed on the packet.": "Диапазон верен, только если это сорт «Граф Дракула». Сверьте название на упаковке.",
+  "Typical jalapeño range; saved seeds may not grow true to type.": "Типичный диапазон для халапеньо; растения из сохранённых семян могут не повторять признаки исходного сорта.",
+  "General jalapeño reference. A mild selection can be lower; packet needs verification.": "Общий диапазон для халапеньо. У мягкого сорта острота может быть ниже; проверьте упаковку.",
+  "General jalapeño range; this cultivar may differ.": "Типичный диапазон для халапеньо; у этого сорта острота может отличаться.",
+  "Chocolate habanero published seed-supplier range; varies by line.": "Диапазон для шоколадного хабанеро по данным поставщика семян; у разных линий он отличается.",
+  "General habanero reference; exact white variety not confirmed.": "Общий диапазон для хабанеро; точный белый сорт не подтверждён.",
+  "If this is the Lemon Habanero cultivar; verify the packet.": "Диапазон подходит, если это сорт «Лимонный хабанеро»; проверьте упаковку."
+}))dictionary.set(en,ru);
 const recipeText={
 "The classic distilled style uses grand wormwood, green anise and fennel for its principal character, with petite wormwood, hyssop and lemon balm often used for the green coloration. This is an ingredient inventory, not a distillation tutorial.":"Классический дистиллированный вариант основан на горькой полыни, анисе и фенхеле; для зелёного оттенка традиционно используют понтийскую полынь, иссоп и мелиссу. Это только учёт ингредиентов, а не инструкция по перегонке.",
 "A classic basil-based sauce. Harvest mature edible leaves; seed packets are not cooking ingredients.":"Классический соус из базилика. Используйте зрелые съедобные листья; семена из пакета не являются пищевым ингредиентом.",
@@ -145,6 +166,11 @@ for(const [en,ru] of additionalTranslations)dictionary.set(en,ru);
 
 for(const [en,ru] of Object.entries({"Кустовой":"Кустовой","Unverified seed packet photo":"Фотография пакетика не подтверждена","Checking photo…":"Проверяется фотография…","No exact variety photo verified":"Точная фотография сорта не подтверждена","Named seed-packet photo (not growing carrots)":"Фото фирменного пакетика семян (не выращенная морковь)","Photo of named cultivar":"Фото указанного сорта","Seller's photo of named cultivar":"Фото сорта от продавца","One example of this seed blend":"Пример растения из смеси","Seed photo cannot be loaded":"Не удалось загрузить фотографию семян"}))dictionary.set(en,ru);
 for(const [en,ru] of Object.entries({"English":"Английский","Nightshade (Solanaceae)":"Паслёновые (Solanaceae)","Brassica (Brassicaceae)":"Капустные (Brassicaceae)","Gourd (Cucurbitaceae)":"Тыквенные (Cucurbitaceae)","Carrot (Apiaceae)":"Зонтичные (Apiaceae)","Allium (Amaryllidaceae)":"Амариллисовые (Amaryllidaceae)","Amaranth (Amaranthaceae)":"Амарантовые (Amaranthaceae)","Grass (Poaceae)":"Злаковые (Poaceae)","Mint (Lamiaceae)":"Яснотковые (Lamiaceae)","Legume (Fabaceae)":"Бобовые (Fabaceae)","Daisy (Asteraceae)":"Астровые (Asteraceae)","Miner's lettuce (Montiaceae)":"Монтиевые (Montiaceae)","Honeysuckle (Caprifoliaceae)":"Жимолостные (Caprifoliaceae)","count":"штуки","bunches":"пучки","🌱 Your monthly seed-starting checklist":"🌱 Список посевов на этот месяц","Dismiss for this month":"Закрыть на этот месяц","Close":"Закрыть","Estimated last spring frost:":"Предполагаемый последний весенний заморозок:","No matching sowing windows in this month for your recorded varieties. Check earlier or later months.":"В этом месяце для ваших записанных сортов нет подходящих сроков посева. Проверьте соседние месяцы.","(due)":"(пора выполнить)","Mark next sown":"Отметить следующий посев","Remove plan":"Удалить план","No repeat-sowing reminders set.":"Напоминания о повторных посевах пока не установлены.","No viability tests recorded.":"Тесты на всхожесть пока не записаны.","Known low-stock seed counts":"Учитываемые остатки семян с малым запасом","⚠ Same crop family as the previous season. Consider rotating to a different family if practical.":"⚠ В предыдущем сезоне здесь выращивалась культура того же семейства. По возможности измените севооборот.","Add a variety":"Добавить сорт","Assign":"Назначить","Remove bed":"Удалить грядку","No saved seed harvests recorded yet.":"Сбор собственных семян пока не записывался.","Select a seed to create print-ready labels.":"Выберите семена для подготовки этикеток к печати.","Link a specific variety only if you know it was planted":"Указывайте конкретный сорт, только если уверены, что именно он был посеян.","Species notes:":"Примечания о виде:","Growing instructions":"Рекомендации по выращиванию","Seeds sown:":"Посеяно семян:","active varieties":"активных сортов","plantings":"посадок","garden spaces":"мест выращивания","harvests":"сборов урожая","How to stay safe:":"Как обезопасить себя:","General safety reference:":"Общие сведения о безопасности:","Planting guide & details":"Инструкция по посадке и уходу","When, where & how to plant":"Когда, где и как сажать","📷 Add / replace plant photo":"📷 Добавить или заменить фото растения","📦 Add / replace packet photo":"📦 Добавить или заменить фото пакета семян","Paste a direct picture link, not a webpage address.":"Вставьте прямую ссылку на изображение, а не ссылку на веб-страницу.","You do not have to download the picture first.":"Предварительно скачивать фотографию не требуется.","Show sourced image":"Показать изображение из источника","Show my plant":"Показать моё растение","Show my packet":"Показать мой пакет семян","Delete my plant photo":"Удалить моё фото растения","Delete my packet photo":"Удалить моё фото пакета","Find more photos of this variety on Wikimedia Commons":"Найти другие фотографии сорта в Викискладе","Exact variety image not yet confirmed. You can upload your own.":"Точное изображение сорта пока не подтверждено. Вы можете загрузить своё фото.","× Close planting details":"× Закрыть подробности посадки","Growing method":"Способ выращивания","All methods":"Все способы","Greenhouse recommended":"Рекомендуется теплица","Needs species verification":"Необходимо уточнить вид","My photos":"Мои фотографии","All seeds":"Все семена","Has my photo":"Есть моё фото","No personal photo yet":"Моего фото пока нет","Choose a region and growing setup. Alaska varies enormously from town to town; planting dates depend on your actual frost dates and greenhouse heating.":"Выберите регион и условия выращивания. На Аляске климат сильно меняется от места к месту; сроки посева зависят от фактических заморозков и обогрева теплицы.","Alaska (location TBD)":"Аляска (место уточняется)","Kansas":"Канзас","Other location":"Другой регион","Growing space":"Место выращивания","Indoors / grow lights":"В помещении / под фитолампами","Expected last spring frost":"Ожидаемый последний весенний заморозок","🌱 What could I plant now?":"🌱 Что можно посадить сейчас?","Set your expected last spring frost to calculate approximate sowing windows.":"Укажите предполагаемую дату последнего весеннего заморозка для расчёта примерных сроков посева.","Protected-growing candidates":"Культуры для защищённого грунта","Frost-date-based planting candidates":"Культуры для посева с учётом заморозков","Germinating":"Прорастает","Harvested":"Урожай собран","Plant reference":"Справка о растении","active planting records":"активных посадок","checks due or past suggested date":"проверок влажности пора выполнить","without a moisture check":"без проверки влажности","watering/history records":"записей о поливе и влажности"}))dictionary.set(en,ru);
+// Russian quantity nouns depend on both the last digit and the last two digits.
+function ruCount(n,one,few,many){
+ const value=Math.abs(Number(n)),last=value%10,lastTwo=value%100;
+ return lastTwo>=11&&lastTwo<=14?many:last===1?one:last>=2&&last<=4?few:many;
+}
 const dkDynamicRules=[
  [/Planting Journal/gi,"Журнал посадок"],
  [/Growing Planner/gi,"Планировщик выращивания"],
@@ -159,8 +185,9 @@ const dkDynamicRules=[
  [/(\d+)\s+harvests\b/gi,"$1 сборов урожая"],
  [/(\d+)\s+germination tests\b/gi,"$1 проверок всхожести"],
  [/(\d+)\s+count\(s\) unconfirmed\b/gi,"$1 без уточнённого количества"],
- [/(\d+)\s+packets?\b/gi,"$1 пакетов"],
- [/(\d+)\s+saved lots?\b/gi,"$1 партий семян"],
+ [/(\d+)\s+packets?\b/gi,(_,n)=>n+" "+ruCount(n,"пакет","пакета","пакетов")],
+ [/(\d+)\s+saved lots?\b/gi,(_,n)=>n+" "+ruCount(n,"партия","партии","партий")+" семян"],
+ [/(\d+)\s+(?:batches|batchs|batch)\b/gi,(_,n)=>n+" "+ruCount(n,"партия","партии","партий")],
  [/\bLog planting\b/gi,"Записать посадку"],
  [/\bManage photos\b/gi,"Управление фотографиями"]
 ];
@@ -168,9 +195,9 @@ function dkDynamic(text){let value=String(text||"");for(const [rule,replacement]
 for(const [en,rus] of Object.entries({"DK Seed Bank":"ДК Банк семян","DK Media Plus":"ДК Медиа Плюс","Try tomato, tomatoe, Peredovik, pollinator…":"Например: томат, Передовик, медоносы…","📔 Planting Journal":"📔 Журнал посадок","Planting Journal":"Журнал посадок","📷 Manage photos":"📷 Управление фотографиями","＋ Log planting":"＋ Записать посадку","Log planting":"Записать посадку","Manage photos":"Управление фотографиями","Seller's photo of named cultivar":"Фото сорта от продавца","Photo of named cultivar":"Фотография указанного сорта","One example of this seed blend":"Пример растения из этой смеси","No exact variety photo verified":"Точная фотография сорта не подтверждена","Named seed-packet photo (not growing carrots)":"Фото упаковки семян (не растущей моркови)","Growing Planner":"Планировщик выращивания","Garden Workbench":"Учёт садовых работ","Recipe Guide":"Сборник рецептов","Monastery Garden":"Монастырский сад","Garden Watering Manager":"Учёт полива сада","Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.":"Записывайте посев, всходы, пересадки и урожай. Записи и фотографии хранятся в браузере, а не синхронизируются автоматически. Сохраняйте резервные копии.","Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.":"Выбирайте конкретный сорт, только если знаете, что именно он был посеян. По одной фотографии нельзя надёжно определить сорт.","Link exact variety from my Seed Bank":"Связать с точным сортом из коллекции","Clear search":"Очистить поиск","Clear entire search":"Очистить весь поиск","UAF · Alaska greenhouse gardening":"Университет Аляски: выращивание в теплице","⚠️ Why Caution:":"⚠️ Почему нужна осторожность:","⚠️ Caution: what is dangerous and what to do":"⚠️ Опасность растения и меры предосторожности","View full seed card and picture settings":"Открыть карточку семян и настройки фотографий","View photo for":"Просмотреть фото:","Add / replace plant photo":"Добавить или заменить фото растения","Add / replace packet photo":"Добавить или заменить фото упаковки","Your garden records stay in this browser. Use":"Данные о саде хранятся в этом браузере. Используйте","No photo available":"Фото недоступно","Photo by":"Автор фотографии:","Unknown":"Неизвестно","Not specified":"Не указано","Not recorded":"Не записано","Quantity not recorded":"Количество не записано","Edit planting":"Изменить посадку","Save planting":"Сохранить посадку","Date germinated":"Дата прорастания","Seeds germinated":"Проросло семян","Plants survived":"Выжило растений","No seed lots recorded yet. Add one above to track actual seed counts.":"Партии семян пока не добавлены. Добавьте партию выше для учёта количества.","No garden beds or containers created yet.":"Грядки и контейнеры пока не добавлены.","No harvests recorded yet.":"Записей об урожае пока нет.","No active planting records. Use the Planting Journal to record what you actually sowed; every seed card already has a watering guide.":"Активных посадок пока нет. Запишите фактические посевы в журнал. Инструкция по поливу доступна для каждого растения.","No watering or moisture checks recorded yet.":"Записей о поливе и проверках влажности пока нет.","Check soil today":"Проверить почву сегодня","No check recorded":"Проверок пока нет","Next check":"Следующая проверка","First record an actual planting in the Planting Journal. Watering records attach to that planting, not merely to an unused seed packet.":"Сначала запишите посадку в журнал. Учёт полива связан с фактической посадкой, а не просто с пакетом семян.","Added":"Добавлено","No matching records":"Нет подходящих записей","Try another name or clear filters.":"Введите другое название или сбросьте фильтры.","Not recorded in your collection":"Нет в вашей коллекции","No entries match these filters":"Ничего не найдено по выбранным фильтрам"}))dictionary.set(en,rus);
 
 const replacements=[
-[/\b(\d+)\s+packets?\b/gi,(_,n)=>n+" "+(n==="1"?"пакет":"пакета")],
-[/\b(\d+)\s+bags?\b/gi,(_,n)=>n+" пакетов"],
-[/\b(\d+)\s+saved lots?\b/gi,(_,n)=>n+" партий сохранённых семян"],
+[/\b(\d+)\s+packets?\b/gi,(_,n)=>n+" "+ruCount(n,"пакет","пакета","пакетов")],
+[/\b(\d+)\s+bags?\b/gi,(_,n)=>n+" "+ruCount(n,"пакет","пакета","пакетов")],
+[/\b(\d+)\s+saved lots?\b/gi,(_,n)=>n+" "+ruCount(n,"партия","партии","партий")+" сохранённых семян"],
 [/\b(\d+)\s+entries\b/gi,"$1 записей"],
 [/\b(\d+)\s+units\b/gi,"$1 единиц"],
 [/\b(\d+)\s+categories\b/gi,"$1 категорий"],
@@ -198,9 +225,10 @@ function generalTranslation(value){
  const raw=String(value||""),txt=raw.trim();if(!txt)return raw;
  if(dictionary.has(txt))return raw.replace(txt,dictionary.get(txt));
  const mixed=dkDynamic(txt);if(mixed!==txt)return raw.replace(txt,mixed);
- if(/^(\d+)\s*(packet|packets|batch|batchs|lots|bags)$/.test(txt)){
-  const m=txt.match(/^(\d+)\s*(packet|packets|batch|batchs|lots|bags)$/);
-  return m[1]+" "+(m[2].startsWith("packet")?"пакетов":m[2].startsWith("bag")?"пакетов":"партий");
+ if(/^(\d+)\s*(packets?|batch|batchs|batches|lots?|bags?)$/.test(txt)){
+  const m=txt.match(/^(\d+)\s*(packets?|batch|batchs|batches|lots?|bags?)$/);
+  const kind=m[2],isPacket=/^packet|^bag/.test(kind),isLot=/^lot/.test(kind);
+  return m[1]+" "+(isPacket?ruCount(m[1],"пакет","пакета","пакетов"):ruCount(m[1],"партия","партии","партий"))+(isLot?" семян":"");
  }
  if(/^Showing \d+ of \d+ seed entries\b/.test(txt)){
   return txt.replace(/^Showing (\d+) of (\d+) seed entries/,"Показано $1 из $2 записей")
@@ -293,7 +321,10 @@ function lightRU(s){
  t=t.replace(/full sun/gi,"полное солнце").replace(/partial shade/gi,"полутень").replace(/part shade/gi,"полутень").replace(/deep shade/gi,"глубокая тень").replace(/light shade/gi,"лёгкая тень").replace(/bright light/gi,"яркий свет").replace(/cool sun/gi,"прохладное солнце").replace(/shade/gi,"тень").replace(/bright/gi,"яркий");
  return t;
 }
-function numberRU(s){return generalTranslation(String(s||"").replace(/\bto\b/g,"–"));}
+function numberRU(s){
+ const value=String(s||"").replace(/\bto\b/g,"–").replace(/([¼½¾⅛⅜⅝⅞])\s*in\b/gi,"$1 дюйма");
+ return generalTranslation(value);
+}
 function growingRules(p,g){
  const cat=p.cat,n=p.name.toLowerCase();
  const cold=/Peppers|Tomatoes|Eggplant|Pumpkins and melons|Gourds and squash/.test(cat)||/stevia|agave|tropical|passion flower|peanut/.test(n);
@@ -397,7 +428,7 @@ function translateText(value,el){
  if(el.classList.contains("seed-name")&&seed)out=dkSeedDisplay(seed.dataset.name,seed.dataset.category);
  else if(el.tagName==="IMG"&&seed)out="Фото: "+dkSeedDisplay(seed.dataset.name,seed.dataset.category);
  else if(el.classList.contains("entry-note")&&p)out=dkCyrillic(noteFor(p));
- else if(el.classList.contains("seed-brief")&&p)out=generalTranslation(p.guide.depth)+" глубина · "+lightRU(p.guide.light);
+ else if(el.classList.contains("seed-brief")&&p)out="Глубина посева: "+numberRU(p.guide.depth)+" · "+lightRU(p.guide.light);
  else if(el.classList.contains("seed-photo-state"))out=dictionary.get(trim)||"Иллюстрация растения. Уточните соответствие сорту.";
  else if(el.matches(".journal-entry h3"))out=dkCyrillic(trim);
  else if(el.matches(".wm-due-row strong,#wmSelectedGuide strong"))out=dkCyrillic(trim);

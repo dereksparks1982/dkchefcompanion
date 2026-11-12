@@ -27,7 +27,7 @@ DK Seed Bank combines a searchable seed catalog with real-world gardening record
 
 ### Languages and appearance
 
-Choose **English** or **Русский** from the top-right selector. The English version uses a green theme and green DK sprout emblem. The Russian version uses a DK Red theme and red DK sprout emblem, with the Russian product title **ДК Банк семян**. Interface language is saved locally. Scientific and original seed identifiers are preserved in the stored data.
+Choose **English** or **Русский** from the top-right selector. The English version uses a green theme and green DK sprout emblem. The Russian version uses a DK Red theme and red DK sprout emblem, with the Russian product title **ДК Банк семян**. Interface language is saved locally. Scoville heat explanations, cultivar verification notes, unit labels and their help tooltips are localized in Russian; quantities use Russian grammatical forms. Scientific and original seed identifiers are preserved in the stored data.
 
 **DK Red** is the official shade `#9D1F32`. Reusable palette, accessibility guidelines and usage instructions for other DK apps are in [docs/DK-RED.md](docs/DK-RED.md). The visible website header does not advertise the shade or its HEX code.
 
