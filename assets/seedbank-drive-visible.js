@@ -14,24 +14,75 @@ const lang=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
 let selected=null;
 try{selected=JSON.parse(localStorage.getItem(PREFIX)||"null");}catch(e){}
 if(!selected||typeof selected.id!=="string"||!/^[a-zA-Z0-9_-]{8,150}$/.test(selected.id))selected=null;
-const folder=()=>selected;
+let verification="unchecked",lookupPromise=null;
+const folder=()=>verification==="found"?selected:null;
+const discoveryStatus=()=>verification;
 function saveFolder(pick){
  const id=String(pick.id||"");
  if(!/^[a-zA-Z0-9_-]{8,150}$/.test(id))throw Error("Invalid Drive folder selection.");
  selected={id,name:String(pick.name||"DK Seed Bank").slice(0,160)};
- localStorage.setItem(PREFIX,JSON.stringify(selected));
+ verification="found";
+ try{localStorage.setItem(PREFIX,JSON.stringify(selected));}catch(error){}
  return selected;
 }
+function resetVerification(){verification="unchecked";}
+async function discover(token){
+ if(lookupPromise)return lookupPromise;
+ lookupPromise=(async()=>{
+  assertToken(token);
+  verification="checking";
+  try{
+   // Never trust a remembered folder ID until this Google token can access it.
+   if(selected){
+    const response=await fetch(DRIVE+"/"+encodeURIComponent(selected.id)+
+     "?fields=id,name,mimeType,trashed",{headers:{Authorization:"Bearer "+token,Accept:"application/json"}});
+    if(response.ok){
+     const item=await response.json();
+     if(item.id===selected.id&&item.mimeType==="application/vnd.google-apps.folder"&&!item.trashed)
+      return {status:"found",folder:saveFolder(item)};
+    }else if(response.status!==403&&response.status!==404){
+     throw Error("Could not verify existing Drive folder ("+response.status+").");
+    }
+   }
+   // drive.file reveals only folders created or explicitly opened with this app.
+   // Use a unique Drive ID to identify a folder, not its display name alone.
+   const found=[];let page="",pages=0;
+   do{
+    const query=new URLSearchParams({spaces:"drive",
+     q:"name = 'DK Seed Bank' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+     fields:"nextPageToken,files(id,name,mimeType,trashed)",pageSize:"100"});
+    if(page)query.set("pageToken",page);
+    const json=await (await request(token,DRIVE+"?"+query)).json();
+    for(const item of json.files||[]){
+     if(item?.id&&item.name==="DK Seed Bank"&&item.mimeType==="application/vnd.google-apps.folder"&&
+        !item.trashed&&!found.some(f=>f.id===item.id))found.push(item);
+    }
+    page=json.nextPageToken||"";
+    if(++pages>10||found.length>100)throw Error("Too many matching folders to check safely.");
+   }while(page);
+   if(found.length===1)return {status:"found",folder:saveFolder(found[0])};
+   selected=null;
+   try{localStorage.removeItem(PREFIX);}catch(error){}
+   verification=found.length?"multiple":"missing";
+   return {status:verification,folder:null};
+  }catch(error){verification="error";throw error;}
+ })();
+ try{return await lookupPromise;}
+ finally{lookupPromise=null;}
+}
 async function createFolder(token){
- // A dedicated folder created in the user's own Google Drive. No pre-set folder IDs.
+ // Recheck on every click: other devices may have created this folder already.
+ const checked=await discover(token);
+ if(checked.status==="found")return {...checked.folder,created:false};
+ if(checked.status!=="missing")throw Error("Multiple DK Seed Bank folders found. Select the existing folder.");
  const response=await request(token,DRIVE+"?fields=id,name,mimeType","POST",
   JSON.stringify({name:"DK Seed Bank",mimeType:"application/vnd.google-apps.folder"}),"application/json");
- const result=await response.json();
- if(!result.id||result.mimeType!=="application/vnd.google-apps.folder")throw Error("Google did not return a new folder.");
- return saveFolder(result);
+ const item=await response.json();
+ if(!item.id||item.mimeType!=="application/vnd.google-apps.folder")throw Error("Google did not return a new folder.");
+ return {...saveFolder(item),created:true};
 }
 function clearFolder(){
- selected=null;
+ selected=null;verification="unchecked";
  try{localStorage.removeItem(PREFIX);}catch(e){}
 }
 function loadPicker(){
@@ -71,6 +122,7 @@ async function choose(token){
  const create=document.createElement("button");
  create.type="button";create.className="dk-drive-picker-close";
  create.textContent=lang("Create my DK Seed Bank folder instead","Создать свою папку DK Seed Bank");
+ create.hidden=verification!=="missing";
  const retry=document.createElement("button");
  retry.type="button";retry.className="dk-drive-picker-close";
  retry.disabled=true;
@@ -258,5 +310,5 @@ async function mirror(token,snapshot){
  await write(token,backup,name,"application/json",target,data,await digest(data));
  return {skipped:false,photos:saved,folder:target,name:selected.name};
 }
-root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,createFolder,clearFolder,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
+root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,discover,discoveryStatus,resetVerification,createFolder,clearFolder,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
 })(window);
