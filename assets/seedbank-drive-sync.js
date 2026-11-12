@@ -9,6 +9,8 @@ const scope="https://www.googleapis.com/auth/drive.appdata";
 const clientRx=/^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/;
 const filePrefix="dk-seedbank-sync-v1-";
 const desktop=!!root.DKSeedBankDesktop?.googleDrive;
+// Public application identifier, not a Google account, password or access token.
+const webClientId="990130733984-vc9lofrdpjc04flhkgc91buelgfo00ls.apps.googleusercontent.com";
 const t=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
 let saved={};
 try{saved=JSON.parse(localStorage.getItem(appKey)||"{}")||{};}catch(error){}
@@ -33,9 +35,9 @@ box.setAttribute("data-dk-no-translate","");
 box.innerHTML='<summary>☁ Google Drive sync</summary>'+
 '<div class="dk-drive-body">'+
 '<p id="dkDriveExplain"></p>'+
-'<label class="dk-drive-client-label" for="dkDriveClient"></label>'+
-'<input id="dkDriveClient" type="text" maxlength="130" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="000000000000-example.apps.googleusercontent.com">'+
-'<p id="dkDriveClientHelp"></p>'+
+(desktop?'<label class="dk-drive-client-label" for="dkDriveClient"></label>':'')+
+(desktop?'<input id="dkDriveClient" type="text" maxlength="130" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="000000000000-example.apps.googleusercontent.com">':'')+
+(desktop?'<p id="dkDriveClientHelp"></p>':'')+
 '<div class="dk-drive-actions">'+
 '<button type="button" id="dkDriveConnect"></button>'+
 '<button type="button" id="dkDriveNow"></button>'+
@@ -48,7 +50,7 @@ const position=document.getElementById("dkResilience");
 if(position)position.insertAdjacentElement("afterend",box);
 else journal.insertAdjacentElement("afterend",box);
 const $=id=>document.getElementById(id);
-$("dkDriveClient").value=saved.clientId||"";
+if(desktop)$("dkDriveClient").value=saved.clientId||"";
 $("dkDriveAuto").checked=!!saved.auto;
 const ready=()=>connected&&(desktop||!!token&&Date.now()<expires-60000);
 function render(){
@@ -56,6 +58,7 @@ function render(){
  $("dkDriveExplain").textContent=t(
   "Optional. Connect YOUR OWN Google account to share plantings, growth charts, photos and collection records between devices. No one else's Google Drive is connected.",
   "Необязательно. Подключите СВОЙ аккаунт Google, чтобы синхронизировать посадки, графики роста, фотографии и коллекцию между устройствами.");
+ if(desktop){
  $("dkDriveClient").disabled=busy||connected;
  $("dkDriveClient").setAttribute("aria-label",t("Google OAuth Client ID","Идентификатор клиента OAuth Google"));
  box.querySelector(".dk-drive-client-label").textContent=t(
@@ -64,6 +67,7 @@ function render(){
  $("dkDriveClientHelp").textContent=t(
   "One-time Google Cloud setup is required. The Web and Desktop client IDs must belong to the same Google Cloud project. No passwords or Google account identifiers are stored in the app.",
   "Требуется однократная настройка Google Cloud. Веб- и настольный идентификаторы должны принадлежать одному проекту Google Cloud. Пароли не сохраняются.");
+ }
  $("dkDriveConnect").textContent=t(ready()?"Connected":connected?"Reconnect Google Drive":"Connect my Google Drive",
   ready()?"Подключено":connected?"Переподключить Google Диск":"Подключить мой Google Диск");
  $("dkDriveConnect").disabled=busy||ready();
@@ -208,32 +212,24 @@ async function syncNow(){
 }
 async function connect(){
  if(busy||ready())return;
- const clientId=$("dkDriveClient").value.trim();
+ const clientId=desktop?$("dkDriveClient").value.trim():webClientId;
  if(!clientRx.test(clientId)){
-  lastStatus=t("Enter a valid Google OAuth Client ID before connecting.",
-   "Введите правильный идентификатор клиента OAuth Google.");render();return;
+  lastStatus=t("Google Drive sign-in is not configured for this edition.",
+   "Вход через Google Диск не настроен для этой версии.");render();return;
  }
  if(!desktop&&!root.google?.accounts?.oauth2){
-  busy=true;lastStatus=t("Loading Google sign-in (no account connected yet)…",
-   "Загрузка входа Google (аккаунт ещё не подключён)…");render();
-  try{
-   await gis();
-   lastStatus=t("Google sign-in is ready. Tap Connect again to choose your Google account.",
-    "Вход Google готов. Нажмите «Подключить» ещё раз, чтобы выбрать аккаунт.");
-  }catch(error){lastStatus=error.message;}
-  finally{busy=false;render();}
-  return;
+  busy=true;lastStatus=t("Loading secure Google sign-in…","Загрузка входа Google…");render();
+  try{await gis();}
+  catch(error){lastStatus=error.message;busy=false;render();return;}
+  busy=false;
  }
- const confirmation=t(
-  "Authorize your OWN Google account? Records on this device may be synchronized into the Google account you select. Check which account you authorize. Continue?",
-  "Подключить СВОЙ аккаунт Google? Записи с этого устройства могут быть перенесены в выбранный аккаунт. Проверьте аккаунт. Продолжить?");
- if(!window.confirm(confirmation))return;
  busy=true;lastStatus=t("Opening Google sign-in…","Открытие входа Google…");render();
  try{
   if(desktop){
    await root.DKSeedBankDesktop.googleDrive.connect(clientId);
   }else await connectWeb(clientId);
-  saved.clientId=clientId;persist();connected=true;
+  if(desktop)saved.clientId=clientId;
+  persist();connected=true;
   lastStatus=t("Google connected. Use Sync now to transfer records.",
    "Google подключён. Нажмите «Синхронизировать сейчас» для передачи записей.");
  }catch(error){
@@ -273,6 +269,8 @@ if(desktop){
   render();
  }).catch(()=>render());
 }
+// Load Google's official sign-in library before the first user click.
+if(!desktop&&navigator.onLine)gis().catch(()=>{});
 syncTimer=setInterval(()=>{
  if(saved.auto&&connected&&ready()&&!busy&&document.visibilityState==="visible"&&navigator.onLine)
   syncNow();
