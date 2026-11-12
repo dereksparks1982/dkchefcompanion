@@ -54,14 +54,14 @@ function familyOf(p){
  if(!p)return "Unknown";
  const name=(p.name+" "+p.cat).toLowerCase();
  if(p.cat==="Tomatoes"||p.cat==="Eggplant"||p.cat==="Peppers"||/belladonna|henbane|tobacco|pokeberry/.test(name))return "Nightshade (Solanaceae)";
- if(/pak choi|bok choy|radish|turnip|kohlrabi|cabbage|kale|collard|brassica/.test(name))return "Brassica (Brassicaceae)";
+ if(/pak choi|bok choy|radish|turnip|kohlrabi|cabbage|kale|collard|broccoli|cauliflower|brussels|rapini|brassica/.test(name))return "Brassica (Brassicaceae)";
  if(/garden huckleberry/.test(name))return "Nightshade (Solanaceae)";
   if(/elderberry/.test(name))return "Moschatel (Adoxaceae)";
   if(/strawberry|serviceberry/.test(name))return "Rose (Rosaceae)";
   if(/blueberry|evergreen huckleberry/.test(name))return "Heath (Ericaceae)";
   if(/white mulberry/.test(name))return "Mulberry (Moraceae)";
   if(/english ivy/.test(name))return "Ginseng (Araliaceae)";
-  if(/fenugreek/.test(name))return "Legume (Fabaceae)";
+  if(p.cat==="Beans and legumes"||/fenugreek/.test(name))return "Legume (Fabaceae)";
  if(/catalogna|chicory|italian dandelion/.test(name))return "Daisy (Asteraceae)";
  if(/winter purslane/.test(name))return "Miner's lettuce (Montiaceae)";
  if(/mâche|mache|corn salad/.test(name))return "Honeysuckle (Caprifoliaceae)";
@@ -79,7 +79,8 @@ function dangerFor(p){
  const name=p.name.toLowerCase();
  if(/belladonna|deadly nightshade|henbane|foxglove|lily of the valley/.test(name))return "Highly poisonous. Do not consume; protect children and pets.";
  if(/pokeberry|pokeweed|afghan poppy|papaver somniferum/.test(name))return "Potentially toxic or legally restricted plant. Verify handling and local requirements; keep away from pets and children.";
- if(/english ivy/.test(name))return "Leaves are toxic if swallowed and can irritate skin; traditional leaf-cleaning use is not a guarantee of skin-safe soap. Plant can be invasive.";
+ if(/red kidney bean/.test(name))return "Raw or undercooked kidney beans contain high levels of phytohaemagglutinin and can cause serious illness; cook fully. Food-store bag seeds may have variable germination.";
+  if(/english ivy/.test(name))return "Leaves are toxic if swallowed and can irritate skin; traditional leaf-cleaning use is not a guarantee of skin-safe soap. Plant can be invasive.";
   if(/garden huckleberry/.test(name))return "Nightshade: unripe fruit may be poisonous. Confirm botanical species and proper preparation; keep away from pets and children.";
   if(/elderberry/.test(name))return "Unripe berries, foliage and stems may be poisonous. Use only correctly prepared ripe berries.";
   if(/wormwood|rue|mugwort/.test(name))return "Contains potentially irritating or toxic compounds; avoid self-medicating and follow species-specific precautions.";
@@ -105,7 +106,7 @@ host.innerHTML=
  '<label>Variety or seed name<input name="name" maxlength="140" required placeholder="e.g. Purple Dragon Carrot"></label>'+
  '<label>Category<select name="category" required>'+categoryOptions()+'</select></label>'+
  '<label>Packets / lots owned<input name="amount" type="number" min="0" max="999999" value="1" required></label>'+
- '<label>Seed source<select name="source"><option value="packet">Commercial packet</option><option value="harvested">Saved from my garden</option><option value="unknown">Unknown</option></select></label>'+
+ '<label>Seed source<select name="source"><option value="packet">Commercial packet</option><option value="bag">Bag of beans / lentils</option><option value="harvested">Saved from my garden</option><option value="unknown">Unknown</option></select></label>'+
  '<fieldset class="wb-span"><legend>Color-coded roles</legend><div class="wb-roles">'+rolesHTML(["Food crop"])+'</div></fieldset>'+
  '<button type="submit" class="wb-primary">Add to Seed Bank</button></form>'+
  '<h3>Edit a seed already in your collection</h3><form id="wbEditSeed" class="wb-form">'+
@@ -113,7 +114,7 @@ host.innerHTML=
  '<label>Seed name<input name="name" maxlength="140" required></label>'+
  '<label>Category<select name="category" required>'+categoryOptions()+'</select></label>'+
  '<label>Packets / lots<input name="amount" type="number" min="0" max="999999" required></label>'+
- '<label>Source<select name="source"><option value="packet">Commercial packet</option><option value="harvested">Harvested seeds</option><option value="unknown">Unknown</option></select></label>'+
+ '<label>Source<select name="source"><option value="packet">Commercial packet</option><option value="bag">Bag of beans / lentils</option><option value="harvested">Harvested seeds</option><option value="unknown">Unknown</option></select></label>'+
  '<label class="wb-check"><input name="archived" type="checkbox">Archive / hide this entry</label>'+
  '<fieldset class="wb-span"><legend>Purpose labels</legend><div class="wb-roles">'+rolesHTML()+'</div></fieldset>'+
  '<button type="submit" class="wb-primary">Save seed changes</button></form>'+

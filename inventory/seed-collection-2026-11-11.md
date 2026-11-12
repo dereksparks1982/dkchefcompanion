@@ -103,6 +103,12 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Arugula Roquette: 1 packet
 - Celery Tall Utah: 3 packets
 
+## Other vegetables
+- Okra Clemson Spineless: 1 packet
+- Okra Red Burgundy: 1 packet
+- Artichoke Green Globe: 2 packets
+- Artichoke Purple Romagna: 1 packet
+
 ## Roots and brassicas
 - Kohlrabi White Vienna: 1
 - Kohlrabi Superschmelz: 1
@@ -118,6 +124,19 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Beet Early Wonder Tall Top: 1
 - Cabbage Copenhagen Market Early: 1 packet
 - Cabbage Golden Acre: 2 packets
+- Broccoli Waltham 29: 1 packet
+- Broccoli Spring Rapini: 1 packet
+- Cauliflower Snowball Y Improved: 1 packet
+- Brussels Sprouts Long Island Improved: 1 packet
+- Brussels Sprouts Rubine: 1 packet
+
+## Beans and legumes
+- Njahi Beans: 3 bags
+- Lentils: 1 bag
+- Pinto Beans: 2 bags
+- Red Kidney Beans: 1 bag
+- Lima Bean Henderson: 1 packet
+- Cowpea California Blackeye: 2 packets
 
 ## Pumpkins and melons
 - Pumpkin, harvested from store pumpkin: 1 loose batch
@@ -149,6 +168,9 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Golden Summer Crookneck Squash: 1
 - Yellow Squash: 1
 - Bush Delicata Squash: 1
+- Cucumber Boston Pickling: 1 packet
+- Cucumber National Pickling: 1 packet
+- Cucumber Marketmore 76: 1 packet
 
 ## Trees and woody plants
 - Date palm, harvested from dates: 1 loose batch
@@ -287,8 +309,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Virginia Gold Tobacco (Nicotiana tabacum): 1
 
 ## Inventory notes
-- Seven additional seed varieties were added November 11, 2026. Their four unconfirmed packet counts are **not** included in the 290 known packet/lot total, which is a lower bound.
-- Canton White Stem spelling was standardized from the spoken "canten white stem" entry; botanical identifications are seed-type references, not laboratory verification.
-- This is a transcription of the conversation, not a germination or identity verification.
-- Unspecified counts were treated as one packet during dictation; verify against physical packets.
-- Keep loose harvested lots separate from commercial packet totals.
+- Every mentioned seed is one commercial packet unless a different packet count is explicitly stated or the user calls it a **bag** or explicitly identifies loose/saved seeds.
+- The second bag of pinto beans was added to the original bag, for **2 bags total**.
+- Source type `bag` is separate from commercial packets and saved/harvested seed lots.
+- Njahi is Lablab purpureus (Kenyan lablab/dolichos bean); exact packet or food-bag variety and germination are unverified.
+- Varieties remain as spoken; guides are general growing references and are not proof of seed identity.

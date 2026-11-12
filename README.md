@@ -2,6 +2,6 @@
 
 [Open the DK Seed Bank website](https://dereksparks1982.github.io/seedrepo/)
 
-250 entries · 330 recorded packets/seed lots · 17 categories · inventory-aware recipe guide.
+268 seed entries · 337 commercial packets · 7 bags · 9 saved seed lots · 19 categories.
 
-Commercial seed packets default to one packet unless a different number is specified; explicitly saved, harvested or loose seeds remain separate.
+Commercial seed packets default to one unless otherwise stated. Bags and loose or harvested seed lots are counted separately. Inventory-aware recipe guide, planting journal and independent category cards.
