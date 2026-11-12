@@ -11,6 +11,13 @@ const save=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));ret
 const esc=(v)=>String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 const def=(depth,spacing,light,germ,soil,when,where,water,harvest,mode,setup,days,extra)=>({depth,spacing,light,germ,soil,when,where,water,harvest,mode,setup,days,extra:extra||""});
 const guides={
+
+ pakChoi:def("¼ in","6–12 in for full-size heads","Full sun / partial shade","5–10 days","50–75°F","Direct sow in cool spring or late summer for fall","Fertile, well-drained bed or container","Keep evenly moist; protect from summer heat","Baby leaves about 25–35 days; full heads 45–60 days","direct-cool","outdoor","25–60 days","Brassica rapa subsp. chinensis. Hot spells and long days can trigger bolting. Canton White Stem has pale, fleshy petioles."),
+ chicory:def("¼ in","8–12 in","Full sun / partial shade","7–14 days","55–75°F","Direct sow in cool spring or late summer for autumn greens","Outdoor bed with compost-rich, well-drained soil","Steady moisture reduces bitterness","Young leaves about 45–60 days; mature leaves later","direct-cool","outdoor","45–80 days","Italian dandelion is a leaf chicory (Cichorium intybus), not true dandelion (Taraxacum). Catalogna can be cut repeatedly."),
+ purslaneWinter:def("Surface–⅛ in; cover very lightly","4–6 in","Partial shade / cool sun","7–21 days","45–65°F","Sow in early spring or late summer / early autumn","Cool, moist garden bed or container","Keep evenly moist; do not allow germinating seed to dry","Tender leaves about 40–60 days","direct-cool","outdoor","40–60 days","Winter purslane is Claytonia perfoliata (miner's lettuce), not common Portulaca purslane. Can self-seed."),
+ chard:def("½ in","8–12 in","Full sun / partial shade","5–14 days","50–85°F","Direct sow 2–4 weeks before last frost and for fall","Fertile outdoor bed or large container","Water consistently to keep leaves tender","Baby leaves about 25–35 days; mature stalks 50–65 days","direct-cool","outdoor","25–65 days","Beta vulgaris (leaf beet). Harvest outside leaves for repeated picking. Ruby Red has red ribs; Large White has broad white ribs."),
+ mache:def("¼ in","4–6 in","Full sun / partial shade","7–21 days","40–65°F","Sow in cool early spring or late summer through autumn","Outdoor cool bed or container; avoid hot soil","Moist, well-drained soil; germination slows in warmth","Small rosettes about 45–65 days","direct-cool","outdoor","45–65 days","Mâche / corn salad is Valerianella locusta, not maize. Best flavor and germination in cool weather."),
+ fenugreek:def("¼–½ in","4–6 in for greens","Full sun / light shade","5–10 days","60–80°F","Direct sow after the risk of hard frost; repeat for leaf harvests","Sunny garden bed or container with drainage","Water regularly until established; avoid waterlogging","Tender leaves in 25–40 days; dry seeds about 90–120 days","direct-warm","outdoor","25–120 days","Trigonella foenum-graecum (Fabaceae). Edible greens (methi) and aromatic seeds; traditional uses are not medical advice."),
  generic:def("Check packet","Check species","Check packet","Varies","Varies","Follow species and packet guidance","Unknown until species is confirmed","Keep evenly moist during germination, avoid saturation","Varies","unknown","verify","Varies","General botanical guidance only; this variety needs verification."),
  tomato:def("¼ in","24–36 in","Full sun","5–10 days","75–85°F","Start indoors about 5–8 weeks before last spring frost","Warm bed or greenhouse; harden off before transplanting","Water evenly, especially during fruiting","Typically 65–90 days from transplant","indoor","protected", "65–90 days","Support vining plants; long-season cultivars often benefit from protected growing."),
  pepper:def("¼ in","12–24 in","Full sun","7–21 days","75–90°F","Start indoors about 8–10 weeks before last spring frost","Warm greenhouse or sheltered bed; transplant after soil warms","Keep consistently moist; good drainage","Roughly 60–120 days from transplant","indoor","protected","60–120 days","Very hot varieties can mature slowly; provide extra warmth in short seasons."),
@@ -54,6 +61,7 @@ function resolveGuide(name,cat){
  if(cat==="Sunflowers")return guides.sunflower;
  if(cat==="Eggplant")return guides.eggplant;
  if(cat==="Wildflower mixes")return guides.flower;
+ if(cat==="Leafy greens")return /pak choi|bok choy/.test(n)?guides.pakChoi:n.includes("catalogna")?guides.chicory:n.includes("winter purslane")?guides.purslaneWinter:n.includes("swiss chard")?guides.chard:n.includes("corn salad")?guides.mache:guides.generic;
  if(cat==="Roots and brassicas")return n.includes("parsnip")?guides.parsnip:n.includes("kohlrabi")?guides.kohlrabi:n.includes("turnip")?guides.turnip:n.includes("radish")?guides.radish:guides.beet;
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?guides.pumpkin:guides.melon;
  if(cat==="Gourds and squash")return n.includes("loofah")?guides.tropical:guides.squash;
@@ -63,6 +71,7 @@ function resolveGuide(name,cat){
  if(cat==="Grains and grasses")return /corn/.test(n)?guides.corn:guides.grain;
  if(cat==="Alliums: chives, onions and leeks")return n.includes("chives")?guides.chives:n.includes("leek")?guides.leek:/scallion|bunching/.test(n)?guides.scallion:guides.onion;
  if(cat==="Herbs and medicinal plants"){
+  if(n.includes("fenugreek"))return guides.fenugreek;
   for(const k of ["basil","chives","thyme","oregano","dill","coriander","cilantro","parsley","mint","fennel"])if(n.includes(k))return guides[k==="cilantro"?"coriander":k];
   if(n.includes("marjoram"))return guides.oregano;
   if(n.includes("anise")||n.includes("caraway")||n.includes("cumin"))return guides.coriander;
@@ -72,7 +81,7 @@ function resolveGuide(name,cat){
 }
 const commonWiki={
  "Wildflower mixes":"Wildflower","Sunflowers":"Helianthus annuus","Carrots":"Carrot","Tomatoes":"Tomato",
- "Eggplant":"Eggplant","Peppers":"Capsicum annuum","Roots and brassicas":"Root vegetable",
+ "Eggplant":"Eggplant","Peppers":"Capsicum annuum","Roots and brassicas":"Root vegetable","Leafy greens":"Leaf vegetable",
  "Pumpkins and melons":"Cucurbitaceae","Gourds and squash":"Squash (plant)",
  "Trees and woody plants":"Tree","Flowers and ornamentals":"Flower",
  "Herbs and medicinal plants":"Herb","Alliums: chives, onions and leeks":"Allium","Grains and grasses":"Cereal",
@@ -81,6 +90,8 @@ const commonWiki={
 function wikiFor(name,cat){
  const n=name.toLowerCase();
  if(cat==="Wildflower mixes")return n.includes("butterfly")?"Butterfly gardening":"Wildflower";
+ if(cat==="Leafy greens")return /bok choy|pak choi/.test(n)?"Bok choy":n.includes("catalogna")?"Chicory":n.includes("winter purslane")?"Claytonia perfoliata":n.includes("swiss chard")?"Chard":n.includes("corn salad")?"Valerianella locusta":"Leaf vegetable";
+ if(n.includes("fenugreek"))return "Fenugreek";
  if(cat==="Tomatoes"&&n.includes("tamarillo"))return "Tamarillo";
  if(cat==="Peppers"){
   if(n.includes("ghost"))return "Bhut jolokia";
@@ -122,7 +133,7 @@ const referenceGuides={
  parsley:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"],
  fennel:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"]
 };
-const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Fiber and historical crops":"🌱"};
+const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Leafy greens":"🥬","Fiber and historical crops":"🌱"};
 const checkedPhotoCatalog=window.DKSeedBankVarietyImages||{};
 const photoPreferenceKey="dk-seedbank-photo-view-v2";
 const remoteImageStorageKey="dk-seedbank-remote-image-urls-v1";
@@ -287,7 +298,7 @@ syncPurposeChips();
 
 function applyExtraFilters(){
  const grow=growFilter.value,photo=photoFilter.value;
- let count=0,units=0,sectionsCount=0;
+ let count=0,units=0,unknownCounts=0,sectionsCount=0;
  cats.forEach(section=>{
   let n=0;
   section.querySelectorAll(".seed").forEach(card=>{
@@ -296,13 +307,13 @@ function applyExtraFilters(){
    const goodPhoto=!photo||photo===card.dataset.userPhoto;
    const visible=alreadyVisible&&goodGrow&&goodPhoto;
    card.hidden=!visible;
-   if(visible){n++;count++;units+=Number(card.dataset.amount);}
+   if(visible){n++;count++;units+=Number(card.dataset.amount);if(card.dataset.quantityKnown==="no")unknownCounts++;}
   });
   section.hidden=n===0;
   section.querySelector(".visible-num").textContent=n;
   if(n)sectionsCount++;
  });
- document.getElementById("count").textContent="Showing "+count+" of "+cards.length+" seed entries · "+units+" recorded packets / lots · "+sectionsCount+" categories";
+ document.getElementById("count").textContent="Showing "+count+" of "+cards.length+" seed entries · "+units+" known packets / lots"+(unknownCounts?" · "+unknownCounts+" count(s) unconfirmed":"")+" · "+sectionsCount+" categories";
  document.getElementById("empty").hidden=count>0;
 }
 function requestFiltering(){search.dispatchEvent(new Event("input",{bubbles:true}));}
@@ -735,6 +746,7 @@ function patchInventoryCard(key,patch){
  }
  if(Number.isInteger(patch.amount)&&patch.amount>=0&&patch.amount<=999999){
   card.dataset.amount=String(patch.amount);
+  card.dataset.quantityKnown="yes";
   card.querySelector(".stock-badge").textContent=patch.amount+" "+(patch.amount===1?"packet / lot":"packets / lots");
  }
  if(["packet","harvested","unknown"].includes(patch.source))card.dataset.source=patch.source;
@@ -782,7 +794,7 @@ function createInventoryCard(entry){
  const section=cats.find(x=>x.dataset.category===cat),key=cat+"|"+name;
  if(!name||!section||plants.has(key))return null;
  const card=document.createElement("article");card.className="seed";
- Object.assign(card.dataset,{name,category:cat,tags:"",source:"packet",amount:"0",archived:"no"});
+ Object.assign(card.dataset,{name,category:cat,tags:"",source:"packet",amount:"0",quantityKnown:"yes",archived:"no"});
  card.innerHTML='<div class="seed-top"><strong class="seed-name">'+esc(name)+'</strong><span class="stock-badge">0 packets</span></div><div class="tagline"></div>';
  section.querySelector(".entries").appendChild(card);tagContent(card);cards.push(card);
  const p=plants.get(key);initializeNewSeedCard(p);patchInventoryCard(key,entry);return key;

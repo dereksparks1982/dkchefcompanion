@@ -1,4 +1,4 @@
-/* DK Seed Bank, distinct crop/variety photo sources. External sources remain owned by their publishers; no images are copied into this repo. */
+/* DK Seed Bank: distinct photos linked to external publishers, with source and match caveats. */
 window.DKSeedBankVarietyImages = Object.freeze({
   "Sunflowers|Mammoth": {
     "file": "Bee and mammoth sunflower.jpg",
@@ -895,5 +895,61 @@ window.DKSeedBankVarietyImages = Object.freeze({
     "license": "Externally hosted image; reuse rights not confirmed",
     "level": "type",
     "note": "Sourced crop/variety reference. Check packet label for exact strain."
+  },
+  "Leafy greens|Canton White Stem Pak Choi (Bok Choy)": {
+    "url": "https://survivalgardenseeds.com/cdn/shop/products/Pak-Choi-01.jpg?crop=center&height=1200&v=1672936188&width=1200",
+    "source": "https://survivalgardenseeds.com/products/canton-white-stem-pak-choi-or-bok-choy-seed-for-planting",
+    "author": "Survival Garden Seeds",
+    "license": "External source; reuse rights not confirmed",
+    "level": "packet",
+    "note": "Named Canton White Stem commercial seed-packet photograph, not a standalone plant photo; packet pictured is from the source retailer, not necessarily the owner's packet."
+  },
+  "Herbs and medicinal plants|Fenugreek (Trigonella foenum-graecum)": {
+    "url": "https://www.westcoastseeds.com/cdn/shop/products/HR1200-Fenugreek-Organic-2_600x.jpg?v=1576612988",
+    "source": "https://www.westcoastseeds.com/products/fenugreek-organic-1",
+    "author": "West Coast Seeds",
+    "license": "External source; reuse rights not confirmed",
+    "level": "species",
+    "note": "Fenugreek plant photograph, species reference; grower's seed strain unknown."
+  },
+  "Leafy greens|Italian Dandelion / Catalogna Chicory": {
+    "url": "https://kraeutergarten-urban.de/assets/images/5/id-2024-05-14-16-46-31-catalogna-frastagliata-9654272b.jpg",
+    "source": "https://kraeutergarten-urban.de/shop/jungpflanzen/besondeer/catalognas",
+    "author": "Kräutergarten Urban",
+    "license": "External source; reuse rights not confirmed",
+    "level": "type",
+    "note": "Catalogna Frastagliata chicory seedling photograph; Catalogna leaf-chicory type, precise user's strain not confirmed."
+  },
+  "Leafy greens|Winter Purslane (Claytonia perfoliata)": {
+    "url": "https://www.bobby-seeds.com/media/image/8e/94/af/posteleinYnxNMNlsg4bw5_600x600.jpg",
+    "source": "https://www.bobby-seeds.com/kraeutersamen/kraeutersaaten/508/kraeuter-postelein-winterportulak",
+    "author": "Bobby Seeds",
+    "license": "External source; reuse rights not confirmed",
+    "level": "species",
+    "note": "Winter purslane / Claytonia perfoliata, not common summer purslane (Portulaca oleracea)."
+  },
+  "Leafy greens|Swiss Chard Ruby Red": {
+    "url": "https://images.squarespace-cdn.com/content/v1/611be4ad3233db1de7d6699b/1634657985277-E63Q2BLE6OPA212MUBPS/Swiss%2BChard_Ruby%2BRed.jpg?format=1500w",
+    "source": "https://www.theurbanforestfarm.com/shop/p/ruby-red-swiss-chard",
+    "author": "The Urban Forest Farm",
+    "license": "External source; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Ruby Red Swiss chard cultivar, showing red stems and veins."
+  },
+  "Leafy greens|Swiss Chard Large White": {
+    "url": "https://www.harrisseeds.com/cdn/shop/files/00832d_900x.jpg?v=1739842063",
+    "source": "https://www.harrisseeds.com/products/00832-swiss-chard-large-white-ribbed",
+    "author": "Harris Seeds",
+    "license": "External source; reuse rights not confirmed",
+    "level": "type",
+    "note": "Large White Ribbed type Swiss chard photo, close botanical match; user's packet says Large White, so exact cultivar unverified."
+  },
+  "Leafy greens|Mâche / Corn Salad (Valerianella locusta)": {
+    "url": "https://www.nkz.cz/sites/default/files/public/2025-03/shutterstock2484936597.jpg",
+    "source": "https://www.nkz.cz/praxe/uzitkova-zahrada/jak-pestovat-polnicek-povede-se-mu-i-v-kvetinaci-na-balkone-nebo-doma-na",
+    "author": "Naše krásná zahrada",
+    "license": "External source; reuse rights not confirmed",
+    "level": "species",
+    "note": "Valerianella locusta crop photo, species identified; exact seed strain unspecified."
   }
 });

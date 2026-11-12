@@ -77,6 +77,14 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Habanero White: 1
 - Habanero Lemon Yellow: 1
 
+## Leafy greens
+- Canton White Stem Pak Choi (Bok Choy) (*Brassica rapa* subsp. *chinensis*): 1 packet
+- Italian Dandelion / Catalogna Chicory (*Cichorium intybus*): **2 packets**
+- Winter Purslane (*Claytonia perfoliata*): packet count **unconfirmed**
+- Swiss Chard Ruby Red (*Beta vulgaris*): packet count **unconfirmed**
+- Swiss Chard Large White (*Beta vulgaris*): packet count **unconfirmed**
+- Mâche / Corn Salad (*Valerianella locusta*): packet count **unconfirmed**
+
 ## Roots and brassicas
 - Kohlrabi White Vienna: 1
 - Kohlrabi Superschmelz: 1
@@ -157,6 +165,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Zinnia California Giant: 1 commercial packet
 
 ## Herbs and medicinal plants
+- Fenugreek (*Trigonella foenum-graecum*): 1 packet
 - Ashwagandha: 1
 - Hyssop: 1
 - Wormwood (Artemisia absinthium): 1
@@ -247,6 +256,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Virginia Gold Tobacco (Nicotiana tabacum): 1
 
 ## Inventory notes
+- Seven additional seed varieties were added November 11, 2026. Their four unconfirmed packet counts are **not** included in the 290 known packet/lot total, which is a lower bound.
+- Canton White Stem spelling was standardized from the spoken "canten white stem" entry; botanical identifications are seed-type references, not laboratory verification.
 - This is a transcription of the conversation, not a germination or identity verification.
 - Unspecified counts were treated as one packet during dictation; verify against physical packets.
 - Keep loose harvested lots separate from commercial packet totals.

@@ -54,7 +54,12 @@ function familyOf(p){
  if(!p)return "Unknown";
  const name=(p.name+" "+p.cat).toLowerCase();
  if(p.cat==="Tomatoes"||p.cat==="Eggplant"||p.cat==="Peppers"||/belladonna|henbane|tobacco|pokeberry/.test(name))return "Nightshade (Solanaceae)";
- if(/radish|turnip|kohlrabi|brassica/.test(name))return "Brassica (Brassicaceae)";
+ if(/pak choi|bok choy|radish|turnip|kohlrabi|brassica/.test(name))return "Brassica (Brassicaceae)";
+ if(/fenugreek/.test(name))return "Legume (Fabaceae)";
+ if(/catalogna|chicory|italian dandelion/.test(name))return "Daisy (Asteraceae)";
+ if(/winter purslane/.test(name))return "Miner's lettuce (Montiaceae)";
+ if(/mâche|mache|corn salad/.test(name))return "Honeysuckle (Caprifoliaceae)";
+ if(/swiss chard/.test(name))return "Amaranth (Amaranthaceae)";
  if(/cucumber|cucamelon|melon|watermelon|gourd|pumpkin|squash|zucchini|luffa/.test(name)||p.cat==="Pumpkins and melons"||p.cat==="Gourds and squash")return "Gourd (Cucurbitaceae)";
  if(/carrot|dill|parsley|cilantro|coriander|fennel|anise|parsnip|caraway|cumin/.test(name)||p.cat==="Carrots")return "Carrot (Apiaceae)";
  if(/onion|leek|chives|allium/.test(name)||p.cat.startsWith("Alliums:"))return "Allium (Amaryllidaceae)";
@@ -135,7 +140,7 @@ host.innerHTML=
  '<details class="wb-panel" id="wb-beds"><summary>▦ Garden beds, containers and crop rotation</summary><div class="wb-panel-body">'+
  '<form id="wbBedForm" class="wb-form"><label>Bed or container name<input name="name" required maxlength="90" placeholder="Raised bed 1"></label>'+
  '<label>Growing area<select name="type"><option>Outdoor garden</option><option>Unheated greenhouse</option><option>Heated greenhouse</option><option>Indoor container</option></select></label>'+
- '<label>Previous crop family<select name="previous"><option value="">Unknown / new bed</option><option>Nightshade (Solanaceae)</option><option>Brassica (Brassicaceae)</option><option>Gourd (Cucurbitaceae)</option><option>Carrot (Apiaceae)</option><option>Allium (Amaryllidaceae)</option><option>Amaranth (Amaranthaceae)</option><option>Grass (Poaceae)</option><option>Mint (Lamiaceae)</option><option>Other / verify</option></select></label>'+
+ '<label>Previous crop family<select name="previous"><option value="">Unknown / new bed</option><option>Nightshade (Solanaceae)</option><option>Brassica (Brassicaceae)</option><option>Gourd (Cucurbitaceae)</option><option>Carrot (Apiaceae)</option><option>Allium (Amaryllidaceae)</option><option>Amaranth (Amaranthaceae)</option><option>Grass (Poaceae)</option><option>Mint (Lamiaceae)</option><option>Legume (Fabaceae)</option><option>Daisy (Asteraceae)</option><option>Miner&#39;s lettuce (Montiaceae)</option><option>Honeysuckle (Caprifoliaceae)</option><option>Other / verify</option></select></label>'+
  '<label class="wb-span">Plant or assign variety'+formSelect("seedKey",false)+'</label>'+
  '<label class="wb-span">Notes<input name="notes" maxlength="220" placeholder="Size, light, watering…"></label>'+
  '<button type="submit">Add garden space</button></form><div id="wbBedList"></div>'+
