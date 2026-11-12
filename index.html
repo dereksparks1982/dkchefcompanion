@@ -44,7 +44,7 @@ label{display:block;font-size:.82rem;font-weight:750;margin-bottom:7px;color:#38
 .seed-name{font-size:.96rem;line-height:1.35;overflow-wrap:anywhere}.stock-badge{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:.72rem;background:#e8eee7;color:#31533c;padding:4px 7px;border-radius:6px;font-weight:750}
 .tagline{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}.entry-note{margin:0;color:#647369;font-size:.78rem}
 .empty{padding:26px;background:#fff;border:1px dashed #98ac98;border-radius:14px}.empty h2{margin:0 0 8px;font-size:1.25rem}.empty p{margin:0;color:#516656;max-width:670px}
-footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:23px 16px;font-size:.82rem}
+footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:23px 16px;font-size:.82rem}.dk-offline-status{margin:10px auto 0;font-size:.84rem;font-weight:600;max-width:680px}
 @media(max-width:760px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{gap:7px}.stat{flex:1;min-width:95px;padding:9px 12px}.category>summary{padding:13px 12px;gap:9px}.category-count{font-size:.72rem}.category-name{font-size:1rem}.entries{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));padding:3px 10px 12px}.controls{padding:14px}}
 @media(max-width:430px){.filter-grid{grid-template-columns:1fr 1fr;gap:9px}.category-count{white-space:normal;text-align:right;max-width:90px}.entries{grid-template-columns:1fr}.stat strong{font-size:1.08rem}.stat span{font-size:.72rem}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
@@ -66,6 +66,7 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <link rel="stylesheet" href="assets/seedbank-watering.css?v=20261111-water1">
 <link rel="stylesheet" href="assets/seedbank-i18n.css?v=20261112-icon4">
 <link rel="stylesheet" href="assets/seedbank-recipes.css?v=20261111-recipes1">
+<link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
 <header><div class="header-inner"><div class="dk-language-bar"><label for="dkLanguageSelect">Language</label><select id="dkLanguageSelect" aria-label="Select language"><option value="en">English</option><option value="ru">Русский</option></select></div><div class="eyebrow">My seed collection</div>
@@ -437,7 +438,7 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <article class="seed" data-name="Virginia Gold Tobacco (Nicotiana tabacum)" data-category="Fiber and historical crops" data-tags="Fiber / heritage|Caution" data-source="packet" data-amount="1"><div class="seed-top"><strong class="seed-name">Virginia Gold Tobacco (Nicotiana tabacum)</strong><span class="stock-badge">1 packet</span></div><div class="tagline"><button type="button" class="tag tag-fiber purpose-tag" data-purpose-tag="Fiber / heritage" aria-pressed="false" title="Filter by Fiber / heritage">Fiber / heritage</button><button type="button" class="tag tag-caution purpose-tag" data-purpose-tag="Caution" aria-pressed="false" title="Filter by Caution">Caution</button></div></article></div></details></div>
 <section class="empty" id="empty" hidden role="status" aria-live="polite"><h2 id="missing-name">No matching records</h2><p id="missing-description">Try another name or clear filters.</p></section>
 </main>
-<footer>DK Seed Bank · Inventory recorded November 11, 2026 · Unverified packet names are kept as recorded. Category labels describe general gardening roles, not advice to consume or handle a plant.</footer>
+<footer>DK Seed Bank · Inventory recorded November 11, 2026 · Unverified packet names are kept as recorded. Category labels describe general gardening roles, not advice to consume or handle a plant.<p id="dkOfflineStatus" class="dk-offline-status" role="status" aria-live="polite" data-dk-no-translate>Preparing offline access…</p></footer>
 <script>
 (function(){
 "use strict";
@@ -544,4 +545,5 @@ update();
 <script defer src="assets/seedbank-watering.js?v=20261111-dkred1"></script>
 <script defer src="assets/seedbank-monastery.js?v=20261111-monastery2"></script>
 <script defer src="assets/seedbank-i18n.js?v=20261112-loc7"></script>
+<script defer src="assets/seedbank-offline.js?v=20261112-offline1"></script>
 </body></html>
