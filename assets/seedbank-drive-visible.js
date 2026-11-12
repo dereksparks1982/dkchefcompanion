@@ -36,26 +36,95 @@ function loadPicker(){
  });
 }
 async function choose(token){
- if(!apiKey||!appId)throw Error(lang("DK Softworks still needs to enable Google's folder picker for this website. Existing photo sync remains safe.","Для выбора папки разработчику нужно включить Google Picker. Существующая синхронизация сохранена."));
- if(!token)throw Error("Reconnect your Google Drive first.");
- await loadPicker();
+ if(!apiKey||!appId)throw Error(lang("The Google folder picker is not configured.","Выбор папки Google Диска не настроен."));
+ if(!token)throw Error(lang("Reconnect your Google Drive first.","Сначала подключите Google Диск."));
+ // Render a fixed, closable in-app dialog immediately. Google's normal modal
+ // has been positioning itself at the end of the seed catalog for some users.
+ if(document.getElementById("dkDrivePickerOverlay"))return null;
+ const overlay=document.createElement("div");
+ overlay.id="dkDrivePickerOverlay";
+ overlay.className="dk-drive-picker-overlay";
+ overlay.setAttribute("role","presentation");
+ const dialog=document.createElement("div");
+ dialog.className="dk-drive-picker-dialog";
+ dialog.setAttribute("role","dialog");
+ dialog.setAttribute("aria-modal","true");
+ dialog.setAttribute("aria-label",lang("Choose Google Drive folder","Выберите папку Google Диска"));
+ const bar=document.createElement("div");bar.className="dk-drive-picker-bar";
+ const heading=document.createElement("strong");
+ heading.textContent=lang("Choose a Google Drive folder","Выберите папку Google Диска");
+ const close=document.createElement("button");
+ close.type="button";close.className="dk-drive-picker-close";
+ close.textContent=lang("Close","Закрыть");
+ const message=document.createElement("div");
+ message.className="dk-drive-picker-message";
+ message.setAttribute("role","status");
+ message.textContent=lang("Loading Google Drive folders…","Загрузка папок Google Диска…");
+ const frame=document.createElement("iframe");
+ frame.className="dk-drive-picker-frame";
+ frame.title=lang("Google Drive folder selection","Выбор папки Google Диска");
+ frame.referrerPolicy="strict-origin-when-cross-origin";
+ frame.setAttribute("allow","clipboard-read; clipboard-write");
+ bar.append(heading,close);
+ dialog.append(bar,message,frame);
+ overlay.appendChild(dialog);
+ document.body.appendChild(overlay);
+ const oldFocus=document.activeElement;
+ const oldScroll=window.scrollY;
+ close.focus({preventScroll:true});
  return new Promise((resolve,reject)=>{
-  try{
-   const view=new root.google.picker.DocsView(root.google.picker.ViewId.FOLDERS)
-    .setIncludeFolders(true).setSelectFolderEnabled(true)
-    .setMimeTypes("application/vnd.google-apps.folder")
-    .setMode(root.google.picker.DocsViewMode.LIST);
-   const picker=new root.google.picker.PickerBuilder()
-    .addView(view).setOAuthToken(token).setDeveloperKey(apiKey).setAppId(appId)
-    .setOrigin(window.location.origin)
-    .setCallback(data=>{
-     if(data.action===root.google.picker.Action.PICKED){
-      const item=(data.docs||[])[0];
-      try{resolve(saveFolder({id:item.id,name:item.name}));}catch(e){reject(e);}
-     }else if(data.action===root.google.picker.Action.CANCEL)resolve(null);
-    }).build();
-   picker.setVisible(true);
-  }catch(e){reject(e);}
+  let done=false;
+  const clean=()=>{
+   if(done)return false;
+   done=true;
+   document.removeEventListener("keydown",onKey);
+   overlay.remove();
+   try{oldFocus?.focus({preventScroll:true});}catch(ignore){}
+   if(Math.abs(window.scrollY-oldScroll)>5)window.scrollTo({top:oldScroll,behavior:"instant"});
+   return true;
+  };
+  const endPick=value=>{if(clean())resolve(value);};
+  const fail=error=>{
+   // Keep a clear failure message visible instead of an invisible picker.
+   message.textContent=lang("Google folder picker could not open: ","Не удалось открыть выбор папки: ")+error.message;
+   message.setAttribute("role","alert");
+   frame.hidden=true;
+  };
+  function onKey(event){if(event.key==="Escape"){event.preventDefault();endPick(null);}}
+  document.addEventListener("keydown",onKey);
+  close.addEventListener("click",()=>endPick(null));
+  // PickerBuilder.toUri() is Google's documented iframe embedding API.
+  // The embedded dialog does not depend on Google positioning a modal.
+  loadPicker().then(()=>{
+   if(done)return;
+   try{
+    const gp=root.google?.picker;
+    if(!gp?.PickerBuilder)throw Error("Google Picker library did not initialize.");
+    const view=new gp.DocsView(gp.ViewId.FOLDERS)
+     .setIncludeFolders(true).setSelectFolderEnabled(true)
+     .setMimeTypes("application/vnd.google-apps.folder")
+     .setMode(gp.DocsViewMode.LIST);
+    const builder=new gp.PickerBuilder()
+     .addView(view).setOAuthToken(token).setDeveloperKey(apiKey)
+     .setAppId(appId).setOrigin(window.location.origin)
+     .setCallback(data=>{
+      if(done)return;
+      if(data?.action===gp.Action.PICKED){
+       const item=(data.docs||[])[0];
+       try{
+        if(!item?.id)throw Error("Google did not return a folder.");
+        endPick(saveFolder({id:item.id,name:item.name}));
+       }catch(error){fail(error);}
+      }else if(data?.action===gp.Action.CANCEL)endPick(null);
+      else if(data?.action===gp.Action.ERROR)fail(Error("Google Picker returned an error. Check third-party content blocking."));
+     });
+    if(typeof builder.toUri!=="function")throw Error("This Google Picker cannot be embedded.");
+    const pickerUrl=builder.toUri().toString();
+    if(!/^https:\/\//.test(pickerUrl))throw Error("Google returned an invalid folder picker address.");
+    frame.src=pickerUrl;
+    message.textContent=lang("Select the folder you want DK Seed Bank to use.","Выберите папку для хранения файлов ДК Банка семян.");
+   }catch(error){fail(error);}
+  }).catch(error=>{if(!done)fail(error);});
  });
 }
 function assertToken(token){if(typeof token!=="string"||!token)throw Error("Google Drive must be connected first.");}
