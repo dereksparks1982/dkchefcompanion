@@ -51,10 +51,7 @@ There is **no client-ID input for website users**. DK Softworks provides the pub
 - **Sync now** works on demand; optional auto-sync runs approximately every two
   minutes while the app is open, online, and authorized. Browsers on iPhone do
   not continuously sync while the website is closed.
-- Website access tokens remain **in memory only** and typically require another
-  Google sign-in after reloading or when the token expires. The Linux desktop
-  refresh token is stored only within that OS user's DK Seed Bank data directory,
-  with owner-only file permissions.
+- Website access tokens are stored only in memory and **per-tab sessionStorage**, until expiration. An ordinary refresh can reuse the valid token without another sign-in or forced consent. **Disconnect** clears the temporary cache. Closing the tab/browser or token expiry can still require sign-in; guaranteed persistent authorization across sessions would require a secure backend with refresh tokens. Tokens never go into permanent localStorage, backups, or public GitHub. The Linux desktop refresh token is stored only within that OS user's DK Seed Bank data directory, with owner-only file permissions.
 - Sync is **not** a substitute for full downloadable JSON backups. Before the
   first synchronization, export a safety copy from each device.
 
