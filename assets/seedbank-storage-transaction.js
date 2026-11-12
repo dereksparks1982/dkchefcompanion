@@ -13,15 +13,17 @@ async function apply(store,entries,commitMedia){
   seen.add(item[0]);
   old.set(item[0],store.getItem(item[0]));
  }
+ const touched=[];
  try{
   // Prepare local JSON before touching photographs. If storage is full,
   // the existing IndexedDB collection remains unmodified.
-  for(const [key,value] of entries)store.setItem(key,JSON.stringify(value));
+  for(const [key,value] of entries){store.setItem(key,JSON.stringify(value));touched.push(key);}
   if(!await commitMedia())throw Error("Could not commit synchronized photographs.");
   return true;
  }catch(error){
   const failures=[];
-  for(const [key,value] of [...old].reverse()){
+  for(const key of touched.reverse()){
+   const value=old.get(key);
    try{
     if(value===null)store.removeItem(key);
     else store.setItem(key,value);
