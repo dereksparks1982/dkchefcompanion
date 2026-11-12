@@ -2,6 +2,8 @@
 
 [Open the DK Seed Bank website](https://dereksparks1982.github.io/seedrepo/)
 
-283 seed entries · 358 commercial packets · 7 bags · 9 saved seed lots · 19 categories.
+318 seed entries · 411 commercial packets · 7 bags · 9 saved seed lots · 19 categories.
 
-Commercial seed packets default to one unless otherwise stated. Bags and loose/harvested seed lots are separate. Crop-specific guides for snow, snap and shell peas, bush/pole beans, and peanuts. Every Caution-tagged seed has its risk, precautions, and who is at risk displayed on the card and in the planting details. Inventory-aware recipe guide and planting journal.
+Full dictated seed inventory is recorded. Seed packets default to one unless the user specifies otherwise. Bags and saved seeds are recorded separately. Same-species synonym entries are combined: Lemon Mint / Lemon Bergamot (3 packets) and English / True Lavender (6 packets), with original labels preserved in inventory notes. Ambiguous species names require packet verification.
+
+Includes seed planting guides and visible plant-specific Caution reasons, handling instructions and who is at risk; personal journal, photos and garden-workbench data stay in browser storage unless exported.

@@ -50,8 +50,10 @@ function rolesHTML(selected=[]){
 function formSelect(name,required=true,klass=""){
  return '<select name="'+name+'" class="'+klass+'" data-seed-select'+(required?" required":"")+'>'+seedOptions()+'</select>';
 }
+const completeInventoryFamilies={"American Ginseng":"Ginseng (Araliaceae)","Panax Ginseng (species unverified)":"Ginseng (Araliaceae)","Mountain Mint":"Mint (Lamiaceae)","Pennyroyal Mint":"Mint (Lamiaceae)","Spearmint":"Mint (Lamiaceae)","Peppermint":"Mint (Lamiaceae)","Lemon Mint / Lemon Bergamot":"Mint (Lamiaceae)","Nettleleaf Horsemint":"Mint (Lamiaceae)","Bergamot":"Mint (Lamiaceae)","Milk Thistle":"Daisy (Asteraceae)","Blue Camas":"Asparagus (Asparagaceae)","Borage":"Borage (Boraginaceae)","Comfrey":"Borage (Boraginaceae)","Stevia Sugar Plant":"Daisy (Asteraceae)","White Yarrow":"Daisy (Asteraceae)","Betony":"Mint (Lamiaceae)","St. John's Wort":"St. John's-wort (Hypericaceae)","Marsh Mallow (Althaea officinalis)":"Mallow (Malvaceae)","Calendula Pacific Beauty":"Daisy (Asteraceae)","Toothache Plant (Spilanthes oleracea)":"Daisy (Asteraceae)","Echinacea Purple Coneflower":"Daisy (Asteraceae)","Marigold Mix":"Daisy (Asteraceae)","Pyrethrum Daisy":"Daisy (Asteraceae)","Bishop's Flower":"Carrot (Apiaceae)","Stinging Nettle":"Nettle (Urticaceae)","Lovage":"Carrot (Apiaceae)","Pansy (Viola × wittrockiana)":"Violet (Violaceae)","Blue Agave":"Asparagus (Asparagaceae)","German Chamomile":"Daisy (Asteraceae)","Passion Flower":"Passionflower (Passifloraceae)","Horehound":"Mint (Lamiaceae)","Lemon Balm":"Mint (Lamiaceae)","Giant Bamboo":"Grass (Poaceae)","English / True Lavender":"Mint (Lamiaceae)","Valerian":"Honeysuckle (Caprifoliaceae)"};
 function familyOf(p){
  if(!p)return "Unknown";
+ if(Object.hasOwn(completeInventoryFamilies,p.name))return completeInventoryFamilies[p.name];
  const name=(p.name+" "+p.cat).toLowerCase();
  if(p.cat==="Tomatoes"||p.cat==="Eggplant"||p.cat==="Peppers"||/belladonna|henbane|tobacco|pokeberry/.test(name))return "Nightshade (Solanaceae)";
  if(/pak choi|bok choy|radish|turnip|kohlrabi|cabbage|kale|collard|broccoli|cauliflower|brussels|rapini|brassica/.test(name))return "Brassica (Brassicaceae)";

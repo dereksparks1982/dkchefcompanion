@@ -198,6 +198,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Boxwood: 1
 - White Mulberry: 1 packet
 - English Ivy: 1 packet
+- Blue Agave: 1 packet
 
 ## Berries and fruit
 - Strawberry: 1 packet
@@ -230,6 +231,12 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Barb Skullcap (spoken name, verify): 1
 - Blue Sea Holly (Eryngium planum): 3
 - Zinnia California Giant: 1 commercial packet
+- Blue Camas: 1 packet
+- Calendula Pacific Beauty: 2 packets
+- Marigold Mix: 2 packets
+- Pyrethrum Daisy: 1 packet
+- Bishop's Flower: 1 packet
+- Pansy (Viola × wittrockiana): 1 packet
 
 ## Herbs and medicinal plants
 - Fenugreek (*Trigonella foenum-graecum*): 1 packet
@@ -279,6 +286,33 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Summer Savory: 1 commercial packet
 - Big Italy Parsley (packet name as spoken): 1 commercial packet
 - Chervil Curled: 1 packet
+- American Ginseng: 1 packet
+- Panax Ginseng (species unverified): 2 packets
+- Mountain Mint: 1 packet
+- Pennyroyal Mint: 1 packet
+- Spearmint: 1 packet
+- Peppermint: 2 packets
+- Lemon Mint / Lemon Bergamot: 3 packets
+- Nettleleaf Horsemint: 1 packet
+- Bergamot: 1 packet
+- Milk Thistle: 4 packets
+- Borage: 1 packet
+- Comfrey: 1 packet
+- Stevia Sugar Plant: 1 packet
+- White Yarrow: 1 packet
+- Betony: 1 packet
+- St. John's Wort: 1 packet
+- Marsh Mallow (Althaea officinalis): 1 packet
+- Toothache Plant (Spilanthes oleracea): 1 packet
+- Echinacea Purple Coneflower: 1 packet
+- Stinging Nettle: 2 packets
+- Lovage: 1 packet
+- German Chamomile: 2 packets
+- Passion Flower: 1 packet
+- Horehound: 1 packet
+- Lemon Balm: 1 packet
+- English / True Lavender: 6 packets
+- Valerian: 3 packets
 
 ## Alliums: chives, onions and leeks
 - Garlic Chives (white flowers): 1 commercial packet
@@ -316,12 +350,20 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Blue Hopi Corn: 1 packet
 - Peaches and Cream Sweet Corn: 1 packet
 - Bloody Butcher Ornamental Corn: 4 packets
+- Giant Bamboo: 1 packet
 
 ## Fiber and historical crops
 - Civil War Heirloom Red Cotton: 1
 - Traditional White Cotton: 2
 - Gold Heirloom Cotton: 5
 - Virginia Gold Tobacco (Nicotiana tabacum): 1
+
+## Final inventory reconciliation
+- The final two dictated batches contain 35 unique varieties and 53 packets.
+- Lemon Mint (2 packets) and Lemon Bergamot (1 packet) are combined under **Lemon Mint / Lemon Bergamot (Monarda citriodora)**, 3 packets; verify botanical names on the actual packets.
+- English Lavender (2 packets) and True Lavender (4 packets) are combined under **English / True Lavender (Lavandula angustifolia)**, 6 packets; verify botanical identity on actual packets.
+- Common names without a specific botanical identity, including Bergamot, Panax, Bishop's Flower and Giant Bamboo, remain separately labeled for verification.
+- Bags and saved seed lots are separate from commercial seed packets. Plants marked Caution have specific risk, handling and affected-group details on their cards and guides.
 
 ## Inventory notes
 - Every mentioned seed is one commercial packet unless a different packet count is explicitly stated or the user calls it a **bag** or explicitly identifies loose/saved seeds.
