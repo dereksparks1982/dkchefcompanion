@@ -123,6 +123,13 @@ function validate(data){
   if(section!=null&&(!Array.isArray(section)||section.length>3000||section.some(x=>!isObject(x))))
    throw Error("Invalid inventory section: "+key);
  }
+ if(data.watering?.deletedRecords!=null){
+  const deleted=data.watering.deletedRecords;
+  if(!Array.isArray(deleted)||deleted.length>20000)throw Error("Invalid watering deletion history.");
+  for(const row of deleted)if(!isObject(row)||typeof row.id!=="string"||row.id.length>180||
+   typeof row.deletedAt!=="string"||Number.isNaN(Date.parse(row.deletedAt)))
+   throw Error("Invalid deleted watering record.");
+ }
  if(data.photos!=null&&!Array.isArray(data.photos))throw Error("Invalid photo section.");
  const photos=array(data.photos);
  if(photos.length>MAX_PHOTOS)throw Error("Too many photos in backup.");

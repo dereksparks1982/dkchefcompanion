@@ -96,7 +96,12 @@ function mergeSnapshots(inputs){
  }
  const waterings=snapshots.map(s=>object(s.watering));
  const watering={...object(local.watering)};
- watering.records=mergeRows(waterings.flatMap(w=>array(w.records)),row=>row.id);
+ const wateringDeletes=unionTombstones(waterings.flatMap(w=>array(w.deletedRecords)),"deletedAt");
+ const waterDeletedIds=new Map(wateringDeletes.map(row=>[row.id,timestamp(row.deletedAt)]));
+ watering.deletedRecords=wateringDeletes;
+ watering.records=mergeRows(waterings.flatMap(w=>array(w.records)),row=>row.id).filter(row=>
+  !waterDeletedIds.has(row.id)||timestamp(row.updatedAt)>waterDeletedIds.get(row.id));
+ watering.preferences=Object.assign({},...waterings.map(w=>object(w.preferences)));
  // Prefer actual upload revisions to backup export times so an older
  // photograph saved on another device cannot overwrite a recent replacement.
  const photoChanges={};
