@@ -37,3 +37,8 @@ html[lang="ru"] #dkDriveOpenFolder{color:#8e2941}
 .dk-drive-picker-message{font-size:.84rem;color:#455f4b;padding:8px 14px}
 .dk-drive-picker-frame{display:block;width:100%;flex:1;min-height:0;border:0;background:#fff}
 @media(max-width:500px){.dk-drive-picker-overlay{padding:4px}.dk-drive-picker-dialog{width:100%;height:95dvh;min-height:280px;border-radius:7px}.dk-drive-picker-bar{padding:10px}}
+
+/* Keep Google Picker retry and close controls usable in narrow phone views. */
+.dk-drive-picker-bar{flex-wrap:wrap}
+.dk-drive-picker-bar strong{flex:1 1 180px}
+.dk-drive-picker-bar button:disabled{opacity:.5;cursor:not-allowed}
