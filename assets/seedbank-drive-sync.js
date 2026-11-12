@@ -64,9 +64,9 @@ function render(){
  $("dkDriveClientHelp").textContent=t(
   "One-time Google Cloud setup is required. The Web and Desktop client IDs must belong to the same Google Cloud project. No passwords or Google account identifiers are stored in the app.",
   "Требуется однократная настройка Google Cloud. Веб- и настольный идентификаторы должны принадлежать одному проекту Google Cloud. Пароли не сохраняются.");
- $("dkDriveConnect").textContent=t(connected?"Connected":"Connect my Google Drive",
-  connected?"Подключено":"Подключить мой Google Диск");
- $("dkDriveConnect").disabled=busy||connected;
+ $("dkDriveConnect").textContent=t(ready()?"Connected":connected?"Reconnect Google Drive":"Connect my Google Drive",
+  ready()?"Подключено":connected?"Переподключить Google Диск":"Подключить мой Google Диск");
+ $("dkDriveConnect").disabled=busy||ready();
  $("dkDriveNow").textContent=t("Sync now","Синхронизировать сейчас");
  $("dkDriveNow").disabled=busy||!ready();
  $("dkDriveDisconnect").textContent=t("Disconnect Google","Отключить Google");
@@ -126,6 +126,7 @@ async function driveRequest(url,method="GET",body,contentType="application/json"
   method,headers:{Authorization:"Bearer "+token,Accept:"application/json",
    ...(body!==undefined?{"Content-Type":contentType}:{})},body
  });
+ if(response.status===401){token="";expires=0;lastStatus=t("Google session expired. Reconnect Google Drive to continue.","Сеанс Google истёк. Переподключите Google Диск.");}
  if(!response.ok)throw Error("Google Drive API error ("+response.status+"): "+(await response.text()).slice(0,300));
  return response.text();
 }
@@ -206,7 +207,7 @@ async function syncNow(){
  }finally{busy=false;render();}
 }
 async function connect(){
- if(busy)return;
+ if(busy||ready())return;
  const clientId=$("dkDriveClient").value.trim();
  if(!clientRx.test(clientId)){
   lastStatus=t("Enter a valid Google OAuth Client ID before connecting.",
@@ -235,7 +236,10 @@ async function connect(){
   saved.clientId=clientId;persist();connected=true;
   lastStatus=t("Google connected. Use Sync now to transfer records.",
    "Google подключён. Нажмите «Синхронизировать сейчас» для передачи записей.");
- }catch(error){lastStatus=t("Could not connect: ","Не удалось подключиться: ")+error.message;}
+ }catch(error){
+  if(!desktop){token="";expires=0;connected=false;}
+  lastStatus=t("Could not connect: ","Не удалось подключиться: ")+error.message;
+ }
  finally{busy=false;render();}
 }
 async function disconnect(){
