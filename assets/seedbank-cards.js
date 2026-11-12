@@ -252,6 +252,23 @@ function placeSeedFallback(thumb,name,cat){
 const checkedPhotoCatalog=window.DKSeedBankVarietyImages||{};
 const photoPreferenceKey="dk-seedbank-photo-view-v2";
 const remoteImageStorageKey="dk-seedbank-remote-image-urls-v1";
+const photoChangesKey="dk-seedbank-photo-changes-v1";
+let photoChanges=field(photoChangesKey,{});
+if(!photoChanges||typeof photoChanges!=="object"||Array.isArray(photoChanges))photoChanges={};
+function markPhotoChange(key,deleted){
+ photoChanges[key]={at:new Date().toISOString(),deleted:!!deleted};
+ if(!save(photoChangesKey,photoChanges))alert("Photo change history could not be saved. Export a full backup.");
+}
+function restorePhotoChanges(data){
+ const record=data&&typeof data==="object"&&!Array.isArray(data)?data:{};
+ const clean={};
+ for(const [key,change] of Object.entries(record)){
+  if(typeof key!=="string"||key.length>320||!change||typeof change.at!=="string")continue;
+  if(Number.isNaN(Date.parse(change.at)))continue;
+  clean[key]={at:change.at,deleted:change.deleted===true};
+ }
+ return clean;
+}
 let remoteImageUrls=field(remoteImageStorageKey,{});
 if(!remoteImageUrls||typeof remoteImageUrls!=="object"||Array.isArray(remoteImageUrls))remoteImageUrls={};
 function validImageLink(value){
@@ -883,6 +900,7 @@ async function storeUpload(p,kind,input){
  const key=kind==="packet"?p.key+"|packet":p.key;
  const stored=await dbPut(key,file);
  if(!stored){alert("This browser could not save the photo. No changes were made. Try freeing storage space or using another browser.");return;}
+  markPhotoChange(key,false);
  const target=kind==="packet"?packetPhotos:userPhotos;
  const prior=target.get(p.key);if(prior)URL.revokeObjectURL(prior);
  target.set(p.key,URL.createObjectURL(file));
@@ -901,6 +919,7 @@ async function deleteUpload(p,kind){
  catch(e){alert("Unable to delete photo from local storage.");return;}
  const old=target.get(p.key);if(old)URL.revokeObjectURL(old);
  target.delete(p.key);
+  markPhotoChange(kind==="packet"?p.key+"|packet":p.key,true);
  delete photoPreferences[p.key];save(photoPreferenceKey,photoPreferences);
  refreshPhoto(p);requestFiltering();
 }
@@ -1007,13 +1026,13 @@ async function createFullBackup(){
   if(typeof key==="string"&&key.startsWith("journal-photo|")&&!growthKeys.has(key))continue;
   const data=await fileToDataURL(blob);
   if(!data)throw Error("Could not read an uploaded photo. No incomplete backup was downloaded.");
-  serialized.push({key,data});
+  serialized.push({key,data,updatedAt:photoChanges[key]&&!photoChanges[key].deleted?photoChanges[key].at:undefined});
  }
  // Normalize the export through JSON so the checksum covers exactly what will be saved.
  // This also strips undefined values that cannot survive a round trip through a file.
  const draft={
   format:"dk-seedbank-v1",backupSchema:2,exportedAt:new Date().toISOString(),
-  journal,journalDeletes,settings,photoUrls:remoteImageUrls,photoPreferences,
+  journal,journalDeletes,settings,photoUrls:remoteImageUrls,photoPreferences,photoChanges,
   workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,
   watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,
   recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,
@@ -1119,6 +1138,8 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   if(!save(storageKey,nextJournal)||!save(settingsKey,nextSettings))
    throw Error("Local browser storage is full or blocked. Check your safety backup.");
   journal=nextJournal;settings=nextSettings;
+   photoChanges=restorePhotoChanges(data.photoChanges);
+   if(!save(photoChangesKey,photoChanges))throw Error("Could not save photo change history.");
   journalDeletes=nextDeletes;
   save(journalDeletesKey,nextDeletes);
   if(data.photoUrls){
@@ -1216,12 +1237,13 @@ async function applySyncedBackup(data){
  }
  // Commit photographs in one IndexedDB transaction, then persist each local record.
  if(!await dbReplacePhotos(media))throw Error("Unable to store synchronized photographs.");
+ const nextPhotoChanges=restorePhotoChanges(data.photoChanges);
  if(!save(storageKey,nextJournal)||!save(journalDeletesKey,nextDeletes)||
     !save(settingsKey,nextSettings)||!save(remoteImageStorageKey,links)||
-    !save(photoPreferenceKey,preferences))
+    !save(photoPreferenceKey,preferences)||!save(photoChangesKey,nextPhotoChanges))
   throw Error("Insufficient local storage for synchronization. Your Google Drive snapshots remain intact.");
  journal=nextJournal;journalDeletes=nextDeletes;settings=nextSettings;
- remoteImageUrls=links;photoPreferences=preferences;
+ remoteImageUrls=links;photoPreferences=preferences;photoChanges=nextPhotoChanges;
  for(const url of [...userPhotos.values(),...packetPhotos.values()])URL.revokeObjectURL(url);
  userPhotos.clear();packetPhotos.clear();
  for(const [key,blob] of media){
