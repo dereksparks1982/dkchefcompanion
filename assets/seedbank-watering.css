@@ -1,0 +1,25 @@
+
+/* DK Seed Bank: practical watering dashboard, no garden-map/editor elements. */
+.water-manager{margin:18px 0 24px;border:1px solid #c1d8cd;border-radius:14px;background:#fff;overflow:hidden;color:#294737}
+.water-manager>summary{cursor:pointer;padding:17px 20px;background:linear-gradient(115deg,#e2f1eb,#eef8ed);font-weight:800;color:#194d40;list-style:none;font-size:1.08rem}
+.water-manager>summary::-webkit-details-marker{display:none}.water-manager>summary small{display:block;color:#4a796e;font-weight:500;font-size:.78rem;margin-top:3px}
+.wm-inner{padding:16px 19px}.wm-intro,.wm-footnote{font-size:.86rem;line-height:1.55;color:#4c665b;margin:0 0 16px}.wm-footnote{margin:18px 0 8px}
+.wm-summary{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.wm-summary span{background:#f0f6f1;border:1px solid #dae9e0;border-radius:9px;padding:9px 11px;font-size:.78rem}.wm-summary strong{font-variant-numeric:tabular-nums;color:#1d614d}
+.wm-inner h3{font-size:1rem;color:#265b46;margin:14px 0 10px}
+.wm-due{display:grid;gap:7px;max-height:380px;overflow:auto;border:1px solid #e0eae3;border-radius:10px;padding:9px}
+.wm-due-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #e4ece5;padding:8px}.wm-due-row:last-child{border:0}
+.wm-due-row>div{display:flex;flex-direction:column;gap:3px;min-width:0}.wm-due-row strong{font-size:.83rem;overflow-wrap:anywhere}.wm-due-row span{font-size:.78rem;color:#3e654e}.wm-due-row small{color:#69776b;font-size:.72rem}
+.wm-due-row button,.wm-record-actions button,.wm-actions button,.water-guidance button{border:1px solid #b2d0be;background:#e8f4e9;color:#1d573b;border-radius:8px;padding:7px 11px;cursor:pointer;font:inherit;font-weight:700;font-size:.8rem}.wm-due-row button{flex:none}
+.wm-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:19px;margin-top:20px}
+.wm-form{display:grid;gap:11px}.wm-form label{display:grid;gap:4px;font-size:.77rem;font-weight:700;color:#405c4b}.wm-form input,.wm-form select{width:100%;min-width:0;box-sizing:border-box;border:1px solid #bfd1c2;border-radius:7px;padding:9px 10px;font-size:.87rem;font-family:inherit;background:#fff;color:#1e402f}.wm-form input:focus,.wm-form select:focus{outline:2px solid #3c9070;outline-offset:1px}
+.wm-inline{display:grid;grid-template-columns:1fr 1fr;gap:9px}.wm-actions{display:flex;flex-wrap:wrap;gap:8px}.wm-actions .wm-primary{background:#266347;color:#fff;border-color:#266347}.wm-form #wmFeedback{font-size:.78rem;color:#315c44;margin:0}
+.wm-selected-guide{border:1px solid #d8e8db;border-left:4px solid #4c9370;background:#f5f9f3;padding:10px;border-radius:8px;font-size:.78rem;line-height:1.48}.wm-selected-guide p{margin:5px 0}.wm-selected-guide small{color:#577264}
+.wm-history{display:grid;gap:8px;max-height:650px;overflow:auto;padding:2px}.wm-record{border:1px solid #dce8de;border-radius:9px;padding:10px 12px;background:#fbfdfa;font-size:.8rem}
+.wm-record-head{display:flex;justify-content:space-between;gap:8px;font-weight:700;color:#235239}.wm-record p{margin:5px 0;line-height:1.4;overflow-wrap:anywhere}.wm-record-actions{display:flex;gap:7px;margin-top:8px}
+.wm-empty{margin:8px 0;padding:10px;color:#66766a;font-size:.84rem;line-height:1.45}
+.wm-sources{font-size:.75rem;color:#53695d}.wm-sources a{color:#205a4a;text-decoration:underline}
+.water-guidance{margin-top:15px;border:1px solid #d5e6de;border-left:4px solid #399070;background:#f5faf6;border-radius:8px;padding:12px 14px;color:#254a39;font-size:.8rem;line-height:1.5}
+.water-guidance h4{margin:0 0 9px;color:#1f634c;font-size:.93rem}.water-guidance p{margin:7px 0}.water-guidance button{margin:8px 0 0}
+@media(max-width:750px){.wm-columns{grid-template-columns:1fr}.wm-inner{padding:13px}.wm-due{max-height:340px}}
+@media(max-width:390px){.wm-inline{grid-template-columns:1fr}.wm-due-row{align-items:flex-start;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.water-manager *{scroll-behavior:auto}}

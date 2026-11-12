@@ -946,7 +946,7 @@ function downloadJSON(data){
 document.getElementById("exportJournal").addEventListener("click",async()=>{
  const photos=await dbAll();
  const serialized=await Promise.all(photos.map(async ([key,blob])=>({key,data:await fileToDataURL(blob)})));
- downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,photos:serialized.filter(x=>x.data)});
+ downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,photos:serialized.filter(x=>x.data)});
 });
 document.getElementById("importJournal").addEventListener("change",async e=>{
  const f=e.target.files&&e.target.files[0];if(!f)return;
@@ -982,6 +982,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   if(data.photoPreferences&&typeof data.photoPreferences==="object"){
    photoPreferences=Object.assign(photoPreferences,data.photoPreferences);save(photoPreferenceKey,photoPreferences);
   }
+  if(data.watering&&window.DKSeedBankWatering)window.DKSeedBankWatering.importData(data.watering);
   if(data.workbench&&window.DKSeedBankWorkbench)window.DKSeedBankWorkbench.importData(data.workbench);
    if(data.recipeGuide&&window.DKSeedBankRecipes)window.DKSeedBankRecipes.importData(data.recipeGuide);
   requestFiltering();

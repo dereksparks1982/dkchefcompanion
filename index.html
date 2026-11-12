@@ -62,6 +62,7 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 </style>
 <link rel="stylesheet" href="assets/seedbank-cards.css?v=20261111-soy-safety6">
 <link rel="stylesheet" href="assets/seedbank-workbench.css?v=20261111-journal-links10">
+<link rel="stylesheet" href="assets/seedbank-watering.css?v=20261111-water1">
 <link rel="stylesheet" href="assets/seedbank-recipes.css?v=20261111-recipes1">
 </head>
 <body>
@@ -512,7 +513,7 @@ document.getElementById("reset").addEventListener("click",function(){
 });
 function setAllPanels(open){
  sections.forEach(function(section){if(!open||!section.hidden)section.open=open;});
- ["growPlanner","seedJournal","seedWorkbench","recipeGuide"].forEach(function(id){
+ ["growPlanner","seedJournal","seedWorkbench","waterManager","recipeGuide"].forEach(function(id){
   var panel=document.getElementById(id);if(panel)panel.open=open;
  });
 }
@@ -530,7 +531,8 @@ document.querySelectorAll("[data-jump]").forEach(function(button){
 update();
 })();</script>
 <script defer src="assets/seedbank-variety-images.js?v=20261111-new-greens12"></script>
-<script defer src="assets/seedbank-cards.js?v=20261111-final-herbs9"></script>
+<script defer src="assets/seedbank-cards.js?v=20261111-watering1"></script>
 <script defer src="assets/seedbank-workbench.js?v=20261111-final-herbs9"></script>
 <script defer src="assets/seedbank-recipes.js?v=20261111-recipes1"></script>
+<script defer src="assets/seedbank-watering.js?v=20261111-water1"></script>
 </body></html>
