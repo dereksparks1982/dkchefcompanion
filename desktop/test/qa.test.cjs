@@ -347,6 +347,7 @@ test("Google Drive sync integrates full photo backup and journal without losing 
 test("planting journal rows align their tags, growing-guide headers and action areas",()=>{
  const source=read("assets/seedbank-workbench.js");
  assert.match(source,/function alignJournalRows\(\)/);
+ assert.match(source,/Array\.from\(document\.querySelectorAll\("#journalEntries \.journal-entry"\)\)/);
  assert.ok(source.indexOf("function alignJournalRows(")<source.indexOf("function journalRoles("),
   "Row alignment helper must not be included in the isolated journal-role test");
  assert.match(source,/journalAlignScheduled/);
