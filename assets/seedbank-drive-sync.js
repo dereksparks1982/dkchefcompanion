@@ -258,15 +258,15 @@ async function syncNow(){
   backup.validate(result);
   const digest=await backup.checksum(result);
   if(digest)result.integrity={algorithm:"SHA-256",digest};
-  // Never upload unless all remote data can be parsed and validated.
-  // Keep a recoverable previous device snapshot in Google Drive until upload succeeds.
+  // Publish the complete, verified merge before modifying this device's
+  // local data. If a local restore then fails, the remote recovery copy remains.
+  const mine=files.find(file=>file.name===filename);
+  await upload(result,mine?.id);
   let reloadNeeded=false;
   if(files.length&&cloud.length){
    const applied=await core.applySyncedBackup(result);
    reloadNeeded=!!applied?.reload;
   }
-  const mine=files.find(file=>file.name===filename);
-  await upload(result,mine?.id);
   let visibleMessage="";
   const visible=root.DKSeedBankDriveVisible;
   if(!desktop&&visible?.folder()){
