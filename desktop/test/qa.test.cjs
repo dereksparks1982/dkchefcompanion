@@ -370,7 +370,7 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
   assert.match(source,/seedbank-cards\.js\?v=20261112-planner-top2/);
  }
  const worker=read("sw.js");
- assert.match(worker,/dk-seedbank-app-v23/);
+ assert.match(worker,/dk-seedbank-app-v26/);
 });
 
 test("Monastery Garden displays title only with historical details inside",()=>{
@@ -380,4 +380,20 @@ test("Monastery Garden displays title only with historical details inside",()=>{
  assert.match(monastery,/Historical reference, not an endorsement/);
  for(const source of [read("index.html"),read("docs/index.html")])
   assert.match(source,/seedbank-monastery\.js\?v=20261112-titleonly2/);
+});
+
+test("Drive reuse and timestamped private/photo backups remain independent",()=>{
+ const picker=read("assets/seedbank-drive-visible.js");
+ const sync=read("assets/seedbank-drive-sync.js");
+ assert.match(picker,/async function discover\(token\)/);
+ assert.match(picker,/const checked=await discover\(token\)/);
+ assert.match(sync,/dkDriveFindFolder/);
+ assert.match(sync,/dkDriveCreateFolder"\)\.hidden=lookup!=="missing"/);
+ assert.match(sync,/dkDriveLastPrivate/);
+ assert.match(sync,/dkDriveLastVisible/);
+ assert.match(sync,/saved\.lastVisibleSync=new Date\(\)\.toISOString\(\)/);
+ for(const html of [read("index.html"),read("docs/index.html")]){
+  assert.match(html,/seedbank-drive-sync\.js\?v=20261112-history5/);
+  assert.match(html,/seedbank-drive-visible\.js\?v=20261112-reusefolder4/);
+ }
 });

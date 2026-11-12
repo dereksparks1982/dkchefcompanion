@@ -21,7 +21,7 @@ if(!saved.deviceId||!/^[a-z0-9-]{15,90}$/.test(saved.deviceId)){
 }
 const persist=()=>{
  localStorage.setItem(appKey,JSON.stringify({
-  deviceId:saved.deviceId,clientId:saved.clientId||"",auto:!!saved.auto,lastSync:saved.lastSync||""
+  deviceId:saved.deviceId,clientId:saved.clientId||"",auto:!!saved.auto,lastSync:saved.lastSync||"",lastVisibleSync:saved.lastVisibleSync||""
  }));
 };
 try{persist();}catch(error){}
@@ -72,6 +72,7 @@ box.innerHTML='<h3 id="dkDriveTitle">Google Drive</h3>'+
 (!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveFindFolder"></button> <button type="button" id="dkDriveChooseFolder"></button> <button type="button" id="dkDriveCreateFolder"></button> <button type="button" id="dkDriveClearFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
 '<label class="dk-drive-auto"><input type="checkbox" id="dkDriveAuto"><span id="dkDriveAutoLabel"></span></label>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
+'<div class="dk-drive-history"><p id="dkDriveLastPrivate"></p><p id="dkDriveLastVisible"></p></div>'+
 '<p id="dkDriveScope"></p>'+
 '</div>';
 const position=document.getElementById("dkSyncBackupDriveSlot");
@@ -138,6 +139,13 @@ function render(){
    lookup==="missing"?t("No DK Seed Bank folder accessible to this app was found in this account.","В этом аккаунте не найдена папка DK Seed Bank, доступная приложению."):
    t("Connect Google Drive to locate your existing folder.","Подключите Google Диск для поиска существующей папки.");
  }
+ const validTime=value=>typeof value==="string"&&Number.isFinite(Date.parse(value));
+ $("dkDriveLastPrivate").textContent=validTime(saved.lastSync)?
+  t("Last successful private cloud sync on this device: ","Последняя успешная личная синхронизация на устройстве: ")+new Date(saved.lastSync).toLocaleString():
+  t("No successful private cloud sync recorded on this device.","На устройстве ещё нет подтверждённой синхронизации.");
+ $("dkDriveLastVisible").textContent=validTime(saved.lastVisibleSync)?
+  t("Last successful photo-folder backup on this device: ","Последняя успешная копия фотографий в папке на устройстве: ")+new Date(saved.lastVisibleSync).toLocaleString():
+  t("No successful visible-folder backup recorded on this device.","На устройстве ещё нет подтверждённой копии в видимой папке.");
  $("dkDriveState").textContent=lastStatus||(
   connected?(ready()?t("Connected. Ready to synchronize.","Подключено. Можно синхронизировать."):
    t("Google session expired. Reconnect to continue syncing.","Срок действия сеанса истёк. Подключитесь снова.")):
@@ -263,6 +271,7 @@ async function syncNow(){
   if(!desktop&&visible?.folder()){
    try{
     const published=await visible.mirror(token,result);
+    saved.lastVisibleSync=new Date().toISOString();
     visibleMessage=t(" · Visible photos: "," · Видимые фото: ")+published.photos;
    }catch(error){
     visibleMessage=t(" · Visible-folder copy FAILED: "," · Не удалось сохранить в папку: ")+error.message;

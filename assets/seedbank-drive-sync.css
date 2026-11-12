@@ -42,3 +42,9 @@ html[lang="ru"] #dkDriveOpenFolder{color:#8e2941}
 .dk-drive-picker-bar{flex-wrap:wrap}
 .dk-drive-picker-bar strong{flex:1 1 180px}
 .dk-drive-picker-bar button:disabled{opacity:.5;cursor:not-allowed}
+
+/* Compact, persistent sync history and thumb-friendly phone buttons. */
+.dk-drive-history{padding:8px 11px;margin:4px 0 13px;border:1px solid #dce8dc;background:#f8fbf8;border-radius:8px}
+.dk-drive-history p{margin:3px 0;font-size:.76rem;color:#42634d;overflow-wrap:anywhere}
+.dk-visible-folder button[hidden]{display:none!important}
+@media(max-width:550px){.dk-visible-folder button:not([hidden]){display:block;width:100%;margin:7px 0;min-height:44px}}
