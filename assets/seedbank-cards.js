@@ -475,7 +475,7 @@ function tagContent(card){
   '<p><strong>Water:</strong> '+esc(g.water)+'</p>'+
   '<p><strong>Harvest:</strong> '+esc(g.harvest)+'</p>'+
   (g.extra?'<p class="uncertain"><strong>Notes:</strong> '+esc(g.extra)+'</p>':'')+
-  '<p class="calendar-date" data-method="'+esc(g.mode)+'">Calendar: Choose a last frost date in Growing Planner to get a suggested window.</p>'+
+  '<p class="calendar-date" data-method="'+esc(g.mode)+'">Calendar: Choose a last frost date in Garden Planner to get a suggested window.</p>'+
   '<p class="uncertain">General species or crop guidance, not a test of this seed packet. Follow a verified packet label when it differs.</p></div>'+
   seedSafetyDetails(safety)+'<div class="plant-links">'+links+'</div>'+
   '<div class="seed-photo-tools" aria-label="Your photos">'+
@@ -597,7 +597,7 @@ const clearOriginal=document.getElementById("reset");
 clearOriginal.addEventListener("click",()=>{growFilter.value="";photoFilter.value="";queueMicrotask(applyExtraFilters);});
 document.querySelectorAll("[data-jump]").forEach(j=>j.addEventListener("click",()=>{growFilter.value="";photoFilter.value="";queueMicrotask(applyExtraFilters);}));
 const planner=document.createElement("details");planner.id="growPlanner";
-planner.innerHTML='<summary>🌱 Growing Planner</summary><div class="planner-body"><p>Choose a region and growing setup. Alaska varies enormously from town to town; planting dates depend on your actual frost dates and greenhouse heating.</p>'+
+planner.innerHTML='<summary>🌱 Garden Planner</summary><div class="planner-body"><p>Choose a region and growing setup. Alaska varies enormously from town to town; planting dates depend on your actual frost dates and greenhouse heating.</p>'+
 '<div class="planner-controls"><label>Growing region<select id="regionSelect"><option value="alaska">Alaska (location TBD)</option><option value="kansas">Kansas</option><option value="custom">Other location</option></select></label>'+
 '<label>Growing space<select id="envSelect"><option value="outdoors">Outdoor garden</option><option value="unheated">Unheated greenhouse</option><option value="heated">Heated greenhouse</option><option value="indoors">Indoors / grow lights</option></select></label>'+
 '<label>Expected last spring frost<input id="frostDate" type="date" aria-label="Estimated last spring frost date"></label></div><div class="journal-toolbar"><button class="journal-btn" id="plantNow" type="button">🌱 What could I plant now?</button></div><div id="plantNowResult" class="plant-now" hidden></div>'+
