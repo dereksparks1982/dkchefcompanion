@@ -644,8 +644,8 @@ document.getElementById("plantNow").addEventListener("click",()=>{
   (relevant.length?"<ul>"+relevant.map(p=>"<li>"+esc(p.name)+" · "+esc(p.guide.depth)+" deep</li>").join("")+"</ul>":"<p>No reliable outdoor sowing matches for this date and setup. Try a greenhouse option or adjust your frost date.</p>");
 });
 const section=document.createElement("details");section.id="seedJournal";
-section.innerHTML='<summary>📔 Planting Journal · <span id="journalCount">8 recorded plantings</span></summary>'+
-'<div class="journal-body"><p class="journal-note">Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.</p>'+
+section.innerHTML='<summary>📔 Planting Journal</summary>'+
+'<div class="journal-body"><p id="journalCount" class="journal-count">8 recorded plantings</p><p class="journal-note">Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.</p>'+
 '<div class="journal-toolbar"><button class="journal-btn primary" id="addJournal" type="button">＋ Record planting</button><button hidden class="journal-btn" id="exportJournal" type="button">↓ Export backup (with photos)</button><label hidden class="journal-btn" style="cursor:pointer">↑ Import backup<input id="importJournal" type="file" accept="application/json,.json" hidden></label></div>'+
 '<div class="journal-card-list" id="journalEntries"></div>'+
 '<form id="journalForm" hidden><h3 id="journalFormTitle">Record planting</h3><div class="form-grid">'+

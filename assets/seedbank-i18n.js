@@ -67,7 +67,7 @@ function seedName(name,cat){
 }
 const pairs=[
 ["My seed collection","Моя коллекция семян"],["Explore the whole collection. Search varieties, browse plant families, and filter by what each plant is grown for.","Просматривайте коллекцию, ищите сорта, изучайте семейства растений и отбирайте культуры по назначению."],
-["Seed varieties","Разновидности семян"],["Commercial packets","Покупные пакеты"],["Bags of beans/lentils","Пакеты бобовых"],["Saved seed lots","Собранные партии семян"],["Plant categories","Категории растений"],
+["Seed varieties","Разновидности семян"],["Varieties in collection","Сортов в коллекции"],["Commercial packets","Покупные пакеты"],["Bags of beans/lentils","Пакеты бобовых"],["Saved seed lots","Собранные партии семян"],["Plant categories","Категории растений"],
 ["Search your seeds","Поиск семян"],["Category","Категория"],["All categories","Все категории"],["Purpose / role","Назначение"],["All purposes","Все назначения"],["Seed source","Источник семян"],["All recorded sources","Все источники"],["Seed bags (beans / lentils)","Пакеты бобов и чечевицы"],["Saved / loose seeds","Собранные / россыпные семена"],
 ["Quantity","Количество"],["Any quantity","Любое количество"],["2+ units","2 и более"],["1 unit","1 единица"],["Count unconfirmed","Количество не подтверждено"],
 ["Pepper heat (SHU)","Острота перца (SHU)"],["All heat levels","Любая острота"],["No heat (0)","Без остроты (0)"],["Mild","Слабая"],["Medium","Средняя"],["Hot","Острая"],["Very hot","Очень острая"],["Superhot","Экстремально острая"],

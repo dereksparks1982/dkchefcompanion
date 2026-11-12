@@ -1,0 +1,11 @@
+.dk-seed-suppliers{margin:24px 0 32px;border:1px solid #c9d9c8;border-radius:13px;background:#f8fbf7;overflow:hidden;color:#244630}
+.dk-seed-suppliers>summary{cursor:pointer;padding:16px 18px;font-size:1.06rem;font-weight:800;background:#e8f2e6}
+.dk-suppliers-content{padding:15px 18px 20px}.dk-suppliers-content>p{margin:0 0 12px}.dk-suppliers-content h3{font-size:1rem;margin:18px 0 8px}
+.dk-supplier-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.dk-supplier-list li{border:1px solid #d8e4d6;background:#fff;border-radius:9px;padding:11px 13px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.dk-supplier-list a{color:#195c36;font-weight:700;text-decoration:underline;overflow-wrap:anywhere}
+.dk-supplier-list button,.dk-supplier-form button{border:1px solid #adc6ad;border-radius:8px;background:#eff7ee;color:#254b35;font:inherit;cursor:pointer;padding:9px 12px;font-weight:650}
+.dk-supplier-form{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:12px}.dk-supplier-form label{display:grid;gap:5px;flex:1 1 190px;font-size:.9rem;font-weight:600}
+.dk-supplier-form input{box-sizing:border-box;width:100%;min-height:42px;border:1px solid #b9cbb8;border-radius:8px;padding:8px 10px;font:inherit;background:#fff;color:#203a2c}
+.dk-supplier-form button{min-height:42px}#dkSupplierMessage{font-size:.85rem;min-height:1em;margin-top:10px}
+html[lang="ru"] .dk-seed-suppliers{border-color:#d2afba}html[lang="ru"] .dk-seed-suppliers>summary{background:#f7e9ed}
