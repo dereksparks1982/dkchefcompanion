@@ -23,3 +23,7 @@ html[lang="ru"] .dk-drive-actions button:first-child{background:#9b304b;border-c
 .dk-visible-folder button{border:1px solid #b9caba;background:#eef7f0;color:#234b33;border-radius:9px;padding:10px 14px;min-height:43px;font:inherit;font-size:.83rem;font-weight:750;cursor:pointer}
 .dk-visible-folder button:disabled{opacity:.55;cursor:not-allowed}
 #dkDriveFolderState{font-size:.8rem;margin:9px 0;color:#4d6253;overflow-wrap:anywhere}
+
+#dkDriveOpenFolder{display:inline-block;margin:0 0 12px;font-size:.83rem;font-weight:700;color:#205740;text-decoration:underline;text-underline-offset:3px}
+#dkDriveOpenFolder[hidden]{display:none}
+html[lang="ru"] #dkDriveOpenFolder{color:#8e2941}
