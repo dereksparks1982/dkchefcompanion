@@ -80,7 +80,7 @@ async function choose(token){
    document.removeEventListener("keydown",onKey);
    overlay.remove();
    try{oldFocus?.focus({preventScroll:true});}catch(ignore){}
-   if(Math.abs(window.scrollY-oldScroll)>5)window.scrollTo({top:oldScroll,behavior:"instant"});
+   if(Math.abs(window.scrollY-oldScroll)>5)window.scrollTo(0,oldScroll);
    return true;
   };
   const endPick=value=>{if(clean())resolve(value);};
