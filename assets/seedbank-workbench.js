@@ -27,9 +27,15 @@ function persist(){try{localStorage.setItem(storageKey,JSON.stringify(state));re
 function item(key){return core.plants().get(key);}
 function matchesName(entry){
  if(entry.seedKey&&item(entry.seedKey))return entry.seedKey;
- const requested=String(entry.variety||entry.plant||"").trim().toLowerCase();
- const matches=[...core.plants().values()].filter(p=>p.name.toLowerCase()===requested);
- return matches.length===1?matches[0].key:null;
+ const variety=String(entry.variety||"").trim().toLowerCase();
+ const plant=String(entry.plant||"").trim().toLowerCase();
+ const all=[...core.plants().values()];
+ if(variety&&!/standard type|unspecified|unknown|not specified/i.test(variety)){
+  const exact=all.filter(p=>p.name.toLowerCase()===variety);
+  if(exact.length===1)return exact[0].key;
+ }
+ const exactPlant=all.filter(p=>p.name.toLowerCase()===plant);
+ return exactPlant.length===1?exactPlant[0].key:null;
 }
 function seedOptions(selected=""){
  const values=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes").sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
@@ -442,25 +448,141 @@ document.addEventListener("click",event=>{
  state[list]=state[list].filter(x=>x.id!==btn.dataset.id);
  persist();renderAll();
 });
+// Species-level journal illustrations are REFERENCES, never proof of the planted cultivar.
+// Commons file sources are linked beside each image, and no image is copied into the repo.
+const journalReferencePhotos={
+ basil:{file:"Starr 080607-7268 Ocimum basilicum.jpg",species:"Ocimum basilicum",by:"Forest & Kim Starr"},
+ chives:{file:"20170509Allium schoenoprasum1.jpg",species:"Allium schoenoprasum",by:"Wikimedia Commons contributor"},
+ coriander:{file:"CoriandrumSativum.jpg",species:"Coriandrum sativum",by:"Jonathunder"},
+ dill:{file:"Starr-081031-0428-Anethum graveolens-leaves-Makawao-Maui (24926744115).jpg",species:"Anethum graveolens",by:"Forest & Kim Starr"},
+ thyme:{file:"Flowering Thymus vulgaris.jpg",species:"Thymus vulgaris",by:"Pharmattila"},
+ mint:{file:"Mint leaves (Mentha spicata).jpg",species:"Mentha spicata (spearmint)",by:"Commonists"},
+ oregano:{file:"Origanum vulgare vulgare 378325973.jpg",species:"Origanum vulgare",by:"Alex Abair"},
+ parsley:{file:"Petroselinum crispum leaves.png",species:"Petroselinum crispum",by:"Wikimedia Commons contributor"}
+};
+function journalPlantGroup(entry){
+ const plant=String(entry.plant||"").trim().toLowerCase();
+ if(/^(coriander|cilantro)$/.test(plant))return "coriander";
+ if(/^(basil|chives|dill|thyme|mint|oregano|parsley)$/.test(plant))return plant;
+ return "";
+}
+function journalCandidates(entry){
+ const group=journalPlantGroup(entry);
+ if(!group)return [];
+ return [...core.plants().values()].filter(p=>{
+  const n=p.name.toLowerCase(),cat=p.cat;
+  if(group==="chives")return cat.startsWith("Alliums:")&&n.includes("chives");
+  if(cat!=="Herbs and medicinal plants")return false;
+  if(group==="coriander")return n.includes("coriander")||n.includes("cilantro");
+  if(group==="dill")return /^dill\b/.test(n);
+  if(group==="mint")return /\bmint\b/.test(n);
+  return n.includes(group);
+ }).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function journalGuide(entry,linked,candidates){
+ if(linked)return linked.guide;
+ if(candidates.length)return candidates[0].guide;
+ // Mint and thyme appear in the historic journal, but not in the seed inventory.
+ // Provide a crop-level guide without fabricating a seed card or a cultivar.
+ const group=journalPlantGroup(entry);
+ return group?core.guideFor(group,"Herbs and medicinal plants"):null;
+}
+function journalCalendar(guide){
+ if(!guide)return "Choose a specific seed or confirm the plant species for a schedule.";
+ const frost=parseDate(core.settings().lastFrost);
+ if(!frost)return "Set a last spring frost date in Growing Planner for estimated planting windows.";
+ const offsets=guide.mode==="indoor"?[-70,-35]:guide.mode==="direct-cool"?[-35,14]:guide.mode==="direct-warm"?[7,45]:null;
+ if(!offsets)return "Confirm species-specific timing; frost date alone is insufficient.";
+ return "Approximate sowing window: "+dateText(dateOffset(frost,offsets[0]))+" to "+dateText(dateOffset(frost,offsets[1]))+". Check local weather and your packet.";
+}
+function journalDetailsHTML(entry,linked,candidates,guide){
+ const label=linked?"Linked variety: "+linked.name:"Plant type only; exact variety unconfirmed";
+ const comparison=linked?"These instructions follow your selected seed entry.":candidates.length?
+  "Multiple varieties exist in your Seed Bank. This is general crop guidance, not proof of which was planted.":
+  "This herb does not currently have a matching seed card in your inventory. General plant-type guidance only.";
+ const options='<option value="">Exact variety unknown / not linked</option>'+candidates.map(p=>
+  '<option value="'+esc(p.key)+'"'+(linked&&linked.key===p.key?' selected':'')+'>'+esc(p.name)+'</option>').join("");
+ const chooser=candidates.length?
+  '<label class="wb-journal-link-label">Link a specific variety only if you know it was planted<select data-journal-link="'+esc(entry.id)+'">'+options+'</select></label>':
+  '<p class="wb-note">No matching seed variety is currently listed. You can add one in Garden Workbench, but this journal record is preserved.</p>';
+ let facts="";
+ if(guide){
+  const data=[["Depth",guide.depth],["Spacing",guide.spacing],["Sunlight",guide.light],["Germination",guide.germ],["Soil temperature",guide.soil],["Maturity / lifespan",guide.days]];
+  facts='<div class="wb-journal-guide-facts">'+data.map(([key,value])=>'<div><small>'+esc(key)+'</small><strong>'+esc(value)+'</strong></div>').join("")+'</div>'+
+   '<p><strong>When:</strong> '+esc(guide.when)+'</p>'+
+   '<p><strong>Where:</strong> '+esc(guide.where)+'</p>'+
+   '<p><strong>Water:</strong> '+esc(guide.water)+'</p>'+
+   '<p><strong>Harvest:</strong> '+esc(guide.harvest)+'</p>'+
+   (guide.extra?'<p><strong>Species notes:</strong> '+esc(guide.extra)+'</p>':'')+
+   '<p class="wb-note">'+esc(journalCalendar(guide))+'</p>';
+ }
+ return '<p class="wb-journal-link-state">'+esc(label)+'</p>'+chooser+
+  '<p class="wb-note">'+esc(comparison)+'</p>'+
+  '<h4>Growing instructions</h4>'+facts+
+  (linked?'<button type="button" class="wb-small" data-wb-guide="'+esc(linked.key)+'">View full seed card and picture settings</button>':'');
+}
 function journalEnhance(){
- const entries=core.journal().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
+ const entries=core.journal().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  const cards=$$(".journal-entry",$("#journalEntries"));
  cards.forEach((card,i)=>{
   const entry=entries[i];if(!entry)return;
-  const key=matchesName(entry),p=key?item(key):null;
-  const old=$(".wb-journal-extra",card);if(old)old.remove();
-  if(!p)return;
-  const extra=document.createElement("div");extra.className="wb-journal-extra";
-  const photo=$(".seed-thumb img",p.card);
-  const tags=p.card.dataset.tags.split("|").map(r=>roleClass[r]?'<span class="tag tag-'+roleClass[r]+'">'+esc(r)+'</span>':"").join("");
-  extra.innerHTML=(photo?'<img loading="lazy" alt="" src="'+esc(photo.src)+'">':'')+
-   '<div><div class="wb-journal-tags">'+tags+'</div><p><strong>'+esc(p.cat)+'</strong> · '+esc(p.guide.depth)+' deep · '+esc(p.guide.light)+'</p>'+
-   '<p>'+esc(p.guide.when)+'</p>'+
-   (dangerFor(p)?'<p class="wb-warning">'+esc(dangerFor(p))+'</p>':'')+
-   '<button type="button" class="wb-small" data-wb-guide="'+esc(p.key)+'">Open seed planting guide</button></div>';
-  card.insertBefore(extra,card.querySelector(".journal-actions"));
+  const key=matchesName(entry),linked=key?item(key):null,candidates=journalCandidates(entry);
+  const guide=journalGuide(entry,linked,candidates);
+  const roleList=linked?linked.card.dataset.tags.split("|"):
+   candidates.length?candidates.map(p=>p.card.dataset.tags.split("|")).reduce((acc,arr)=>acc.filter(role=>arr.includes(role))):
+   journalPlantGroup(entry)?["Culinary herb"]:[];
+  const tags=[...new Set(roleList)].filter(r=>roleClass[r]).map(r=>
+   '<button type="button" class="tag tag-'+roleClass[r]+' purpose-tag" data-purpose-tag="'+esc(r)+'" aria-pressed="false">'+esc(r)+'</button>').join("");
+  const old=$(".wb-journal-overview",card);if(old)old.remove();
+  let expanded=$(".wb-journal-details",card);
+  if(!expanded){
+   expanded=document.createElement("details");expanded.className="wb-journal-details";
+   expanded.innerHTML='<summary>Growing guide and full planting record</summary><div class="wb-journal-guide"></div><div class="wb-journal-original"><h4>Planting observations and progress</h4></div>';
+   const original=$$(":scope > p",card);
+   original.forEach(node=>$(".wb-journal-original",expanded).appendChild(node));
+   card.insertBefore(expanded,$(".journal-actions",card));
+  }
+  $(".wb-journal-guide",expanded).innerHTML=journalDetailsHTML(entry,linked,candidates,guide);
+  const photoData=journalReferencePhotos[journalPlantGroup(entry)];
+  const seedPhoto=linked?$(".seed-thumb img",linked.card):null;
+  const imageURL=seedPhoto?.src||(photoData?"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(photoData.file.replace(/ /g,"_"))+"?width=480":null);
+  const sourceLink=photoData?"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(photoData.file.replace(/ /g,"_")):"";
+  const plantName=photoData?photoData.species:String(entry.plant||"plant");
+  const photoLabel=seedPhoto?"From your selected seed card":"Botanical reference: "+plantName+"; exact planted variety not confirmed";
+  const overview=document.createElement("div");overview.className="wb-journal-overview";
+  const visual=document.createElement("div");visual.className="wb-journal-visual";
+  if(imageURL){
+   const image=document.createElement("img");image.loading="lazy";image.alt=photoLabel;image.src=imageURL;
+   image.addEventListener("error",()=>{
+    if(image.parentNode===visual){image.replaceWith(Object.assign(document.createElement("span"),{textContent:"🌱",className:"wb-journal-placeholder"}));}
+    const caption=$(".wb-journal-photo-credit",overview);if(caption)caption.textContent="Reference photo unavailable. No other variety was substituted.";
+   });
+   visual.appendChild(image);
+  }else{
+   const placeholder=document.createElement("span");placeholder.className="wb-journal-placeholder";placeholder.textContent="🌱";visual.appendChild(placeholder);
+  }
+  overview.appendChild(visual);
+  const body=document.createElement("div");body.className="wb-journal-headline";
+  body.innerHTML='<div class="wb-journal-tags">'+tags+'</div>'+
+   '<p><strong>Planted:</strong> '+esc(entry.date)+(entry.time?' · '+esc(entry.time):'')+'</p>'+
+   '<p><strong>Seeds sown:</strong> '+esc(entry.minSeeds&&entry.maxSeeds?(entry.minSeeds===entry.maxSeeds?entry.minSeeds:entry.minSeeds+"–"+entry.maxSeeds):"Not recorded")+'</p>'+
+   '<p><strong>Variety:</strong> '+esc(linked?linked.name:"Not yet identified")+'</p>'+
+   '<p class="wb-journal-photo-credit">'+esc(photoLabel)+'</p>';
+  if(!seedPhoto&&photoData){
+   const link=document.createElement("a");link.href=sourceLink;link.target="_blank";link.rel="noopener noreferrer";link.className="wb-photo-source";link.textContent="Photo source and license · "+photoData.by;
+   body.appendChild(link);
+  }
+  overview.appendChild(body);
+  card.insertBefore(overview,expanded);
  });
 }
+document.addEventListener("change",event=>{
+ const control=event.target.closest?.("select[data-journal-link]");
+ if(!control)return;
+ const id=control.dataset.journalLink,key=control.value;
+ if(key&&!item(key))return;
+ core.setJournalSeedKey(id,key);
+});
 document.addEventListener("dkseedbank:journal-rendered",()=>{journalEnhance();renderSummary();renderLots();renderViability();});
 document.addEventListener("dkseedbank:inventorychange",()=>{refreshSelects();renderAll();});
 document.addEventListener("click",event=>{
@@ -516,9 +638,19 @@ $$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
 }));
 function makeBackTopButton(className){
  const button=document.createElement("button");button.type="button";button.className=className;
- button.textContent="↑ Back to top";button.setAttribute("aria-label","Back to the top of DK Seed Bank");
- button.addEventListener("click",()=>{const reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.scrollTo({top:0,behavior:reduced?"auto":"smooth"});});
+ const withinCategory=className.includes("wb-back-category");
+ button.textContent=withinCategory?"↑ Back to category top":"↑ Back to page top";
+ button.setAttribute("aria-label",withinCategory?"Back to the beginning of this seed category":"Back to the top of DK Seed Bank");
+ button.addEventListener("click",()=>{
+  const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior=reduced?"auto":"smooth";
+  if(withinCategory){
+   const category=button.closest(".category");
+   const heading=category?.querySelector(":scope > summary");
+   if(heading){heading.scrollIntoView({behavior,block:"start"});return;}
+  }
+  window.scrollTo({top:0,behavior});
+ });
  return button;
 }
 const backFooter=document.createElement("div");backFooter.className="wb-page-top";

@@ -93,3 +93,43 @@
  body.wb-print-labels .wb-print-label *{color:black!important}
  @page{margin:10mm}
 }
+
+
+/* Journal: plant reference photography, compact overview, and expandable complete guides */
+.journal-entry{display:flex;flex-direction:column;gap:8px;min-width:0}
+.journal-entry h3{margin-bottom:0}
+.journal-entry>.status{align-self:flex-start}
+.wb-journal-overview{display:grid;grid-template-columns:minmax(86px,105px) minmax(0,1fr);gap:10px;align-items:start;margin:4px 0 2px}
+.wb-journal-visual{width:100%;aspect-ratio:1/1.06;border:1px solid #dce8d9;border-radius:10px;background:#ebf3e9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.wb-journal-visual img{height:100%;width:100%;object-fit:cover;display:block}
+.wb-journal-placeholder{font-size:2.5rem}
+.wb-journal-headline{min-width:0;overflow-wrap:anywhere}
+.wb-journal-headline p{margin:3px 0;color:#4d6150;font-size:.78rem;line-height:1.35}
+.wb-journal-headline p strong{color:#294f35}
+.wb-journal-photo-credit{font-size:.72rem!important;font-style:italic;color:#627064!important}
+.wb-photo-source{font-size:.74rem;color:#205b44;text-decoration:underline;text-underline-offset:2px;display:inline-block;margin-top:5px;overflow-wrap:anywhere}
+.wb-journal-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.wb-journal-tags .tag{font-size:.7rem}
+.wb-journal-details{border-top:1px solid #e1eadd;margin-top:5px;padding-top:5px}
+.wb-journal-details>summary{cursor:pointer;padding:6px 0;color:#2d623e;font-size:.82rem;font-weight:750;list-style:none}
+.wb-journal-details>summary::-webkit-details-marker{display:none}
+.wb-journal-details>summary:before{content:"＋";margin-right:6px}
+.wb-journal-details[open]>summary:before{content:"−"}
+.wb-journal-guide,.wb-journal-original{border-top:1px solid #e9efe6;padding:10px 0 5px}
+.wb-journal-guide h4,.wb-journal-original h4{color:#30543d;font-size:.86rem;margin:7px 0}
+.wb-journal-link-state{font-weight:750;color:#304e38;font-size:.78rem!important}
+.wb-journal-link-label{display:block;font-size:.77rem;font-weight:750;margin:8px 0;color:#375945}
+.wb-journal-link-label select{display:block;box-sizing:border-box;max-width:100%;width:100%;padding:8px;border-radius:7px;border:1px solid #b8d1bb;background:white;font-size:.78rem;margin-top:5px;color:#274532}
+.wb-journal-guide-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0}
+.wb-journal-guide-facts>div{border:1px solid #dce8d8;background:#f8fbf5;border-radius:7px;padding:7px 9px;min-width:0}
+.wb-journal-guide-facts small{display:block;color:#677a68;font-size:.69rem}
+.wb-journal-guide-facts strong{display:block;color:#264c32;font-size:.78rem;overflow-wrap:anywhere}
+.wb-journal-guide p{line-height:1.45;margin:8px 0}
+.wb-journal-original p{margin:5px 0}
+.journal-entry .journal-actions{display:flex;gap:7px;margin-top:auto;padding-top:10px}
+.category>summary{scroll-margin-top:14px}
+@media(max-width:560px){
+ .wb-journal-overview{grid-template-columns:79px minmax(0,1fr)}
+ .wb-journal-guide-facts{grid-template-columns:1fr}
+ .wb-journal-visual{min-height:86px}
+}

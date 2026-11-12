@@ -390,6 +390,7 @@ section.innerHTML='<summary>📔 Planting Journal · <span id="journalCount">8 r
 '<form id="journalForm" hidden><h3 id="journalFormTitle">Record planting</h3><div class="form-grid">'+
 '<label>Plant name<input name="plant" required maxlength="100" placeholder="e.g. Basil"></label>'+
 '<label>Variety (optional)<input name="variety" maxlength="120" placeholder="Unknown / basic variety"></label>'+
+'<label class="full-span">Link exact variety from my Seed Bank<select name="seedKey" id="journalSeedKey"><option value="">Unknown / not selected</option></select><small>Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.</small></label>'+
 '<label>Date planted<input name="date" type="date" required></label>'+
 '<label>Approximate time<input name="time" type="time"></label>'+
 '<label>Minimum seeds<input name="minSeeds" type="number" min="0" max="999999" inputmode="numeric"></label>'+
@@ -426,6 +427,9 @@ function renderJournal(){
 function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
 function openForm(entry){
  section.open=true;journalForm.hidden=false;editId=entry?entry.id:null;journalForm.dataset.seedKey=entry&&entry.seedKey?entry.seedKey:"";
+ const select=journalForm.elements.namedItem("seedKey");
+ select.innerHTML='<option value="">Unknown / not selected</option>'+[...plants.values()].map(p=>'<option value="'+esc(p.key)+'">'+esc(p.cat+" · "+p.name)+'</option>').join("");
+
  const obj=entry||{plant:"",date:today(),time:"",minSeeds:"",maxSeeds:"",soakHours:"",medium:"",location:"",status:"Sown",sprouted:"",germinatedCount:"",survivedCount:"",variety:"",notes:""};
  Array.from(journalForm.elements).forEach(el=>{if(el.name)el.value=obj[el.name]==null?"":obj[el.name];});
  document.getElementById("journalFormTitle").textContent=entry?"Edit planting":"Record planting";
@@ -442,8 +446,10 @@ journalList.addEventListener("click",event=>{
 journalForm.addEventListener("submit",event=>{
  event.preventDefault();
  const f=new FormData(journalForm);
- const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),seedKey:journalForm.dataset.seedKey||"",
- plant:String(f.get("plant")||"").trim(),variety:String(f.get("variety")||"").trim(),
+ const requestedKey=String(f.get("seedKey")||"");
+ const selectedKey=plants.has(requestedKey)?requestedKey:"";
+ const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),seedKey:selectedKey,
+ plant:String(f.get("plant")||"").trim(),variety:selectedKey&&(!String(f.get("variety")||"").trim()||/standard type; exact cultivar not specified/i.test(String(f.get("variety")||"")))?plants.get(selectedKey).name:String(f.get("variety")||"").trim(),
  date:String(f.get("date")||""),time:String(f.get("time")||""),approxTime:false,
  minSeeds:Number(f.get("minSeeds")||0),maxSeeds:Number(f.get("maxSeeds")||0),
  soakHours:Number(f.get("soakHours")||0),medium:String(f.get("medium")||"").trim(),
@@ -804,9 +810,19 @@ function createInventoryCard(entry){
  section.querySelector(".entries").appendChild(card);tagContent(card);cards.push(card);
  const p=plants.get(key);initializeNewSeedCard(p);patchInventoryCard(key,entry);return key;
 }
+function setJournalSeedKey(entryId,key){
+ const record=journal.find(entry=>entry.id===entryId);
+ if(!record||key&&!plants.has(key))return false;
+ const old=record.seedKey&&plants.get(record.seedKey);
+ if(!key&&old&&record.variety===old.name)record.variety="Standard type; exact cultivar not specified";
+ record.seedKey=key;
+ if(key)record.variety=plants.get(key).name;
+ if(!save(storageKey,journal))return false;
+ renderJournal();return true;
+}
 window.DKSeedBankCore=Object.freeze({
  plants:()=>plants,cards:()=>cards.slice(),categories:()=>cats.map(x=>x.dataset.category),
- journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,
+ journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,guideFor:resolveGuide,setJournalSeedKey,
  patchInventoryCard,createInventoryCard,deleteInventoryCard,refreshFilters:requestFiltering,
  logPlanting:(key)=>{const p=plants.get(key);if(p)openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"});},
  showJournal:()=>{section.open=true;section.scrollIntoView({behavior:"smooth",block:"start"});},
