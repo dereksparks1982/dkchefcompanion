@@ -25,6 +25,55 @@ function saveFolder(pick){
  try{localStorage.setItem(PREFIX,JSON.stringify(selected));}catch(error){}
  return selected;
 }
+// A small per-account pointer is kept in the user's PRIVATE Drive appDataFolder.
+// No credentials, photos, or collection details are stored in this pointer.
+const LINK_NAME="dk-seedbank-folder-link-v1.json";
+async function readLink(token){
+ const query=new URLSearchParams({
+  spaces:"appDataFolder",
+  q:"name = '"+LINK_NAME+"' and trashed = false",
+  fields:"nextPageToken,files(id,name)",pageSize:"100"
+ });
+ const result=await (await request(token,DRIVE+"?"+query)).json();
+ if(result.nextPageToken)throw Error("Folder link lookup could not be completed.");
+ const links=(result.files||[]).filter(item=>item?.id&&item.name===LINK_NAME);
+ if(links.length>1)throw Error("Several saved Drive folder links exist. Select your folder manually.");
+ if(!links.length)return null;
+ const value=await (await request(token,DRIVE+"/"+encodeURIComponent(links[0].id)+"?alt=media")).json();
+ if(typeof value?.folderId!=="string"||!/^[a-zA-Z0-9_-]{8,150}$/.test(value.folderId))
+  throw Error("The saved Drive folder link is invalid.");
+ return {id:links[0].id,folderId:value.folderId};
+}
+async function remember(token,folderId){
+ assertToken(token);
+ if(!/^[a-zA-Z0-9_-]{8,150}$/.test(folderId))throw Error("Invalid folder ID.");
+ const previous=await readLink(token);
+ const payload=JSON.stringify({folderId});
+ if(previous?.folderId===folderId)return;
+ if(previous){
+  await request(token,UPLOAD+"/"+encodeURIComponent(previous.id)+"?uploadType=media","PATCH",
+   payload,"application/json");
+  return;
+ }
+ const boundary="seedbank-folder-"+Math.random().toString(36).slice(2);
+ const metadata=JSON.stringify({name:LINK_NAME,mimeType:"application/json",parents:["appDataFolder"]});
+ const body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+metadata+
+  "\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+payload+
+  "\r\n--"+boundary+"--";
+ await request(token,UPLOAD+"?uploadType=multipart&fields=id","POST",body,
+  "multipart/related; boundary="+boundary);
+}
+async function folderById(token,id){
+ const response=await fetch(DRIVE+"/"+encodeURIComponent(id)+
+  "?fields=id,name,mimeType,trashed",{headers:{Authorization:"Bearer "+token,Accept:"application/json"}});
+ if(!response.ok){
+  if(response.status===403||response.status===404)return null;
+  throw Error("Google Drive folder verification failed ("+response.status+").");
+ }
+ const file=await response.json();
+ return file.id===id&&!file.trashed&&file.mimeType==="application/vnd.google-apps.folder"?file:null;
+}
+
 function resetVerification(){verification="unchecked";}
 async function discover(token){
  if(lookupPromise)return lookupPromise;
@@ -32,17 +81,23 @@ async function discover(token){
   assertToken(token);
   verification="checking";
   try{
-   // Never trust a remembered folder ID until this Google token can access it.
+   // Confirm the locally remembered folder belongs to this Google account.
    if(selected){
-    const response=await fetch(DRIVE+"/"+encodeURIComponent(selected.id)+
-     "?fields=id,name,mimeType,trashed",{headers:{Authorization:"Bearer "+token,Accept:"application/json"}});
-    if(response.ok){
-     const item=await response.json();
-     if(item.id===selected.id&&item.mimeType==="application/vnd.google-apps.folder"&&!item.trashed)
-      return {status:"found",folder:saveFolder(item)};
-    }else if(response.status!==403&&response.status!==404){
-     throw Error("Could not verify existing Drive folder ("+response.status+").");
+    const old=await folderById(token,selected.id);
+    if(old){
+     const result=saveFolder(old);
+     try{await remember(token,result.id);}catch(error){/* Folder remains usable. */}
+     return {status:"found",folder:result};
     }
+   }
+   // If another device already stored a folder ID in this account, prefer it.
+   const linked=await readLink(token);
+   if(linked){
+    const folder=await folderById(token,linked.folderId);
+    if(folder)return {status:"found",folder:saveFolder(folder)};
+    verification="unavailable";
+    selected=null;
+    return {status:"unavailable",folder:null};
    }
    // drive.file reveals only folders created or explicitly opened with this app.
    // Use a unique Drive ID to identify a folder, not its display name alone.
@@ -60,7 +115,11 @@ async function discover(token){
     page=json.nextPageToken||"";
     if(++pages>10||found.length>100)throw Error("Too many matching folders to check safely.");
    }while(page);
-   if(found.length===1)return {status:"found",folder:saveFolder(found[0])};
+   if(found.length===1){
+    const result=saveFolder(found[0]);
+    try{await remember(token,result.id);}catch(error){/* Do not fail an existing folder. */}
+    return {status:"found",folder:result};
+   }
    selected=null;
    try{localStorage.removeItem(PREFIX);}catch(error){}
    verification=found.length?"multiple":"missing";
@@ -79,7 +138,10 @@ async function createFolder(token){
   JSON.stringify({name:"DK Seed Bank",mimeType:"application/vnd.google-apps.folder"}),"application/json");
  const item=await response.json();
  if(!item.id||item.mimeType!=="application/vnd.google-apps.folder")throw Error("Google did not return a new folder.");
- return {...saveFolder(item),created:true};
+ const created=saveFolder(item);
+ try{await remember(token,created.id);}
+ catch(error){/* The folder itself was created. A future scan can recover it. */}
+ return {...created,created:true};
 }
 function clearFolder(){
  selected=null;verification="unchecked";
@@ -310,5 +372,5 @@ async function mirror(token,snapshot){
  await write(token,backup,name,"application/json",target,data,await digest(data));
  return {skipped:false,photos:saved,folder:target,name:selected.name};
 }
-root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,discover,discoveryStatus,resetVerification,createFolder,clearFolder,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
+root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,discover,remember,discoveryStatus,resetVerification,createFolder,clearFolder,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
 })(window);
