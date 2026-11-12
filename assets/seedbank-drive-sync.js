@@ -8,7 +8,7 @@ const appKey="dk-seedbank-google-sync-settings-v1";
 const desktop=!!root.DKSeedBankDesktop?.googleDrive;
 // Declare desktop before calculating the requested Google scopes.
 const scope="https://www.googleapis.com/auth/drive.appdata"+
- (!desktop&&root.DKSeedBankDriveVisible?.pickerReady()?" https://www.googleapis.com/auth/drive.file":"");
+ (!desktop?" https://www.googleapis.com/auth/drive.file":"");
 const clientRx=/^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/;
 const filePrefix="dk-seedbank-sync-v1-";
 // Public application identifier, not a Google account, password or access token.
@@ -69,7 +69,7 @@ box.innerHTML='<h3 id="dkDriveTitle">Google Drive</h3>'+
 '<button type="button" id="dkDriveConnect"></button>'+
 '<button type="button" id="dkDriveNow"></button>'+
 '<button type="button" id="dkDriveDisconnect"></button></div>'+
-(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
+(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button> <button type="button" id="dkDriveCreateFolder"></button> <button type="button" id="dkDriveClearFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
 '<label class="dk-drive-auto"><input type="checkbox" id="dkDriveAuto"><span id="dkDriveAutoLabel"></span></label>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
 '<p id="dkDriveScope"></p>'+
@@ -114,6 +114,10 @@ function render(){
   const visible=root.DKSeedBankDriveVisible;
   $("dkDriveChooseFolder").textContent=t("Choose my Google Drive folder","Выбрать папку Google Диска");
   $("dkDriveChooseFolder").disabled=busy||!ready()||!visible?.pickerReady();
+  $("dkDriveCreateFolder").textContent=t("Create my DK Seed Bank folder","Создать свою папку DK Seed Bank");
+  $("dkDriveCreateFolder").disabled=busy||!ready();
+  $("dkDriveClearFolder").textContent=t("Forget selected folder","Забыть выбранную папку");
+  $("dkDriveClearFolder").disabled=busy||!visible?.folder();
   const picked=visible?.folder();
   const open=$("dkDriveOpenFolder");
   open.hidden=!picked;
@@ -124,7 +128,7 @@ function render(){
   $("dkDriveFolderState").textContent=picked?
    t("Visible photo folder: ","Папка с фотографиями: ")+picked.name:
    visible?.pickerReady()?
-    t("Choose a folder to save visible photo files. Hidden sync remains active.","Выберите папку для сохранения файлов фотографий. Скрытая синхронизация работает."):
+    t("Choose an existing folder or create a DK Seed Bank folder in your own Drive. Hidden sync remains active.","Выберите существующую папку или создайте папку DK Seed Bank в своём Диске. Скрытая синхронизация работает."):
     t("Visible folder connection is awaiting Google Picker setup by DK Softworks. Your existing photo sync still works.","Подключение видимой папки ожидает настройки Google Picker разработчиком. Текущая синхронизация фотографий работает.");
  }
  $("dkDriveState").textContent=lastStatus||(
@@ -310,6 +314,24 @@ async function disconnect(){
  }catch(error){lastStatus=t("Could not disconnect: ","Не удалось отключить: ")+error.message;}
  finally{busy=false;render();}
 }
+if(!desktop)$("dkDriveCreateFolder").addEventListener("click",async event=>{
+ event.preventDefault();event.stopPropagation();
+ if(busy||!ready())return;
+ busy=true;lastStatus=t("Creating a folder in your Google Drive…","Создаём папку в Google Диске…");render();
+ try{
+  const created=await root.DKSeedBankDriveVisible.createFolder(token);
+  lastStatus=t("Folder created in your Drive: ","Папка создана в вашем Диске: ")+created.name+
+   t(". Select Sync now to copy your photos and backup.",". Нажмите «Синхронизировать сейчас», чтобы сохранить фото и копию.");
+ }catch(error){lastStatus=t("Could not create folder: ","Не удалось создать папку: ")+error.message;}
+ finally{busy=false;render();}
+});
+if(!desktop)$("dkDriveClearFolder").addEventListener("click",event=>{
+ event.preventDefault();event.stopPropagation();
+ if(busy)return;
+ root.DKSeedBankDriveVisible.clearFolder();
+ lastStatus=t("Folder choice cleared. Drive files were not deleted.","Выбранная папка забыта. Файлы на Диске не удалены.");
+ render();
+});
 if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async event=>{
  event.preventDefault();
  event.stopPropagation();

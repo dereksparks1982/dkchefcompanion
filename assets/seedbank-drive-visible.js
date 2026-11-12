@@ -22,6 +22,18 @@ function saveFolder(pick){
  localStorage.setItem(PREFIX,JSON.stringify(selected));
  return selected;
 }
+async function createFolder(token){
+ // A dedicated folder created in the user's own Google Drive. No pre-set folder IDs.
+ const response=await request(token,DRIVE+"?fields=id,name,mimeType","POST",
+  JSON.stringify({name:"DK Seed Bank",mimeType:"application/vnd.google-apps.folder"}),"application/json");
+ const result=await response.json();
+ if(!result.id||result.mimeType!=="application/vnd.google-apps.folder")throw Error("Google did not return a new folder.");
+ return saveFolder(result);
+}
+function clearFolder(){
+ selected=null;
+ try{localStorage.removeItem(PREFIX);}catch(e){}
+}
 function loadPicker(){
  return new Promise((resolve,reject)=>{
   if(root.google?.picker){resolve();return;}
@@ -56,6 +68,9 @@ async function choose(token){
  const close=document.createElement("button");
  close.type="button";close.className="dk-drive-picker-close";
  close.textContent=lang("Close","Закрыть");
+ const create=document.createElement("button");
+ create.type="button";create.className="dk-drive-picker-close";
+ create.textContent=lang("Create my DK Seed Bank folder instead","Создать свою папку DK Seed Bank");
  const retry=document.createElement("button");
  retry.type="button";retry.className="dk-drive-picker-close";
  retry.disabled=true;
@@ -69,7 +84,7 @@ async function choose(token){
  frame.title=lang("Google Drive folder selection","Выбор папки Google Диска");
  frame.referrerPolicy="strict-origin-when-cross-origin";
  frame.setAttribute("allow","clipboard-read; clipboard-write");
- bar.append(heading,retry,close);
+ bar.append(heading,retry,create,close);
  dialog.append(bar,message,frame);
  overlay.appendChild(dialog);
  document.body.appendChild(overlay);
@@ -88,6 +103,12 @@ async function choose(token){
    return true;
   };
   const endPick=value=>{if(clean())resolve(value);};
+  create.addEventListener("click",async()=>{
+   create.disabled=true;
+   message.textContent=lang("Creating a folder in your own Google Drive…","Создаём папку в вашем Google Диске…");
+   try{endPick(await createFolder(token));}
+   catch(error){fail(error);create.disabled=false;}
+  });
   const fail=error=>{
    // Keep a clear failure message visible instead of an invisible picker.
    message.textContent=lang("Google folder picker could not open: ","Не удалось открыть выбор папки: ")+error.message;
@@ -97,13 +118,15 @@ async function choose(token){
   function onKey(event){if(event.key==="Escape"){event.preventDefault();endPick(null);}}
   document.addEventListener("keydown",onKey);
   close.addEventListener("click",()=>endPick(null));
+  let pickerUrl="";
   retry.addEventListener("click",()=>{
-   if(!frame.src)return;
+   if(!pickerUrl)return;
    frame.hidden=false;
    message.textContent=lang("Retrying Google Drive folders after permission changes…",
     "Повторная загрузка папок Google Диска после изменения разрешений…");
    // The embedded Google account iframe may need reloading after cookies are allowed.
-   frame.src=frame.src;
+   frame.src="about:blank";
+   setTimeout(()=>{if(!done)frame.src=pickerUrl;},120);
   });
   // PickerBuilder.toUri() is Google's documented iframe embedding API.
   // The embedded dialog does not depend on Google positioning a modal.
@@ -131,13 +154,13 @@ async function choose(token){
       else if(data?.action===gp.Action.ERROR)fail(Error("Google Picker returned an error. Check third-party content blocking."));
      });
     if(typeof builder.toUri!=="function")throw Error("This Google Picker cannot be embedded.");
-    const pickerUrl=builder.toUri().toString();
+    pickerUrl=builder.toUri().toString();
     if(!/^https:\/\//.test(pickerUrl))throw Error("Google returned an invalid folder picker address.");
     frame.src=pickerUrl;
     retry.disabled=false;
     message.textContent=lang(
-     "Select your folder. If Google denies access after you allow cookies, press Retry folders once.",
-     "Выберите папку. Если после разрешения файлов cookie Google отказывает в доступе, нажмите «Повторить загрузку».");
+     "Select a folder or create a DK Seed Bank folder in your Drive if Google denies access.",
+     "Выберите папку или создайте папку DK Seed Bank, если Google отказывает в доступе.");
    }catch(error){fail(error);}
   }).catch(error=>{if(!done)fail(error);});
  });
@@ -235,5 +258,5 @@ async function mirror(token,snapshot){
  await write(token,backup,name,"application/json",target,data,await digest(data));
  return {skipped:false,photos:saved,folder:target,name:selected.name};
 }
-root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
+root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,createFolder,clearFolder,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
 })(window);
