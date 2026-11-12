@@ -20,10 +20,23 @@ choose **Sync now** or opt into automatic synchronization while the app is open.
   clearly asks for permission before connecting, and `Sync now` transfers data to
   the account you authorized.
 
-## Connect Google Drive on the website (English and Russian)
+## Sync & Backup on the website (English and Russian)
+
+The former **Google Drive sync** and **Backups and offline readiness** accordions
+are combined into one **☁ Sync & Backup** section. This section contains Google
+Drive connection, folder photo export, full local backup download/restore/validation,
+protect-browser-storage and offline photo caching. The offline readiness indicator
+also appears here. No data formats or account destinations change as a result.
+
+The folder selection window is embedded in a fixed dialog in the web app using
+Google Picker's documented `PickerBuilder.toUri()` method, avoiding Google's
+standard dialog scrolling the long seed list. The dialog has a visible **Close**
+button and can be dismissed by pressing Escape. A failed picker load is displayed
+in the dialog instead of silently moving the page.
+
 
 1. Open [DK Seed Bank](https://dereksparks1982.github.io/seedrepo/) on your device.
-2. Open **Google Drive sync** and select **Connect my Google Drive**.
+2. Open **Sync & Backup → Google Drive synchronization** and select **Connect my Google Drive**.
 3. Pick your own Google account in Google's sign-in window and approve the requested access.
 4. Select **Sync now** to merge the device's records with that account's hidden DK Seed Bank app data. Or enable optional automatic sync while the app is open.
 
@@ -62,7 +75,7 @@ Google API documentation:
 
 **No personal collection or Google account identifiers belong in the project README.**
 
-## Visible folder photo export (pending publisher setup)
+## Visible folder photo export
 
 DK Seed Bank now includes the code for a second copy of each synchronized photograph
 as a real image file in a user-selected, visible Google Drive folder, alongside the full
