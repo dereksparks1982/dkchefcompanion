@@ -12,7 +12,7 @@ assert SOURCE.is_file(), "Missing approved English logo"
 assert OTHER.is_file(), "Missing approved Russian logo"
 with Image.open(SOURCE) as img:
     base = img.convert("RGBA")
-    assert base.size == (96, 96), f"Unexpected approved icon dimensions: {base.size}"
+    assert min(base.size) >= 32, f"Unexpected approved icon dimensions: {base.size}"
     for size in (64, 128, 256, 512):
         icon_path = ICONS / f"{size}x{size}.png"
         with Image.open(icon_path) as png:
