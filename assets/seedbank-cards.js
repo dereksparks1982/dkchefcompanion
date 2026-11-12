@@ -646,7 +646,7 @@ document.getElementById("plantNow").addEventListener("click",()=>{
 const section=document.createElement("details");section.id="seedJournal";
 section.innerHTML='<summary>📔 Planting Journal · <span id="journalCount">8 recorded plantings</span></summary>'+
 '<div class="journal-body"><p class="journal-note">Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.</p>'+
-'<div class="journal-toolbar"><button class="journal-btn primary" id="addJournal" type="button">＋ Record planting</button><button class="journal-btn" id="exportJournal" type="button">↓ Export backup (with photos)</button><label class="journal-btn" style="cursor:pointer">↑ Import backup<input id="importJournal" type="file" accept="application/json,.json" hidden></label></div>'+
+'<div class="journal-toolbar"><button class="journal-btn primary" id="addJournal" type="button">＋ Record planting</button><button hidden class="journal-btn" id="exportJournal" type="button">↓ Export backup (with photos)</button><label hidden class="journal-btn" style="cursor:pointer">↑ Import backup<input id="importJournal" type="file" accept="application/json,.json" hidden></label></div>'+
 '<div class="journal-card-list" id="journalEntries"></div>'+
 '<form id="journalForm" hidden><h3 id="journalFormTitle">Record planting</h3><div class="form-grid">'+
 '<label>Plant name<input name="plant" required maxlength="100" placeholder="e.g. Basil"></label>'+
