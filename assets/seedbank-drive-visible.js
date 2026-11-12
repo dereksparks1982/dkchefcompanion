@@ -81,23 +81,25 @@ async function discover(token){
   assertToken(token);
   verification="checking";
   try{
-   // Confirm the locally remembered folder belongs to this Google account.
+   // The private account-wide link takes precedence over an old device's
+   // saved folder selection. An old device may otherwise overwrite the link.
+   const linked=await readLink(token);
+   if(linked){
+    const linkedFolder=await folderById(token,linked.folderId);
+    if(linkedFolder)return {status:"found",folder:saveFolder(linkedFolder)};
+    verification="unavailable";
+    selected=null;
+    return {status:"unavailable",folder:null};
+   }
+   // No shared link exists yet: verify this device's previous folder and
+   // register it so the next device can find the same ID.
    if(selected){
     const old=await folderById(token,selected.id);
     if(old){
      const result=saveFolder(old);
-     try{await remember(token,result.id);}catch(error){/* Folder remains usable. */}
+     try{await remember(token,result.id);}catch(error){/* Existing folder still usable. */}
      return {status:"found",folder:result};
     }
-   }
-   // If another device already stored a folder ID in this account, prefer it.
-   const linked=await readLink(token);
-   if(linked){
-    const folder=await folderById(token,linked.folderId);
-    if(folder)return {status:"found",folder:saveFolder(folder)};
-    verification="unavailable";
-    selected=null;
-    return {status:"unavailable",folder:null};
    }
    // drive.file reveals only folders created or explicitly opened with this app.
    // Use a unique Drive ID to identify a folder, not its display name alone.
