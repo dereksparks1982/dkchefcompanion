@@ -348,6 +348,7 @@ function translateText(value,el){
  const seed=el.closest(".seed"),p=seed&&core.plants().get(seed.dataset.category+"|"+seed.dataset.name);
  let out=trim;
  if(el.classList.contains("seed-name")&&seed)out=seed.dataset.ruName||seedName(seed.dataset.name,seed.dataset.category);
+ else if(el.tagName==="IMG"&&seed)out="Фото: "+(seed.dataset.ruName||seedName(seed.dataset.name,seed.dataset.category));
  else if(el.classList.contains("entry-note")&&p)out=noteFor(p);
  else if(el.classList.contains("category-name"))out=ruCategories[trim]||trim;
  else if(el.classList.contains("category-count")||el.classList.contains("stock-badge"))out=generalTranslation(trim);
@@ -391,14 +392,14 @@ function scan(root){
  const node=root.nodeType===1?root:root.parentElement;
  if(root.nodeType===3){translateNode(root);return;}
  if(!node||isOwn(node))return;
- if(node.nodeType===1){for(const a of ["placeholder","title","aria-label"])translateAttribute(node,a);}
+ if(node.nodeType===1){for(const a of ["placeholder","title","aria-label","alt"])translateAttribute(node,a);}
  const walker=document.createTreeWalker(node,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
  let current=walker.nextNode(),n=0;
  while(current){
   if(current.nodeType===3)translateNode(current);
-  else if(!isOwn(current)){for(const a of ["placeholder","title","aria-label"])translateAttribute(current,a);}
+  else if(!isOwn(current)){for(const a of ["placeholder","title","aria-label","alt"])translateAttribute(current,a);}
   n++;current=walker.nextNode();
-  if(n>35000)break;
+  if(n>250000)break;
  }
 }
 function schedule(){

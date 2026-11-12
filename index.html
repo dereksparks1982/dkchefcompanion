@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>(function(){try{if(localStorage.getItem("dk-seedbank-language-v1")==="ru")document.documentElement.lang="ru";}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="DK Seed Bank inventory. Browse 319 recorded seed entries and their planting guides, photographs, and journal.">
@@ -464,7 +465,7 @@ function normalize(value){
  .replace(/\bherbs\b/g,"herb")
  .replace(/[^a-z0-9\u0400-\u04ff]+/g," ").trim();
 }
-function searchText(el){return normalize([el.dataset.name,el.dataset.category,el.dataset.tags.replace(/\|/g," "),el.dataset.heatLevel||"",el.dataset.shuText||"","seeds varieties packets"].join(" "));}
+function searchText(el){return normalize([el.dataset.name,el.dataset.category,el.dataset.tags.replace(/\|/g," "),el.dataset.heatLevel||"",el.dataset.shuText||"",el.dataset.ruName||"",el.dataset.ruCategory||"","seeds varieties packets семена сорта пакеты"].join(" "));}
 function matchesQuery(el,terms){var txt=searchText(el);return terms.every(function(t){return txt.indexOf(t)!==-1;});}
 var searchIndex=cards.map(function(card){return{card:card,text:searchText(card)};});
 function update(){
@@ -542,5 +543,5 @@ update();
 <script defer src="assets/seedbank-recipes.js?v=20261111-recipes1"></script>
 <script defer src="assets/seedbank-watering.js?v=20261111-dkred1"></script>
 <script defer src="assets/seedbank-monastery.js?v=20261111-monastery2"></script>
-<script defer src="assets/seedbank-i18n.js?v=20261111-ru2"></script>
+<script defer src="assets/seedbank-i18n.js?v=20261111-ru3"></script>
 </body></html>
