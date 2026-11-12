@@ -137,6 +137,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Red Kidney Beans: 1 bag
 - Lima Bean Henderson: 1 packet
 - Cowpea California Blackeye: 2 packets
+- Soybean Disoy: 1 packet
+- Soybean Chiba Green: 1 packet
 
 ## Pumpkins and melons
 - Pumpkin, harvested from store pumpkin: 1 loose batch

@@ -167,3 +167,11 @@ button.purpose-tag[aria-pressed="true"]{
 
 /* Correct crop-specific squash artwork when no sourced photo is available. */
 .seed-illustration .seed-squash-svg{width:80px;height:80px;display:block;max-width:100%}
+
+/* Caution flags must explain both the danger and how to handle it. */
+.seed-caution-summary{border:1px solid #e7c4a0;border-left:4px solid #ba7835;background:#fff8ef;color:#563a26;padding:10px 12px;border-radius:9px;font-size:.78rem;line-height:1.5}
+.seed-caution-summary p{margin:0 0 7px}.seed-caution-summary p:last-child{margin-bottom:0}
+.seed-caution-summary strong{color:#80431b}
+.seed-safety-details{border:1px solid #d9ae8a;border-left:4px solid #a85c31;border-radius:9px;background:#fff8f1;padding:12px 14px;margin:10px 0;color:#4e382b;font-size:.81rem;line-height:1.5}
+.seed-safety-details h4{margin:0 0 8px;font-size:.91rem;color:#8a401d}.seed-safety-details p{margin:6px 0}.seed-safety-details .safety-ref{margin-top:11px;font-size:.76rem}
+.seed-safety-details a{color:#7a441c;text-decoration:underline;text-underline-offset:2px}

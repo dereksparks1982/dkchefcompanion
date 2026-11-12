@@ -617,7 +617,7 @@ function renderSummary(){
 function renderPlantWarnings(){
  core.plants().forEach(p=>{
   const guide=$(".plant-guide",p.card);if(!guide)return;
-  const danger=dangerFor(p),onion=onionAdvice(p);
+  const danger=$(".seed-safety-details",p.card)?"":dangerFor(p),onion=onionAdvice(p);
   let box=$(".wb-safety-guidance",guide);
   if(!danger&&!onion){if(box)box.remove();return;}
   if(!box){box=document.createElement("div");box.className="wb-safety-guidance";guide.appendChild(box);}

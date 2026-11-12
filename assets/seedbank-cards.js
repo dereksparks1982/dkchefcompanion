@@ -49,6 +49,9 @@ const guides={
  commonBean:def("1–1½ in","4–6 in for bush types","Full sun","5–10 days","65–85°F","Direct sow only after frost when soil is warm","Fertile, well-drained garden bed","Even moisture during flowering and pod set","Typically 70–110 days for mature dry beans","direct-warm","outdoor","70–110 days","Pinto and red kidney beans are Phaseolus vulgaris. Food-store bags may not be certified for planting. Red kidney beans are poisonous if raw or undercooked; boil fully using safe food-handling guidance."),
  lima:def("1–1½ in","4–6 in","Full sun","7–14 days","70–85°F","Direct sow after soil warms; avoid planting into cold wet soil","Warm well-drained garden bed, Henderson is a bush lima bean","Water regularly without waterlogging","Typically 60–80 days for fresh beans","direct-warm","outdoor","60–80 days","Henderson lima bean is Phaseolus lunatus. One commercial packet; use fully cooked beans for eating."),
  cowpea:def("1–1½ in","4–6 in","Full sun","5–10 days","70–95°F","Direct sow into warm soil after all frost danger","Sunny warm garden bed; generally drought tolerant after establishment","Regular water when establishing; moderate after","Typically 65–90 days","direct-warm","outdoor","65–90 days","California Blackeye is a cowpea (Vigna unguiculata), not an ordinary Phaseolus bean. Two packets."),
+
+ soyField:def("1–1½ in","3–6 in for field soybeans","Full sun","5–10 days","65–85°F","Direct sow after frost when soil is consistently warm","Fertile, well-drained outdoor garden soil","Keep consistently moist while plants establish and pods fill","Approximately 90–120 days for mature dry grain (varies with day length and location)","direct-warm","outdoor","90–120 days","Disoy is an Iowa-developed Glycine max cultivar (USDA PI 548550). Field-type soybeans are not necessarily suitable for green edamame harvest. Soy is a major food allergen; cook beans properly before eating."),
+ soyEdamame:def("1–1½ in","4–6 in","Full sun","5–10 days","65–85°F","Direct sow after frost when soil is warm; sow in blocks for an orderly harvest","Fertile, well-drained bed with good air circulation","Regular moisture while pods form and fill","Around 82–83 days to harvest green edamame pods","direct-warm","outdoor","82–83 days","Chiba Green is a Glycine max edible green soybean (edamame). Harvest pods when plump and green; cook edamame before eating. Soy is a major food allergen."),
  generic:def("Check packet","Check species","Check packet","Varies","Varies","Follow species and packet guidance","Unknown until species is confirmed","Keep evenly moist during germination, avoid saturation","Varies","unknown","verify","Varies","General botanical guidance only; this variety needs verification."),
  tomato:def("¼ in","24–36 in","Full sun","5–10 days","75–85°F","Start indoors about 5–8 weeks before last spring frost","Warm bed or greenhouse; harden off before transplanting","Water evenly, especially during fruiting","Typically 65–90 days from transplant","indoor","protected", "65–90 days","Support vining plants; long-season cultivars often benefit from protected growing."),
  pepper:def("¼ in","12–24 in","Full sun","7–21 days","75–90°F","Start indoors about 8–10 weeks before last spring frost","Warm greenhouse or sheltered bed; transplant after soil warms","Keep consistently moist; good drainage","Roughly 60–120 days from transplant","indoor","protected","60–120 days","Very hot varieties can mature slowly; provide extra warmth in short seasons."),
@@ -97,7 +100,7 @@ function resolveGuide(name,cat){
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?guides.pumpkin:guides.melon;
  if(cat==="Gourds and squash")return n.includes("cucumber")?guides.cucumber:n.includes("loofah")?guides.tropical:guides.squash;
  if(cat==="Other vegetables")return n.includes("okra")?guides.okra:n.includes("artichoke")?guides.artichoke:guides.generic;
- if(cat==="Beans and legumes")return n.includes("njahi")?guides.njahi:n.includes("lentil")?guides.lentil:n.includes("cowpea")?guides.cowpea:n.includes("lima")?guides.lima:guides.commonBean;
+ if(cat==="Beans and legumes")return n.includes("soybean")?(n.includes("chiba")?guides.soyEdamame:guides.soyField):n.includes("njahi")?guides.njahi:n.includes("lentil")?guides.lentil:n.includes("cowpea")?guides.cowpea:n.includes("lima")?guides.lima:guides.commonBean;
  if(cat==="Trees and woody plants")return n.includes("white mulberry")?guides.mulberry:n.includes("english ivy")?guides.englishIvy:/date palm|moringa/.test(n)?guides.tropical:guides.tree;
   if(cat==="Berries and fruit")return n.includes("strawberry")?guides.strawberry:n.includes("saskatoon")?guides.serviceberry:n.includes("elderberry")?guides.elderberry:n.includes("lowbush blueberry")?guides.blueberry:n.includes("evergreen huckleberry")?guides.huckleberry:n.includes("garden huckleberry")?guides.gardenHuckleberry:guides.generic;
  if(cat==="Flowers and ornamentals")return /poppy/.test(n)?guides.poppy:guides.flower;
@@ -144,7 +147,7 @@ function wikiFor(name,cat){
  if(cat==="Roots and brassicas")return n.includes("rapini")?"Rapini":n.includes("brussels")?"Brussels sprout":n.includes("cauliflower")?"Cauliflower":n.includes("broccoli")?"Broccoli":n.includes("cabbage")?"Cabbage":n.includes("parsnip")?"Parsnip":n.includes("radish")?"Radish":n.includes("kohlrabi")?"Kohlrabi":n.includes("turnip")?"Turnip":"Beetroot";
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?"Pumpkin":n.includes("cucamelon")?"Melothria scabra":n.includes("watermelon")?"Watermelon":"Cantaloupe";
  if(cat==="Other vegetables")return n.includes("okra")?"Okra":"Artichoke";
- if(cat==="Beans and legumes")return n.includes("njahi")?"Lablab purpureus":n.includes("lentil")?"Lentil":n.includes("cowpea")?"Cowpea":n.includes("lima")?"Lima bean":"Common bean";
+ if(cat==="Beans and legumes")return n.includes("soybean")?(n.includes("chiba")?"Edamame":"Soybean"):n.includes("njahi")?"Lablab purpureus":n.includes("lentil")?"Lentil":n.includes("cowpea")?"Cowpea":n.includes("lima")?"Lima bean":"Common bean";
  if(cat==="Gourds and squash")return n.includes("cucumber")?"Cucumber":n.includes("loofah")?"Luffa aegyptiaca":n.includes("zucchini")?"Zucchini":n.includes("butternut")?"Butternut squash":n.includes("delicata")?"Delicata squash":"Summer squash";
  if(cat==="Berries and fruit")return n.includes("strawberry")?"Strawberry":n.includes("serviceberry")?"Amelanchier alnifolia":n.includes("elderberry")?"Sambucus canadensis":n.includes("blueberry")?"Vaccinium angustifolium":n.includes("evergreen huckleberry")?"Vaccinium ovatum":n.includes("garden huckleberry")?"Solanum scabrum":"Berry";
   if(cat==="Trees and woody plants")return n.includes("mulberry")?"Morus alba":n.includes("english ivy")?"Hedera helix":n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
@@ -242,8 +245,136 @@ function setupDescription(profile){
  if(profile.setup==="outdoor")return "Outdoor garden possible, subject to local frost and hardiness";
  return "Confirm hardiness and protection for this species";
 }
+/* Explain every caution tag with plant-specific risks and precautions. */
+const seedCautionInfo={
+ "Red Kidney Beans": {
+  "why": "Raw or undercooked red kidney beans contain the lectin phytohaemagglutinin, which can cause severe vomiting and diarrhea.",
+  "how": "Soak dried beans for at least 5 hours, discard that water, then vigorously boil in fresh water for at least 30 minutes and cook until fully tender. Do not cook dry kidney beans only in a slow cooker.",
+  "who": "Anyone eating the beans, especially children; keep uncooked beans away from pets.",
+  "source": "https://www.fda.gov/files/food/published/Bad-Bug-Book-2nd-Edition-%28PDF%29.pdf"
+ },
+ "Boxwood": {
+  "why": "Boxwood (Buxus) contains toxic compounds in its leaves and other plant parts. Eating it can poison people or animals.",
+  "how": "Do not use any part as food or tea. Wear gardening gloves when pruning, wash hands afterward and collect clippings where pets cannot chew them.",
+  "who": "Children, dogs, cats and grazing animals.",
+  "source": "https://www.poison.org/"
+ },
+ "English Ivy": {
+  "why": "English ivy leaves and berries are poisonous if swallowed; sap and leaves can cause allergic or irritant skin reactions. It can also spread invasively.",
+  "how": "Wear gloves when harvesting leaves or pruning. Keep leaves out of mouths and away from pets. Traditional ivy-leaf cleaning preparations are NOT automatically safe for hand, face or body soap; avoid skin use without reliable safety evidence.",
+  "who": "Children, pets and anyone with sensitive skin or allergies.",
+  "source": "https://www.poison.org/"
+ },
+ "American Elderberry": {
+  "why": "Leaves, stems, roots and unripe elderberries can contain cyanogenic compounds, and even raw ripe berries can cause stomach upset.",
+  "how": "Use only correctly identified, fully ripe berries that are properly cooked, with stems and leaves removed. Do not use leaves, unripe berries or raw berry preparations as food or medicine.",
+  "who": "Anyone consuming berries, especially children and pets.",
+  "source": "https://www.poison.org/"
+ },
+ "Garden Huckleberry": {
+  "why": "Garden huckleberry is a Solanum nightshade, not a true blueberry. Green/unripe berries and leaves may contain toxic glycoalkaloids; exact species matters.",
+  "how": "Verify the packet's botanical identity. Do not eat unripe fruit, leaves or stems. If confirmed as an edible garden-huckleberry species, use fully ripe berries according to reputable cooking guidance; do not assume unidentified Solanum berries are edible.",
+  "who": "People eating the fruit, especially children; keep pets away from unknown berries.",
+  "source": "https://www.poison.org/"
+ },
+ "Pokeberry (Phytolacca americana)": {
+  "why": "Pokeweed contains toxic substances in roots, leaves, stems and berries; eating it can cause significant poisoning. Cooking does not make unidentified or improperly prepared material reliably safe.",
+  "how": "Treat it as an ornamental, not a food crop. Do not eat berries, roots or leaves or make homemade remedies. Wear gloves when removing plants and keep cut material away from children and animals.",
+  "who": "Children, pets and anyone tempted by the berries or traditional food uses.",
+  "source": "https://www.poison.org/"
+ },
+ "Afghan Poppy": {
+  "why": "The exact botanical species is unconfirmed. Some poppies contain poisonous alkaloids in milky sap and pods; the common name alone cannot establish edible or legal uses.",
+  "how": "Verify the seed packet's botanical name. Do not consume stems, green pods, latex or home extracts. Grow only after checking applicable local requirements and keep plant material away from children and pets.",
+  "who": "Anyone handling or ingesting unidentified poppy plant material, plus children and pets.",
+  "source": "https://www.poison.org/"
+ },
+ "Giant Exotic Poppy (Papaver somniferum)": {
+  "why": "Papaver somniferum green seed pods and milky latex contain potent alkaloids; ingestion or preparation of concentrated extracts can be dangerous. Local cultivation rules may apply.",
+  "how": "Do not ingest pod latex, raw pods or homemade preparations, and do not extract alkaloids. Keep plants inaccessible to children and pets; check local restrictions before growing.",
+  "who": "Children, pets and anyone handling or consuming poppy plant material.",
+  "source": "https://www.poison.org/"
+ },
+ "Lily of the Valley (Convallaria majalis)": {
+  "why": "All parts contain cardiac glycosides that can disturb heart rhythm; the red berries are especially tempting to children.",
+  "how": "Never consume any part or use it as a remedy. Wear gloves when dividing or pulling plants, clean tools and hands, and prevent access by children and pets.",
+  "who": "Children, pets and anyone who might mistake the plant for an edible green.",
+  "source": "https://www.poison.org/"
+ },
+ "Rue": {
+  "why": "Rue sap contains phototoxic compounds that can cause painful skin inflammation or blistering when exposed skin receives sunlight.",
+  "how": "Wear gloves, long sleeves and eye protection when pruning; avoid sap on skin and wash promptly if it contacts you. Keep exposed skin out of sunlight after contact. Do not ingest rue or use it as a homemade medicinal preparation.",
+  "who": "Gardeners with exposed skin, children and pregnant people considering medicinal use.",
+  "source": "https://www.poison.org/"
+ },
+ "Herb of Paris (Paris quadrifolia)": {
+  "why": "Herb of Paris (Paris quadrifolia) is poisonous; its dark berry may be mistaken for an edible woodland fruit.",
+  "how": "Never eat the berries or other parts. Label the planting clearly, wear gloves for handling, and do not leave berries where children or pets can reach them.",
+  "who": "Children, foragers and pets.",
+  "source": "https://www.poison.org/"
+ },
+ "Henbane (species unspecified)": {
+  "why": "Henbane species contain tropane alkaloids such as hyoscyamine and scopolamine. All plant parts can be highly poisonous.",
+  "how": "Never ingest, brew or use henbane as a home remedy. Wear gloves when handling, wash hands and keep the planting secure from children, pets and livestock; confirm species on the seed packet.",
+  "who": "Children, pets, livestock and anyone handling or consuming the plant.",
+  "source": "https://www.poison.org/"
+ },
+ "Foxglove (species unspecified)": {
+  "why": "Foxglove contains cardiac glycosides, including digitalis-related compounds. Eating leaves, flowers or seeds can cause life-threatening heart rhythm problems.",
+  "how": "Never consume any part or make herbal remedies. Label the plant, wear gloves for garden work, wash hands and keep children and pets away.",
+  "who": "Children, pets and anyone who could confuse leaves with an edible herb.",
+  "source": "https://www.poison.org/"
+ },
+ "Deadly Nightshade / Belladonna (Atropa belladonna)": {
+  "why": "Belladonna berries, leaves and other parts contain atropine and related tropane alkaloids. Even small ingestions can cause severe poisoning.",
+  "how": "Never eat the berries or use the plant for home medicine. Wear gloves, wash hands after contact, label clearly and grow only where children and pets cannot reach it.",
+  "who": "Children attracted to berries, pets and anyone handling or ingesting plant material.",
+  "source": "https://www.poison.org/"
+ },
+ "Virginia Gold Tobacco (Nicotiana tabacum)": {
+  "why": "Tobacco contains nicotine, which is toxic if swallowed and can be absorbed through skin, especially from wet leaves (green tobacco sickness).",
+  "how": "Wear waterproof gloves and long sleeves, especially when foliage is wet; wash after handling. Never ingest leaves or extracts, and keep seeds, leaves and curing material away from children and pets.",
+  "who": "Gardeners handling wet tobacco, children, pets and livestock.",
+  "source": "https://www.cdc.gov/niosh/"
+ }
+};
+function safetyForSeed(name,tags){
+ const flagged=String(tags||"").split("|").includes("Caution");
+ if(!flagged)return null;
+ return seedCautionInfo[name]||{
+  why:"This seed is marked Caution, but the species-specific risk has not been verified for this label.",
+  how:"Confirm the precise botanical identity and consult authoritative plant-safety instructions before eating, handling or using it medicinally. Keep it away from children and pets until identified.",
+  who:"Anyone handling or consuming a plant with an unverified identity.",
+  source:"https://www.poison.org/"
+ };
+}
+function seedSafetyBrief(safety){
+ if(!safety)return "";
+ return '<div class="seed-caution-summary" role="note"><p><strong>⚠️ Why Caution:</strong> '+esc(safety.why)+'</p>'+
+  '<p><strong>How to stay safe:</strong> '+esc(safety.how)+'</p></div>';
+}
+function seedSafetyDetails(safety){
+ if(!safety)return "";
+ return '<section class="seed-safety-details" aria-label="Plant-specific caution details">'+
+  '<h4>⚠️ Caution: what is dangerous and what to do</h4>'+
+  '<p><strong>Why:</strong> '+esc(safety.why)+'</p>'+
+  '<p><strong>How:</strong> '+esc(safety.how)+'</p>'+
+  '<p><strong>Who is at risk:</strong> '+esc(safety.who)+'</p>'+
+  '<p class="safety-ref">General safety reference: <a href="'+esc(safety.source)+'" target="_blank" rel="noopener noreferrer">View source / poison safety guidance</a></p>'+
+  '</section>';
+}
+function refreshSeedSafety(p){
+ const card=p.card,safety=safetyForSeed(p.name,card.dataset.tags);
+ const oldBrief=card.querySelector(".seed-caution-summary"),oldDetails=card.querySelector(".seed-safety-details");
+ if(oldBrief)oldBrief.remove();if(oldDetails)oldDetails.remove();
+ if(!safety)return;
+ card.querySelector(".seed-actions").insertAdjacentHTML("beforebegin",seedSafetyBrief(safety));
+ card.querySelector(".plant-links").insertAdjacentHTML("beforebegin",seedSafetyDetails(safety));
+}
+
 function tagContent(card){
  const name=card.dataset.name,cat=card.dataset.category,g=resolveGuide(name,cat);
+  const safety=safetyForSeed(name,card.dataset.tags);
  const wiki=wikiFor(name,cat), key=cat+"|"+name;
  const kind=Object.keys(guides).find(k=>guides[k]===g)||"generic";
  const wikiUrl=wiki?"https://en.wikipedia.org/wiki/"+encodeURIComponent(wiki.replace(/ /g,"_")):null;
@@ -268,7 +399,7 @@ function tagContent(card){
   (g.extra?'<p class="uncertain"><strong>Notes:</strong> '+esc(g.extra)+'</p>':'')+
   '<p class="calendar-date" data-method="'+esc(g.mode)+'">Calendar: Choose a last frost date in Growing Planner to get a suggested window.</p>'+
   '<p class="uncertain">General species or crop guidance, not a test of this seed packet. Follow a verified packet label when it differs.</p></div>'+
-  '<div class="plant-links">'+links+'</div>'+
+  seedSafetyDetails(safety)+'<div class="plant-links">'+links+'</div>'+
   '<div class="seed-photo-tools" aria-label="Your photos">'+
    '<label>📷 Add / replace plant photo<input class="upload-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace plant photo of '+esc(name)+'"></label>'+
    '<label>📦 Add / replace packet photo<input class="upload-packet-photo" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Add or replace packet photo of '+esc(name)+'"></label></div>'+
@@ -294,7 +425,7 @@ function tagContent(card){
  const nameText=top.querySelector(".seed-name").textContent;
  const replacement='<div class="seed-overview">'+thumb+'<div class="seed-text">'+existingTop+quick+'</div></div>';
  top.outerHTML=replacement;
- card.insertAdjacentHTML("beforeend",details+'<div class="seed-actions"><button class="log-planting" type="button">＋ Log planting</button><button class="manage-photos" type="button">📷 Manage photos</button></div>');
+ card.insertAdjacentHTML("beforeend",details+seedSafetyBrief(safety)+'<div class="seed-actions"><button class="log-planting" type="button">＋ Log planting</button><button class="manage-photos" type="button">📷 Manage photos</button></div>');
  card.dataset.growMode=g.mode;card.dataset.growingSetup=g.setup;card.dataset.userPhoto="no";card.dataset.guideKind=kind;
  plants.set(key,{key,name:nameText,cat,guide:g,kind,wiki,wikiUrl,card});
 }
@@ -822,7 +953,7 @@ function patchInventoryCard(key,patch){
  card.querySelector(".seed-brief").textContent=p.guide.depth+" deep · "+p.guide.light;
  const values=[p.guide.depth,p.guide.spacing,p.guide.light,p.guide.germ,p.guide.soil,p.guide.days];
  card.querySelectorAll(".plant-fact strong").forEach((node,i)=>{node.textContent=values[i];});
- refreshPhoto(p);updatePlanner();requestFiltering();syncPurposeChips();
+ refreshSeedSafety(p);refreshPhoto(p);updatePlanner();requestFiltering();syncPurposeChips();
  document.dispatchEvent(new Event("dkseedbank:inventorychange"));
  return true;
 }
