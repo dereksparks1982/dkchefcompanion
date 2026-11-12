@@ -358,7 +358,7 @@ test("planting journal rows align their tags, growing-guide headers and action a
  assert.match(read("desktop/main.cjs"),/journalGuideAlignment/);
 });
 
-test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guide independently",()=>{
+test("Garden Planner stays on top; Monastic Garden follows Recipe Guide independently",()=>{
  const monastery=read("assets/seedbank-monastery.js");
  const cards=read("assets/seedbank-cards.js");
  assert.match(monastery,/document\.getElementById\("recipeGuide"\)\.insertAdjacentElement\("afterend",guide\)/);
@@ -366,7 +366,7 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
  assert.doesNotMatch(monastery,/\(watering\|\|workbench/);
  for(const source of [read("index.html"),read("docs/index.html")]){
   assert.match(source,/<details id="recipeGuide" class="recipe-guide">/);
-  assert.match(source,/seedbank-monastery\.js\?v=20261112-titleonly2/);
+  assert.match(source,/seedbank-monastery\.js\?v=20261112-monastic1/);
   assert.match(source,/seedbank-cards\.js\?v=20261112-finaldata4/);
  }
  const worker=read("sw.js");
@@ -375,11 +375,11 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
 
 test("Monastery Garden displays title only with historical details inside",()=>{
  const monastery=read("assets/seedbank-monastery.js");
- assert.match(monastery,/<summary>🏛️ Medieval Monastery Garden<\/summary>/);
- assert.doesNotMatch(monastery,/<summary>🏛️ Medieval Monastery Garden <small>/);
+ assert.match(monastery,/<summary>🏛️ Monastic Garden<\/summary>/);
+ assert.doesNotMatch(monastery,/<summary>🏛️ Monastic Garden <small>/);
  assert.match(monastery,/Historical reference, not an endorsement/);
  for(const source of [read("index.html"),read("docs/index.html")])
-  assert.match(source,/seedbank-monastery\.js\?v=20261112-titleonly2/);
+  assert.match(source,/seedbank-monastery\.js\?v=20261112-monastic1/);
 });
 
 test("Drive reuse and timestamped private/photo backups remain independent",()=>{
@@ -421,4 +421,17 @@ test("Cloud recovery prepares journal JSON before altering IndexedDB photos",()=
   assert.ok(page.indexOf("seedbank-storage-transaction.js")<page.indexOf("seedbank-cards.js"));
  }
  assert.match(read("sw.js"),/"assets\/seedbank-storage-transaction\.js"/);
+});
+
+test("Each seed category has its own representative botanical icon before the title",()=>{
+ for(const source of [read("index.html"),read("docs/index.html")]){
+  const groups=[...source.matchAll(/<details class="category" data-category="([^"]+)"[^>]*><summary><span class="category-icon" aria-hidden="true">([^<]+)<\/span><span class="category-name">/g)];
+  assert.equal(groups.length,19);
+  assert.equal(new Set(groups.map(match=>match[2])).size,19);
+  assert.match(source,/\.category-icon\{width:36px;height:36px/);
+  assert.match(source,/seedbank-monastery\.js\?v=20261112-monastic1/);
+ }
+ const monastery=read("assets/seedbank-monastery.js");
+ assert.match(monastery,/<summary>🏛️ Monastic Garden<\/summary>/);
+ assert.doesNotMatch(monastery,/<summary>🏛️ Monastic Garden <small>/);
 });

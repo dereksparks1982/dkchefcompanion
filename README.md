@@ -12,7 +12,7 @@
 - **Planting Journal:** dated plantings, photos, notes, measurements, watering observations, and growth charts. Tracking and reminders remain optional.
 - **Sync & Backup:** full JSON backups with verification, restore controls, local/offline storage tools, and opt-in Google Drive synchronization.
 - **Recipe Guide:** personal ingredient checklists and culinary references, separate from the actual seed inventory.
-- **Medieval Monastery Garden:** a standalone historical reference section immediately below Recipe Guide, with its explanatory material inside the section. Garden Planner remains near the top.
+- **Monastic Garden:** a standalone historical reference section immediately below Recipe Guide, with its explanatory material inside the section. Garden Planner remains near the top.
 - **Seed Suppliers:** website links to established seed suppliers plus user-added favorite links. No shopping checkout or global seed-variety catalog is built into the app.
 
 ## Your data and Google Drive
@@ -49,3 +49,5 @@ This README intentionally contains **no personal seed packet lists or collection
 ### Recovery safety: browser quota / interrupted imports
 
 Google Drive sync now prepares changed local JSON records **before** its atomic IndexedDB photograph transaction. If browser quota blocks a JSON write or the photograph transaction fails, the app attempts to restore the previous JSON records and reports any rollback failure. A verified Google Drive recovery snapshot remains available. A sudden power or browser failure between different browser storage systems is not fully atomic; keep independent backups.
+
+**Botanical category icons:** every seed-category heading shows a small representative plant or crop pictogram to the left of its unchanged category name. The icons are decorative and do not identify a specific cultivar, require photo downloads, or alter any inventory record. Mobile sizes are adjusted separately. The former Medieval Monastery Garden heading has been renamed **Monastic Garden** in both English and Russian; its position and interior historical reference remain unchanged.
