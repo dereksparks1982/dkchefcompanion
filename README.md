@@ -1,7 +1,9 @@
 # DK Seed Bank
 
-DK Seed Bank is a free, browser-based seed inventory and gardening recordkeeping application by DK Softworks. It is designed for serious gardeners and preparedness-minded seed collectors, not as a game.
+DK Seed Bank is an offline-capable seed collection and gardening recordkeeping application by DK Softworks for serious gardeners and emergency preparedness, available in English and Russian. It runs in a browser or as a portable Linux desktop application.
 
-It helps you organize and search seed varieties, track packets and saved seed lots, view planting information and reference photos, plan sowing, record planting and germination, manage watering and harvest records, monitor seed viability and storage, and back up your records. The interface is available in English and Russian. After a successful online visit, the app files work offline on that device; previously viewed online photos can also remain available. Export backups regularly because browser storage can be cleared.
+Organize seed varieties, packets and saved seed lots; view planting guides and reference photos; plan sowing; record plantings, germination, watering and harvests; track storage and seed viability; and export or restore backups.
 
 **Web app:** https://dereksparks1982.github.io/seedrepo/
+
+**Standalone Linux AppImage (direct download):** https://github.com/dereksparks1982/seedrepo/releases/download/v0.9.1-linux-preview/DK-Seed-Bank-0.9.1-linux-x86_64.AppImage

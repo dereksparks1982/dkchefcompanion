@@ -1,10 +1,12 @@
 "use strict";
 const path=require("node:path");
+const fs=require("node:fs");
 const {pathToFileURL}=require("node:url");
 const {app,BrowserWindow,protocol,net,shell}=require("electron");
 const {resolveWebPath}=require("./web-path.cjs");
 
 const APP_URL="dkseed://app/index.html";
+const ICON_PATH=path.join(__dirname,"build","icons","256x256.png");
 const IS_SMOKE=process.argv.includes("--smoke-test");
 
 protocol.registerSchemesAsPrivileged([{
@@ -34,7 +36,7 @@ function createWindow(){
   backgroundColor:"#f5f7f0",
   show:false,
   autoHideMenuBar:true,
-  icon:path.join(__dirname,"build","icons","256x256.png"),
+  icon:ICON_PATH,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,devTools:!app.isPackaged}
  });
  mainWindow=window;
@@ -60,11 +62,38 @@ function createWindow(){
   window.webContents.once("did-finish-load",async()=>{
    if(finished)return;
    try{
-    const info=await window.webContents.executeJavaScript(
-      '({cards:document.querySelectorAll(".seed").length,selector:!!document.getElementById("dkLanguageSelect"),core:!!window.DKSeedBankCore,storage:typeof localStorage.getItem==="function",offline:!!document.getElementById("dkOfflineStatus")})'
-    );
-    if(info.cards!==319||!info.selector||!info.core||!info.storage||!info.offline){
-     throw new Error("Missing desktop features: "+JSON.stringify(info));
+    if(!fs.existsSync(ICON_PATH))throw new Error("Approved DK icon is missing from packaged application");
+    const info=await window.webContents.executeJavaScript(`
+      (()=>{
+        const logo=document.querySelector(".dk-logo-en");
+        const redLogo=document.querySelector(".dk-logo-ru");
+        const key="dk-seed-bank-desktop-smoke-check";
+        localStorage.setItem(key,"passed");
+        const storage=localStorage.getItem(key)==="passed";
+        localStorage.removeItem(key);
+        const i18n=window.DKSeedBankI18n;
+        const initial=i18n?.getLanguage();
+        i18n?.setLanguage("ru",false);
+        const russian=i18n?.getLanguage()==="ru"&&document.documentElement.lang==="ru";
+        i18n?.setLanguage("en",false);
+        const english=i18n?.getLanguage()==="en"&&document.documentElement.lang==="en";
+        if(initial==="ru")i18n?.setLanguage("ru",false);
+        return {
+          cards:document.querySelectorAll(".seed").length,
+          selector:!!document.getElementById("dkLanguageSelect"),
+          core:!!window.DKSeedBankCore,
+          storage,
+          offline:!!document.getElementById("dkOfflineStatus"),
+          greenLogo:logo?.getAttribute("src")==="assets/dk-seedbank-green-96.webp",
+          redLogo:redLogo?.getAttribute("src")==="assets/dk-seedbank-red-96.webp",
+          russian,english,
+          exportBackup:!!document.getElementById("exportJournal"),
+          importBackup:!!document.getElementById("importJournal")
+        };
+      })()
+    `);
+    if(Object.entries(info).some(([key,value])=>key==="cards"?value!==319:value!==true)){
+     throw new Error("Desktop smoke test failed: "+JSON.stringify(info));
     }
     console.log("DK Seed Bank desktop smoke test passed:",JSON.stringify(info));
     finished=true;app.exit(0);

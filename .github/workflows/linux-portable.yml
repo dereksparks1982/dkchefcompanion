@@ -39,6 +39,9 @@ jobs:
           for size in (64,128,256,512):
               icon.resize((size,size),Image.Resampling.LANCZOS).save(base/f"{size}x{size}.png")
           PY
+      - name: Verify generated icons match the approved DK artwork
+        run: |
+          "${RUNNER_TEMP}/dk-icon-venv/bin/python" desktop/verify-icons.py
       - name: Install packaging dependencies on the build runner only
         working-directory: desktop
         run: npm install --no-audit --no-fund
@@ -56,6 +59,10 @@ jobs:
         working-directory: desktop
         run: |
           xvfb-run -a timeout 45 ./dist/linux-unpacked/dk-seed-bank --no-sandbox --smoke-test
+      - name: Run the portable AppImage itself without FUSE on the CI runner
+        working-directory: desktop
+        run: |
+          xvfb-run -a timeout 90 env APPIMAGE_EXTRACT_AND_RUN=1 ./dist/DK-Seed-Bank-0.9.1-linux-x86_64.AppImage --no-sandbox --smoke-test
       - name: Preserve the AppImage as a build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -65,8 +72,8 @@ jobs:
       - name: Publish the portable Linux preview
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.9.0-linux-preview
-          name: DK Seed Bank 0.9.0 Linux portable preview
+          tag_name: v0.9.1-linux-preview
+          name: DK Seed Bank 0.9.1 Linux portable preview
           prerelease: true
           generate_release_notes: false
           files: desktop/dist/*.AppImage
