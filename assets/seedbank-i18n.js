@@ -77,7 +77,7 @@ const pairs=[
 ["Loading your recipe collection…","Загружаем рецепты…"],["Tap a category heading to expand or collapse it.","Нажмите на название категории, чтобы открыть или закрыть её."],
 ["Planting guide & details","Инструкция по посадке и уходу"],["Planting depth","Глубина посева"],["Plant spacing","Расстояние между растениями"],["Light","Освещение"],["Germination","Прорастание"],["Soil temperature","Температура почвы"],["Maturity / lifespan","Созревание / срок жизни"],
 ["When, where & how to plant","Когда, где и как сажать"],["When:","Когда:"],["Where:","Где:"],["For Alaska:","Для Аляски:"],["Water:","Полив:"],["Harvest:","Урожай:"],["Notes:","Примечания:"],["Calendar:","Календарь:"],["Safety:","Безопасность:"],["Why:","Причина:"],["How:","Как действовать:"],["Who is at risk:","Кому угрожает:"],["Reference:","Источник:"],
-["Choose a last frost date in Growing Planner to get a suggested window.","Укажите дату последнего заморозка в Планировщике для расчёта сроков."],
+["Choose a last frost date in Garden Planner to get a suggested window.","Укажите дату последнего заморозка в планировщике сада для расчёта сроков."],
 ["General species or crop guidance, not a test of this seed packet. Follow a verified packet label when it differs.","Это общие рекомендации для вида; сведения с подтверждённой упаковки имеют приоритет."],
 ["Add / replace plant photo","Добавить / заменить фото растения"],["Add / replace packet photo","Добавить / заменить фото упаковки"],["Plant picture web address","Ссылка на фото растения"],["Seed-packet picture web address","Ссылка на фото упаковки"],
 ["Preview plant image","Предпросмотр фото растения"],["Save plant URL","Сохранить ссылку на фото"],["Remove plant URL","Удалить ссылку на фото"],["Preview packet image","Предпросмотр фото упаковки"],["Save packet URL","Сохранить ссылку на упаковку"],["Remove packet URL","Удалить ссылку на упаковку"],
@@ -85,8 +85,8 @@ const pairs=[
 ["Record planting","Записать посадку"],["View full seed card and picture settings","Открыть карточку семян и настройки фотографий"],["Growing guide and full planting record","Инструкция по выращиванию и полная запись о посадке"],
 ["📔 Planting Journal","📔 Журнал посадок"],["Planting Journal","Журнал посадок"],["＋ Record planting","＋ Добавить посадку"],["↓ Export backup (with photos)","↓ Скачать резервную копию (с фото)"],["↑ Import backup","↑ Восстановить резервную копию"],["Record planting","Записать посадку"],["Plant name","Название растения"],["Variety (optional)","Сорт (необязательно)"],["Date planted","Дата посадки"],["Approximate time","Приблизительное время"],["Minimum seeds","Минимум семян"],["Maximum seeds","Максимум семян"],["Soaked hours","Часов замачивания"],["Medium / containers","Грунт / ёмкости"],["Location / setup","Место / условия"],["Status","Состояние"],["Date sprouted","Дата всходов"],["Germinated count","Количество проросших"],["Survived count","Количество выживших"],["Notes","Примечания"],["Cancel","Отмена"],["Save","Сохранить"],["Delete","Удалить"],["Edit","Изменить"],["Sown","Посеяно"],["Sprouted","Взошло"],["Growing","Растёт"],["Transplanted","Пересажено"],["Flowering","Цветёт"],["Harvesting","Плодоношение"],["Finished","Завершено"],["Failed","Не удалось"],
 ["Planted:","Посажено:"],["Quantity:","Количество:"],["Variety:","Сорт:"],["Method:","Способ:"],["Sprouted:","Взошло:"],["Germinated:","Проросло:"],["Survived:","Выжило:"],["Location:","Место:"],["Planting observations and progress","Наблюдения за посадкой"],
-["🌱 Growing Planner","🌱 Планировщик выращивания"],["Growing Planner","Планировщик выращивания"],["Growing region","Регион выращивания"],["Growing setup","Условия выращивания"],["Last spring frost","Последний весенний заморозок"],
-["🪴 Garden Workbench","🪴 Учёт садовых работ"],["Garden Workbench","Учёт садовых работ"],["Edit inventory · planting calendar · beds · harvests · seed saving · labels","Редактирование коллекции · календарь · грядки · урожай · заготовка семян · этикетки"],
+["🌱 Garden Planner","🌱 Планировщик сада"],["Garden Planner","Планировщик сада"],["Growing region","Регион выращивания"],["Growing setup","Условия выращивания"],["Last spring frost","Последний весенний заморозок"],
+["Garden management tools","Инструменты планирования сада"],["☁ Sync & Backup","☁ Синхронизация и резервные копии"],
 ["＋ Add or edit seeds","＋ Добавить или изменить семена"],["📅 This month","📅 Этот месяц"],["▦ Garden beds","▦ Грядки"],["↓ Backup","↓ Резервная копия"],["💧 Watering manager","💧 Учёт полива"],
 ["🌱 Inventory editor and seed lots","🌱 Редактор коллекции и партий семян"],["Add a seed variety","Добавить разновидность семян"],["Variety or seed name","Название сорта или семян"],["Packets / lots owned","Имеется пакетов / партий"],["Color-coded roles","Назначения по цветам"],["Add to Seed Bank","Добавить в коллекцию"],["Edit a seed already in your collection","Изменить уже записанные семена"],["Seed entry","Запись о семенах"],["Seed name","Название семян"],["Packets / lots","Пакеты / партии"],["Source","Источник"],["Archive / hide this entry","Архивировать / скрыть запись"],["Purpose labels","Назначения"],["Save seed changes","Сохранить изменения"],["Record a packet or seed lot","Записать пакет или партию семян"],["Seed lot / packet label","Обозначение партии / пакета"],["Year packed / harvested","Год фасовки / сбора"],["Known seeds in lot","Количество семян в партии"],["Storage place","Место хранения"],["Supplier","Поставщик"],["Add seed lot","Добавить партию"],["Seed variety","Сорт семян"],
 ["📅 Monthly planting assistant and succession reminders","📅 Месячный календарь посевов и повторные посадки"],["Month","Месяц"],["See this month","Показать месяц"],["Change frost date","Изменить дату заморозка"],["Succession-sowing reminder","Напоминание о повторном посеве"],["Start date","Дата начала"],["Repeat every (days)","Повторять каждые (дней)"],["Planned sowings","Количество посевов"],["Schedule repeat sowings","Запланировать повторные посевы"],
@@ -114,6 +114,12 @@ for(const [en,ru] of Object.entries(ruRoles))pairs.push([en,ru]);
 const dictionary=new Map(pairs);
 // Pepper heat explanations, source labels, help text and units must localize as complete strings.
 for(const [en,ru] of Object.entries({
+"Edit your garden records, plan sowing, track harvests, and save seed lots. For cloud synchronization or downloadable backups, open Sync & Backup below.":"Редактируйте записи о саде, планируйте посевы, учитывайте урожай и собранные семена. Для синхронизации с облаком или скачивания копий откройте ниже раздел «Синхронизация и резервные копии».",
+"Calendar dates are approximations based on your last frost date in Garden Planner, not local weather forecasts or packet-specific guarantees.":"Даты в календаре приблизительны и основаны на указанной дате последних заморозков, а не на прогнозе погоды или гарантиях для конкретного сорта.",
+"Set your actual last spring frost date in Garden Planner first. Region alone is not accurate enough for a planting calendar.":"Сначала укажите дату последних весенних заморозков в планировщике сада. Одного региона недостаточно для точного календаря.",
+"Set a last spring frost date in Garden Planner for estimated planting windows.":"Укажите дату последних весенних заморозков в планировщике сада, чтобы рассчитать примерные сроки посева.",
+"No matching seed variety is currently listed. You can add one in Garden Planner, but this journal record is preserved.":"Подходящий сорт семян не найден. Его можно добавить в планировщике сада; запись журнала сохранится.",
+
   "🌶 Scoville Heat Units (SHU)": "🌶 Шкала остроты Сковилла",
   "Scoville Heat Units": "Единицы остроты по шкале Сковилла",
   "SHU": "ед. Сковилла",
@@ -173,8 +179,8 @@ function ruCount(n,one,few,many){
 }
 const dkDynamicRules=[
  [/Planting Journal/gi,"Журнал посадок"],
- [/Growing Planner/gi,"Планировщик выращивания"],
- [/Garden Workbench/gi,"Учёт садовых работ"],
+ [/Garden Planner/gi,"Планировщик сада"],
+ [/Growing Planner/gi,"Планировщик сада"],
  [/Garden Watering Manager/gi,"Учёт полива сада"],
  [/Medieval Monastery Garden/gi,"Средневековый монастырский сад"],
  [/Recipe Guide/gi,"Сборник рецептов"],
