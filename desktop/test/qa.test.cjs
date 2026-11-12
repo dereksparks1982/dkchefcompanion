@@ -358,17 +358,17 @@ test("planting journal rows align their tags, growing-guide headers and action a
  assert.match(read("desktop/main.cjs"),/journalGuideAlignment/);
 });
 
-test("Medieval Monastery Garden is standalone below Recipe Guide and above Garden Planner",()=>{
+test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guide independently",()=>{
  const monastery=read("assets/seedbank-monastery.js");
  const cards=read("assets/seedbank-cards.js");
  assert.match(monastery,/document\.getElementById\("recipeGuide"\)\.insertAdjacentElement\("afterend",guide\)/);
- assert.match(cards,/document\.getElementById\("recipeGuide"\)\.insertAdjacentElement\("afterend",planner\)/);
+ assert.match(cards,/document\.querySelector\("\.controls"\)\.insertAdjacentElement\("afterend",planner\)/);
  assert.doesNotMatch(monastery,/\(watering\|\|workbench/);
  for(const source of [read("index.html"),read("docs/index.html")]){
   assert.match(source,/<details id="recipeGuide" class="recipe-guide">/);
   assert.match(source,/seedbank-monastery\.js\?v=20261112-standalone1/);
-  assert.match(source,/seedbank-cards\.js\?v=20261112-standalone1/);
+  assert.match(source,/seedbank-cards\.js\?v=20261112-planner-top2/);
  }
  const worker=read("sw.js");
- assert.match(worker,/dk-seedbank-app-v22/);
+ assert.match(worker,/dk-seedbank-app-v23/);
 });

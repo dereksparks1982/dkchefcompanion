@@ -602,9 +602,9 @@ planner.innerHTML='<summary>🌱 Garden Planner</summary><div class="planner-bod
 '<label>Growing space<select id="envSelect"><option value="outdoors">Outdoor garden</option><option value="unheated">Unheated greenhouse</option><option value="heated">Heated greenhouse</option><option value="indoors">Indoors / grow lights</option></select></label>'+
 '<label>Expected last spring frost<input id="frostDate" type="date" aria-label="Estimated last spring frost date"></label></div><div class="journal-toolbar"><button class="journal-btn" id="plantNow" type="button">🌱 What could I plant now?</button></div><div id="plantNowResult" class="plant-now" hidden></div>'+
 '<p id="plannerNotice" role="status">Set your expected last spring frost to calculate approximate sowing windows.</p></div>';
-// Keep the top-level sections in order: Recipe Guide, Medieval Monastery Garden,
-// Garden Planner. The monastery script inserts its sibling after Recipe Guide.
-document.getElementById("recipeGuide").insertAdjacentElement("afterend",planner);
+// Garden Planner stays at the top, immediately beneath the main search controls.
+// Medieval Monastery Garden is a separate sibling beneath Recipe Guide.
+document.querySelector(".controls").insertAdjacentElement("afterend",planner);
 document.getElementById("regionSelect").value=settings.region;
 document.getElementById("envSelect").value=settings.environment;
 document.getElementById("frostDate").value=settings.lastFrost;
