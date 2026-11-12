@@ -1,7 +1,7 @@
 /* DK Seed Bank offline app shell and previously viewed external photos.
    Personal records remain in their existing browser storage. */
 "use strict";
-const APP_CACHE="dk-seedbank-app-v21";
+const APP_CACHE="dk-seedbank-app-v22";
 const IMAGE_CACHE="dk-seedbank-images-v1";
 const CACHE_PREFIX="dk-seedbank-";
 const IMAGE_LIMIT=180;

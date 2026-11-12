@@ -33,8 +33,9 @@ guide.innerHTML='<summary>🏛️ Medieval Monastery Garden <small>Historical pl
 '<p>Species and period matter: tomatoes, peppers, maize and most American squashes entered Europe after medieval times. Blue Flax is not confirmed as the linen flax (<em>Linum usitatissimum</em>) grown for fiber. Many named modern cultivars are historical <em>crop types</em> only.</p>'+
 '<p><strong>Safety:</strong> historically used medicinal plants such as henbane, belladonna and foxglove can be poisonous. Historical use never implies safety or edible status.</p>'+
 '<p class="monastery-sources">Sources: <a href="https://www.medievalists.net/2022/01/ST-GALL-PLAN-MEDIEVAL-MONASTERIES/" target="_blank" rel="noopener noreferrer">Plan of Saint Gall</a> · <a href="https://etheses.dur.ac.uk/1311/1/1311.pdf" target="_blank" rel="noopener noreferrer">Research on medieval monastic herb and kitchen gardens</a> · <a href="https://plants.ces.ncsu.edu/plants/linum-lewisii/common-name/blue-flax/" target="_blank" rel="noopener noreferrer">Blue flax identification</a></p></div>';
-const watering=document.getElementById("waterManager"),workbench=document.getElementById("seedWorkbench");
-(watering||workbench||document.querySelector(".controls")).insertAdjacentElement("afterend",guide);
+// Medieval Monastery Garden is a standalone section directly below Recipe Guide.
+// Never insert this reference panel inside Garden Planner or any planner subpanel.
+document.getElementById("recipeGuide").insertAdjacentElement("afterend",guide);
 update();
 const count={historical:0,later:0,unverified:0};
 core.plants().forEach(p=>{if(p.card.dataset.archived!=="yes")count[p.card.dataset.monastery]++;});
