@@ -126,3 +126,9 @@ and select both of those APIs under **API restrictions**. Retain the website
 restrictions for `https://dereksparks1982.github.io/*` and
 `https://docs.google.com/*`. Save; do not create a replacement key or change the
 OAuth web client. These are developer-only changes, not end-user steps.
+
+## Alternative if Google Picker says Access Denied
+
+In **Sync & Backup**, use **Create my DK Seed Bank folder** to create a visible folder in the signed-in user's own Google Drive, without relying on Google Picker. Then choose **Sync now** to save photograph files and a full JSON backup in that folder. The same folder-creation option appears in the picker dialog if Google's embedded browser is denied. **Forget selected folder** clears the device selection but never deletes the folder or its files. Selecting *existing* folders still requires Google Picker to be permitted by its API key, referrer rules, OAuth project, and browser privacy settings.
+
+Google's browser-only access tokens expire. An unexpired token is retained during a page refresh, but closing a browser session or token expiry can require reconnecting. Persistent background synchronization requires a separate authorized backend or desktop OAuth flow, which this static website does not have.

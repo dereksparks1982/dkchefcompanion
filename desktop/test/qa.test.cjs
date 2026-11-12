@@ -316,9 +316,9 @@ test("growth measurement UI remains user-controlled with no forced care reminder
 test("Drive sync is included in both web editions, desktop and offline app cache",()=>{
  const html=read("index.html"),docs=read("docs/index.html"),sw=read("sw.js");
  for(const content of [html,docs]){
-  assert.match(content,/seedbank-drive-merge\.js\?v=20261112-drive1/);
-  assert.match(content,/seedbank-drive-sync\.js\?v=20261112-drive1/);
-  assert.match(content,/seedbank-drive-sync\.css\?v=20261112-drive1/);
+  assert.match(content,/seedbank-drive-merge\.js\?v=20261112-[a-z0-9-]+/);
+  assert.match(content,/seedbank-drive-sync\.js\?v=20261112-[a-z0-9-]+/);
+  assert.match(content,/seedbank-drive-sync\.css\?v=20261112-[a-z0-9-]+/);
   assert.ok(content.indexOf("seedbank-drive-sync.js")>content.indexOf("seedbank-resilience.js"));
   assert.equal((content.match(/<article class="seed"/g)||[]).length,319);
  }
