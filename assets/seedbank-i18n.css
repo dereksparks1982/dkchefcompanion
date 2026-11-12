@@ -1,0 +1,47 @@
+/* DK Softworks identity: Official DK Red #9D1F32. Russian mode only. */
+.dk-language-bar{float:right;display:flex;align-items:center;gap:9px;margin:0 0 8px 15px;flex-wrap:wrap;position:relative;z-index:4}
+.dk-language-bar label{font-size:.8rem;color:#f4f6ec;font-weight:650;margin:0}
+.dk-language-bar select{border:1px solid #ffffff6b;border-radius:9px;padding:8px 28px 8px 11px;min-height:39px;color:#173b2b;background:#fff;font:inherit;font-size:.83rem;font-weight:750;cursor:pointer}
+.dk-colour-name{font-size:.71rem;font-weight:650;color:#ffe4eb;white-space:nowrap}
+html[lang="ru"]{--dk-red:#9D1F32;--dk-red-deep:#681422;--dk-red-soft:#F8ECEF;--dk-red-mid:#B52B43;--ink:#3f222b;--muted:#715862;--line:#e6cfd5;--paper:#fbf5f6;--green:#9D1F32;--focus:#9D1F32}
+html[lang="ru"] header{background:linear-gradient(125deg,#681422,#9D1F32 63%,#b9364d)}
+html[lang="ru"] header .eyebrow{color:#ffe1e7}html[lang="ru"] header p{color:#ffedf1}
+html[lang="ru"] .stat{background:#ffffff18;border-color:#ffffff40}html[lang="ru"] .stat span{color:#ffe4ea}
+html[lang="ru"] .dk-language-bar select{border-color:#f8b6c4;color:#681422;background:#fff8fa}
+html[lang="ru"] a{color:#94233b}html[lang="ru"] header a{color:#fff}
+html[lang="ru"] :is(.btn.primary,.wb-primary,.wm-primary,.journal-btn.primary){background:#9D1F32!important;color:#fff!important;border-color:#9D1F32!important}
+html[lang="ru"] :is(.btn,.wb-quick button,.wb-inline button,.wb-form>button,.wb-small,.wm-due-row button,.wm-record-actions button,.wm-actions button,.water-guidance button){border-color:#dfb7c1;color:#7b2137;background:#fff4f6}
+html[lang="ru"] :is(.btn:hover,.wb-quick button:hover,.wm-due-row button:hover){background:#f5dfe5}
+html[lang="ru"] .category{--accent:#9D1F32!important;border-left-color:#9D1F32}
+html[lang="ru"] .category[open]>summary{background:#f9ecf0}
+html[lang="ru"] .category-icon{background:#9D1F32}
+html[lang="ru"] :is(.category-name,.chevron,.wb-inner h3,.wm-inner h3){color:#7b2034}
+html[lang="ru"] :is(#seedWorkbench,#waterManager,#monasteryGuide,.wb-panel){border-color:#e6c3cc}
+html[lang="ru"] :is(#seedWorkbench>summary,#waterManager>summary,#monasteryGuide>summary,.wb-panel>summary){background:linear-gradient(110deg,#f4dfe5,#fff1f4);color:#782336}
+html[lang="ru"] :is(.wb-panel>summary,.wb-note,.wm-intro,.wm-footnote){color:#71505b}
+html[lang="ru"] :is(.wb-summary span,.wm-summary span,.wm-selected-guide,.wm-due,.wm-record,.water-guidance,.seed-brief,.controls){background:#fff8fa;border-color:#ead2d8}
+html[lang="ru"] :is(.tag-food,.tag-culinary,.tag-pollinator,.tag-ornamental,.tag-botanical){background:#f4e2e8;color:#772538}
+html[lang="ru"] :is(.jump,.purpose-tag.is-selected){background:#f6e5ea;border-color:#bc6e80;color:#7e2138}
+html[lang="ru"] :is(.seed-details>summary,.plant-guide h4,.water-guidance h4){color:#8d2940}
+html[lang="ru"] :is(.wm-form input,.wm-form select,.wb-form input,.wb-form select,#search){border-color:#dbb8c0;background:#fff9fa}
+html[lang="ru"] :is(.wm-form input:focus,.wm-form select:focus){outline-color:#9D1F32}
+html[lang="ru"] .water-guidance{border-left-color:#9D1F32}
+html[lang="ru"] :is(.seed-safety-details,.seed-caution-summary){border-color:#bf5866}
+.monastery-guide{margin:18px 0 24px;border:1px solid #cfdfcf;border-radius:14px;background:white;overflow:hidden}
+.monastery-guide>summary{list-style:none;cursor:pointer;background:linear-gradient(120deg,#e8f2e0,#f5f9ed);font-size:1.08rem;font-weight:800;color:#284e33;padding:17px 20px}
+.monastery-guide>summary::-webkit-details-marker{display:none}.monastery-guide>summary small{display:block;font-size:.78rem;color:#68736a;font-weight:500}
+.monastery-inner{padding:17px 20px;font-size:.89rem;line-height:1.6}.monastery-inner h3{font-size:1rem;margin:9px 0}.monastery-counts{border-radius:8px;padding:10px;background:#f4f8ed;font-weight:750;font-size:.83rem}
+.monastery-sources{font-size:.8rem}.monastery-sources a{text-decoration:underline;text-underline-offset:3px}
+html[lang="ru"] .monastery-counts{background:#f9ebee}
+.dk-ru-growing,.dk-ru-water,.dk-ru-safety{font-size:.83rem;line-height:1.55}
+.dk-ru-growing{border-left:3px solid #9D1F32;padding:6px 13px;background:#fff7f8;border-radius:6px;margin:9px 0}
+.dk-ru-growing h4,.dk-ru-water h4{margin:5px 0 9px;color:#7c2134}
+.dk-ru-growing p,.dk-ru-water p,.dk-ru-safety p{margin:6px 0}
+html[lang="ru"] .plant-guide>h4,html[lang="ru"] .plant-guide>p{display:none!important}
+html[lang="ru"] .water-guidance>h4,html[lang="ru"] .water-guidance>p,html[lang="ru"] .water-guidance>button{display:none!important}
+html[lang="ru"] .seed-caution-summary>p,html[lang="ru"] .seed-safety-details>h4,html[lang="ru"] .seed-safety-details>p{display:none!important}
+html[lang="ru"] .wb-safety-guidance{display:none}
+html[lang="en"] .dk-ru-growing,html[lang="en"] .dk-ru-water,html[lang="en"] .dk-ru-safety{display:none!important}
+html[lang="ru"] .dk-ru-safety{display:block;border-left:3px solid #a22139;padding:4px 9px}
+html[lang="ru"] .seed-safety-details .dk-ru-safety{background:#fff4f6}
+@media(max-width:640px){.dk-language-bar{float:none;justify-content:flex-end;margin:0 0 13px}.dk-colour-name{width:100%;text-align:right}.monastery-inner{padding:13px}}
