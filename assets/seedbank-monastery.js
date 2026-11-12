@@ -12,7 +12,7 @@ const medievalVeg=/lettuce|chicory|cress|arugula|endive|kale|spinach|collard|cel
 function classify(p){
  const n=p.name.toLowerCase(),cat=p.cat;
  if(/blue flax|giant bamboo|unknown|unidentified|species unverified|spoken|unspecified|possibly|generic|dahlia moonflower|mache|mâche/.test(n))return "unverified";
- if(c==="Grains and grasses"&&/corn\b|amaranth|quinoa/.test(n))return "later";
+ if(cat==="Grains and grasses"&&/corn\b|amaranth|quinoa/.test(n))return "later";
  if(/corn salad|mâche/.test(n))return "unverified";
  if(/watermelon/.test(n))return "unverified";
  if(american.test(n))return "later";
