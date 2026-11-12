@@ -7,12 +7,19 @@ if(!core){return;}
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>Array.from(root.querySelectorAll(selector));
 const esc=(v)=>String(v===undefined||v===null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-const defaultState=()=>({version:2,additions:[],overrides:{},lots:[],beds:[],harvests:[],savedSeeds:[],tests:[],succession:[],reminderMonth:"",lowStock:30});
+const defaultState=()=>({version:2,additions:[],overrides:{},lots:[],beds:[],harvests:[],savedSeeds:[],tests:[],succession:[],deletedRecords:[],reminderMonth:"",lowStock:30});
 const storageKey="dk-seedbank-workbench-v2";
 let state=defaultState();
 try{const raw=JSON.parse(localStorage.getItem(storageKey)||"null");if(raw&&typeof raw==="object"&&!Array.isArray(raw))state={...state,...raw};}catch(e){}
 for(const key of ["additions","lots","beds","harvests","savedSeeds","tests","succession"]){if(!Array.isArray(state[key]))state[key]=[];}
 if(!state.overrides||typeof state.overrides!=="object"||Array.isArray(state.overrides))state.overrides={};
+if(!Array.isArray(state.deletedRecords))state.deletedRecords=[];
+const changed=()=>new Date().toISOString();
+function recordDeletion(section,id){
+ if(typeof id!=="string"||!id)return;
+ state.deletedRecords.push({section,id,deletedAt:changed()});
+ if(state.deletedRecords.length>3000)state.deletedRecords=state.deletedRecords.slice(-3000);
+}
 const allRoles=["Food crop","Culinary herb","Pollinator","Ornamental","Tree / woody","Grain","Fiber / heritage","Botanical / traditional","Caution"];
 const roleClass={"Food crop":"food","Culinary herb":"culinary","Pollinator":"pollinator","Ornamental":"ornamental","Tree / woody":"tree","Grain":"grain","Fiber / heritage":"fiber","Botanical / traditional":"botanical","Caution":"caution"};
 const statuses=["Sown","Sprouted","Growing","Transplanted","Flowering","Harvesting","Finished","Failed"];
@@ -218,7 +225,7 @@ function getRoles(form){return $$('input[name="role"]:checked',form).map(x=>x.va
 function savePatch(key,patch){
  if(!item(key))return false;
  const old=state.overrides[key]||{};
- const next={...old,...patch};
+ const next={...old,...patch,updatedAt:changed()};
  if(!core.patchInventoryCard(key,next))return false;
  state.overrides[key]=next;
  persist();renderAll();return true;
@@ -228,7 +235,7 @@ $("#wbAddSeed").addEventListener("submit",event=>{
  const name=String(values.get("name")||"").trim().slice(0,140),category=String(values.get("category")||"");
  const key=category+"|"+name;
  if(item(key)||state.additions.some(x=>x.category+"|"+x.name===key)){notice("That seed variety is already in the collection. Use Edit seed instead.");return;}
- const record={name,category,amount:Math.floor(number(values.get("amount"))),source:String(values.get("source")),tags:getRoles(f),archived:false};
+ const record={name,category,amount:Math.floor(number(values.get("amount"))),source:String(values.get("source")),tags:getRoles(f),archived:false,updatedAt:changed()};
  const newKey=core.createInventoryCard(record);
  if(!newKey){notice("Could not create that seed entry. Check the name and category.");return;}
  state.additions.push(record);persist();
@@ -242,6 +249,7 @@ customDelete.addEventListener("click",()=>{
  if(!original){notice("Built-in seed entries can be archived, not deleted. Select Archive and save.");return;}
  if(!window.confirm("Permanently remove this custom variety from this browser? Related journal and harvest records will remain as history."))return;
  state.additions=state.additions.filter(r=>r!==original);
+  recordDeletion("additions",key);
  delete state.overrides[key];
  core.deleteInventoryCard(key);
  persist();refreshSelects();renderAll();notice("Removed custom seed from inventory.");
@@ -259,7 +267,7 @@ $("#wbEditSeed").addEventListener("submit",event=>{
 $("#wbLotForm").addEventListener("submit",event=>{
  event.preventDefault();const form=event.currentTarget,v=new FormData(form),seedKey=String(v.get("seedKey")||"");
  if(!item(seedKey))return;
- state.lots.push({id:id(),seedKey,lot:String(v.get("lot")||"").slice(0,90),year:number(v.get("year"))||null,count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),supplier:String(v.get("supplier")||"").slice(0,100)});
+ state.lots.push({id:id(),updatedAt:changed(),seedKey,lot:String(v.get("lot")||"").slice(0,90),year:number(v.get("year"))||null,count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),supplier:String(v.get("supplier")||"").slice(0,100)});
  persist();form.reset();renderAll();notice("Seed lot recorded.");
 });
 function usedSeeds(key){
@@ -339,7 +347,7 @@ $("#wbSuccessionForm").elements.start.value=today();
 $("#wbSuccessionForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  if(!item(String(v.get("seedKey"))))return;
- state.succession.push({id:id(),seedKey:String(v.get("seedKey")),start:String(v.get("start")),days:Math.floor(number(v.get("days"))),times:Math.floor(number(v.get("times"))),done:[]});
+ state.succession.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),start:String(v.get("start")),days:Math.floor(number(v.get("days"))),times:Math.floor(number(v.get("times"))),done:[]});
  persist();f.reset();f.elements.start.value=today();renderAll();
 });
 function renderSuccession(){
@@ -360,14 +368,14 @@ document.addEventListener("click",event=>{
  const plan=state.succession.find(x=>x.id===button.dataset.wbSuccession);if(!plan)return;
  if(!Array.isArray(plan.done))plan.done=[];
  const i=Array.from({length:plan.times},(_,x)=>x).find(x=>!plan.done.includes(x));
- if(i===undefined)return;plan.done.push(i);persist();renderSuccession();core.logPlanting(plan.seedKey);
+ if(i===undefined)return;plan.done.push(i);plan.updatedAt=changed();persist();renderSuccession();core.logPlanting(plan.seedKey);
 });
 $("#wbTestForm").elements.date.value=today();
 $("#wbTestForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  const tested=number(v.get("tested")),sprouted=number(v.get("sprouted"));
  if(!tested||sprouted>tested){notice("The number sprouted cannot exceed the number tested.");return;}
- state.tests.push({id:id(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),tested,sprouted});
+ state.tests.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),tested,sprouted});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
 $("#wbLowStock").value=state.lowStock;
@@ -427,7 +435,7 @@ function renderViability(){
 $("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(renderViability));
 $("#wbBedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
- state.beds.push({id:id(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});
+ state.beds.push({id:id(),updatedAt:changed(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});
  persist();f.reset();renderAll();
 });
 function renderBeds(){
@@ -447,13 +455,13 @@ document.addEventListener("click",event=>{
  const btn=event.target.closest("[data-wb-assign]");if(!btn)return;
  const bed=state.beds.find(b=>b.id===btn.dataset.wbAssign),select=$('[data-wb-bed-select="'+btn.dataset.wbAssign+'"]');
  if(!bed||!select?.value||!item(select.value))return;
- bed.seedKeys??=[];if(!bed.seedKeys.includes(select.value))bed.seedKeys.push(select.value);
+ bed.seedKeys??=[];if(!bed.seedKeys.includes(select.value))bed.seedKeys.push(select.value);bed.updatedAt=changed();
  persist();renderBeds();
 });
 $("#wbHarvestForm").elements.date.value=today();
 $("#wbHarvestForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
- state.harvests.push({id:id(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),amount:number(v.get("amount")),unit:String(v.get("unit")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,240)});
+ state.harvests.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),amount:number(v.get("amount")),unit:String(v.get("unit")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,240)});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
 function renderHarvests(){
@@ -467,7 +475,7 @@ function renderHarvests(){
 $("#wbSavedForm").elements.date.value=today();
 $("#wbSavedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
- state.savedSeeds.push({id:id(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,300)});
+ state.savedSeeds.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,300)});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
 function renderSavedSeeds(){
@@ -502,6 +510,7 @@ document.addEventListener("click",event=>{
  if(!record||!["lots","beds","harvests","savedSeeds","tests","succession"].includes(list))return;
  if(!window.confirm("Remove this "+list+" record?"))return;
  state[list]=state[list].filter(x=>x.id!==btn.dataset.id);
+  recordDeletion(list,btn.dataset.id);
  persist();renderAll();
 });
 // Species-level journal illustrations are REFERENCES, never proof of the planted cultivar.
@@ -718,6 +727,8 @@ function importData(data,options={}){
   if(Array.isArray(data[key]))fresh[key]=data[key].filter(x=>x&&typeof x==="object").slice(0,3000);
  }
  if(data.overrides&&typeof data.overrides==="object"&&!Array.isArray(data.overrides))fresh.overrides=data.overrides;
+  if(Array.isArray(data.deletedRecords))fresh.deletedRecords=data.deletedRecords.filter(x=>
+   x&&typeof x.section==="string"&&typeof x.id==="string"&&typeof x.deletedAt==="string").slice(-3000);
  if(typeof data.reminderMonth==="string")fresh.reminderMonth=data.reminderMonth;
  fresh.lowStock=number(data.lowStock)||30;
  state=fresh;
