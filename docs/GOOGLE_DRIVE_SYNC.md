@@ -76,20 +76,26 @@ A user selects **Choose my Google Drive folder** and chooses an existing folder 
 Google Picker; the selected folder ID stays on that device. This does not silently grant
 other people access to the publisher's personal Drive.
 
-### One remaining publisher-only configuration
+### Google Picker integration
 
-To activate folder selection the publisher must enable **Google Picker API** in the
-same Google Cloud project as DK Seed Bank's existing web OAuth client, create a
-browser API key restricted to `https://dereksparks1982.github.io/*` and
-`https://docs.google.com/*` and restricted to **Google Picker API**, then set
-`window.DKSeedBankPickerConfig={apiKey:"<API KEY>",appId:"990130733984"}`
-in the web application before loading `seedbank-drive-visible.js`.
-The developer must also add the `https://www.googleapis.com/auth/drive.file`
-permission in the Google OAuth configuration. These values are public application
-identifiers, **never** Google passwords or tokens. Restrict the API key before
-publication. Google requires the Picker API key for selecting a pre-existing folder.
+The website's Google Picker API is enabled and a browser key is configured for
+the DK Seed Bank Google Cloud project. The key is restricted to the DK Seed Bank
+GitHub Pages origin and Google Picker API. It identifies the website and does not
+grant access to the publisher's Google account. Google account authorization is
+per user and requested through Google's own OAuth dialog.
 
-Until the publisher completes this, no visible-folder copy is uploaded. Existing
-hidden app-data synchronization is unchanged, and uploaded photos remain safe.
-Photo export is opt-in and only writes after a folder has been explicitly chosen.
-A failed visible-folder export is reported separately from successful hidden sync.
+After choosing an existing folder on the same Google account, select **Sync now**
+to save each uploaded photograph as a readable image file and create/update
+**DK Seed Bank - full backup.json** directly inside that folder. Use the
+**Open this folder in Google Drive** link to inspect them.
+
+The website asks for the `drive.file` scope in addition to `drive.appdata`.
+The Google consent page may ask users to authorize the additional permission
+when they reconnect. Publisher must keep the scopes and OAuth application status
+appropriately configured in the Google Auth Platform. While in Testing mode,
+only registered test users may connect.
+
+The original hidden app-data sync remains active whether or not a visible folder
+is selected; it is not removed or replaced. A failed visible-folder export is
+reported separately so that users can still see whether hidden sync succeeded.
+Visible photos are not exposed to other users of DK Seed Bank.
