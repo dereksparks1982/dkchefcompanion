@@ -31,6 +31,24 @@ function validate(data){
  for(const record of data.journal){
   if(!isObject(record)||typeof record.plant!=="string"||record.plant.length>300||
     typeof record.date!=="string"||record.date.length>32)throw Error("Invalid planting record in backup.");
+  if(record.growthMeasurements!=null){
+   const measurements=record.growthMeasurements;
+   if(!Array.isArray(measurements)||measurements.length>500)throw Error("Invalid growth measurements.");
+   const ids=new Set();
+   for(const measure of measurements){
+    if(!isObject(measure)||typeof measure.id!=="string"||
+      !/^[a-z0-9-]{8,80}$/.test(measure.id)||ids.has(measure.id)||
+      typeof measure.date!=="string"||!/^(19|20|21)\d\d-\d\d-\d\d$/.test(measure.date)||
+      !Number.isFinite(measure.heightCm)||measure.heightCm<0||measure.heightCm>3000||
+      !["cm","in"].includes(measure.unit)||
+      typeof measure.note!=="string"||measure.note.length>300)
+      throw Error("Invalid growth measurement in backup.");
+    const date=new Date(measure.date+"T12:00:00Z");
+    if(Number.isNaN(date.getTime())||date.toISOString().slice(0,10)!==measure.date)
+      throw Error("Invalid growth measurement date.");
+    ids.add(measure.id);
+   }
+  }
   if(record.growthPhotos!=null){
    if(typeof record.id!=="string"||record.id.length>150||
     !Array.isArray(record.growthPhotos)||record.growthPhotos.length>200)
@@ -92,6 +110,7 @@ function summarize(data){
   wateringChecks:array(data.watering?.records).length,
   uploadedPhotos:array(data.photos).length,
   growthPhotos:array(data.journal).reduce((count,entry)=>count+array(entry.growthPhotos).length,0),
+  growthMeasurements:array(data.journal).reduce((count,entry)=>count+array(entry.growthMeasurements).length,0),
   photoLinks:isObject(data.photoUrls)?Object.keys(data.photoUrls).length:0,
   exportedAt:typeof data.exportedAt==="string"?data.exportedAt:"Unknown"
  };

@@ -61,12 +61,12 @@ jobs:
           gcc -O2 -Wall -Wextra -Werror launcher.c -o "dist/linux-unpacked/DK Seed Bank"
           chmod 755 "dist/linux-unpacked/DK Seed Bank" "dist/linux-unpacked/dk-seed-bank"
           mv dist/linux-unpacked "dist/DK Seed Bank"
-          tar -C dist -czf "dist/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz" "DK Seed Bank"
+          tar -C dist -czf "dist/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz" "DK Seed Bank"
       - name: Extract as an ordinary user and launch without command-line options
         working-directory: desktop
         run: |
           mkdir -p "${RUNNER_TEMP}/dk-seed-portable-test"
-          tar -C "${RUNNER_TEMP}/dk-seed-portable-test" -xzf "dist/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz"
+          tar -C "${RUNNER_TEMP}/dk-seed-portable-test" -xzf "dist/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz"
           test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank"
           test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/dk-seed-bank"
           test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/resources/app.asar"
@@ -77,16 +77,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DK-Seed-Bank-Linux-Portable
-          path: desktop/dist/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz
+          path: desktop/dist/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz
           if-no-files-found: error
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.9.7-linux-portable
-          name: DK Seed Bank 0.9.7 Portable Linux desktop
+          tag_name: v0.9.8-linux-portable
+          name: DK Seed Bank 0.9.8 Portable Linux desktop
           prerelease: true
           generate_release_notes: false
-          files: desktop/dist/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz
+          files: desktop/dist/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz
           body: |
             Portable Linux desktop application folder for x86-64 Ubuntu and compatible systems.
             Download the tar.gz archive, extract it using Files/Archive Manager, open the DK Seed Bank folder, and double-click the executable named DK Seed Bank.

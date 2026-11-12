@@ -677,6 +677,19 @@ function updateJournalGrowth(id,photo,remove=false){
  if(!save(storageKey,updated))return false;
  journal=updated;renderJournal();return true;
 }
+function updateJournalMeasurement(id,record,remove=false){
+ const index=journal.findIndex(entry=>String(entry.id)===String(id));
+ if(index<0||!record||typeof record.id!=="string")return false;
+ const existing=Array.isArray(journal[index].growthMeasurements)?journal[index].growthMeasurements:[];
+ const found=existing.findIndex(item=>item.id===record.id);
+ if(remove&&found<0)return false;
+ if(!remove&&found<0&&existing.length>=500)return false;
+ const next=remove?existing.filter(item=>item.id!==record.id):
+  found>=0?existing.map(item=>item.id===record.id?record:item):[...existing,record];
+ const updated=journal.slice();updated[index]={...journal[index],growthMeasurements:next};
+ if(!save(storageKey,updated))return false;
+ journal=updated;renderJournal();return true;
+}
 function renderJournal(){
  const sorted=journal.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  document.getElementById("journalCount").textContent=journal.length+" recorded plantings";
@@ -738,6 +751,7 @@ journalForm.addEventListener("submit",event=>{
  if(editId){
   const previous=journal.find(x=>x.id===editId);
   if(Array.isArray(previous?.growthPhotos))item.growthPhotos=previous.growthPhotos;
+  if(Array.isArray(previous?.growthMeasurements))item.growthMeasurements=previous.growthMeasurements;
   journal=journal.map(x=>x.id===editId?item:x);
  }else journal.push(item);
  if(!save(storageKey,journal))alert("This browser blocked local storage. Export a backup to preserve your entries.");
@@ -1051,6 +1065,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
    backupLanguage("Seed lots: ","Партии семян: ")+summary.seedLots+"\n"+
    backupLanguage("Uploaded photos: ","Загруженные фотографии: ")+summary.uploadedPhotos+"\n"+
    backupLanguage("Growth photos: ","Фотографии роста: ")+summary.growthPhotos+"\n"+
+   backupLanguage("Height records: ","Измерения высоты: ")+summary.growthMeasurements+"\n"+
    (integrity.verified?backupLanguage("Integrity check passed.\n","Проверка целостности пройдена.\n"):
     backupLanguage("Older backup without a checksum.\n","Старая копия без контрольной суммы.\n"))+
    backupLanguage("A safety copy of your current records will be downloaded before restoration. Continue?",
@@ -1222,6 +1237,8 @@ window.DKSeedBankCore=Object.freeze({
  journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,guideFor:resolveGuide,setJournalSeedKey,
  addJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta),
  removeJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta,true),
+ saveJournalMeasurement:(id,record)=>updateJournalMeasurement(id,record),
+ deleteJournalMeasurement:(id,record)=>updateJournalMeasurement(id,record,true),
  patchInventoryCard,createInventoryCard,deleteInventoryCard,refreshFilters:requestFiltering,
  logPlanting:(key)=>{const p=plants.get(key);if(p)openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"});},
  showJournal:()=>{section.open=true;section.scrollIntoView({behavior:"smooth",block:"start"});},

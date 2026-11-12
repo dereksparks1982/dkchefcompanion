@@ -82,6 +82,7 @@ $("dkRecoveryVerifyInput").addEventListener("change",async event=>{
    l(" · Seed lots: "," · Партии семян: ")+report.seedLots+
    l(" · Photos: "," · Фотографии: ")+report.uploadedPhotos+
    l(" · Growth photos: "," · Фото роста: ")+report.growthPhotos+
+   l(" · Height records: "," · Измерения высоты: ")+report.growthMeasurements+
    l(". No records were changed.",". Записи не изменены.");
  }catch(error){
   photoStatus=l("Backup verification failed: ","Ошибка проверки резервной копии: ")+error.message;

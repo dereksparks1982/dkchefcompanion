@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v8/);
+ assert.match(source,/dk-seedbank-app-v9/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -101,7 +101,7 @@ test("service worker precaches the entire offline shell and uses a network timeo
 
 test("README stays concise and points at the portable Linux folder",()=>{
  const text=read("README.md");
- assert.ok(text.includes("v0.9.7-linux-portable/DK-Seed-Bank-0.9.7-Linux-x86_64.tar.gz"));
+ assert.ok(text.includes("v0.9.8-linux-portable/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz"));
  assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
  assert.ok(!text.includes("inventory/"));
  assert.ok(!text.includes(".AppImage"));
@@ -242,4 +242,72 @@ test("desktop bundle includes photo module, styles and iPhone capture fallback",
  }
  assert.ok(html.includes('capture="environment"')===false,"Camera control belongs in the runtime UI, not static HTML");
  assert.match(html,/seedbank-growth-photos\.js/);
+});
+
+
+test("growth measurement module is loaded and precached on both language versions",()=>{
+ const html=read("index.html"),mirror=read("docs/index.html"),worker=read("sw.js");
+ for(const source of [html,mirror]){
+  assert.match(source,/seedbank-growth-measurements\.css\?v=20261112-height1/);
+  assert.match(source,/seedbank-growth-measurements\.js\?v=20261112-height1/);
+  assert.ok(source.indexOf("seedbank-growth-measurements.js")>source.indexOf("seedbank-growth-photos.js"));
+  assert.equal((source.match(/<article class="seed"/g)||[]).length,319);
+ }
+ for(const file of ["seedbank-growth-measurements.js","seedbank-growth-measurements.css"]){
+  assert.match(worker,new RegExp("assets/"+file.replaceAll(".","\\.")));
+  assert.ok(fs.existsSync(path.join(bundle,"assets",file)),file+" missing from desktop");
+ }
+ assert.match(read("assets/seedbank-growth-measurements.css"),/@media\(max-width:620px\)/);
+});
+test("growth chart math uses actual dates and converts units accurately",()=>{
+ const mathWindow={};
+ const ctx={window:mathWindow,document:{getElementById:()=>null},Date,Math,Number,String,Array,Map,Set,RegExp};
+ vm.runInNewContext(read("assets/seedbank-growth-measurements.js"),ctx);
+ const math=mathWindow.DKSeedBankGrowthMath;
+ assert.equal(math.toCm(5,"in"),12.7);
+ assert.equal(math.toCm("11.4","cm"),11.4);
+ assert.equal(math.fromCm(12.7,"in"),5);
+ assert.equal(math.validDate("2026-02-30"),false);
+ assert.equal(math.validDate("2026-11-12"),true);
+ for(const height of [-1,Infinity,"",null,"xyz"])assert.throws(()=>math.toCm(height,"cm"));
+ const records=[
+  {id:"z",date:"2026-11-20",heightCm:20,unit:"cm",note:""},
+  {id:"a",date:"2026-11-12",heightCm:8,unit:"cm",note:""},
+  {id:"y",date:"2026-11-16",heightCm:15,unit:"cm",note:""}
+ ];
+ const values=math.sorted(records);
+ assert.equal(values[0].date,"2026-11-12");
+ assert.equal(values[2].date,"2026-11-20");
+ const report=math.summarize(records);
+ assert.equal(report.count,3);
+ assert.equal(report.changeCm,5);
+ assert.equal(report.totalCm,12);
+ assert.equal(report.days,4);
+ assert.equal(math.summarize([]).count,0);
+});
+test("measurement history is optional, preserved on edit, and validates backup integrity",()=>{
+ const cards=read("assets/seedbank-cards.js");
+ assert.match(cards,/item\.growthMeasurements=previous\.growthMeasurements/);
+ assert.match(cards,/saveJournalMeasurement:/);
+ assert.match(cards,/deleteJournalMeasurement:/);
+ assert.match(cards,/if\(!save\(storageKey,updated\)\)return false/);
+ const backup=browserModule("seedbank-backup-utils.js").DKSeedBankBackup;
+ const sample={id:"measure-20261112",date:"2026-11-12",heightCm:12.7,unit:"in",note:"Seedling"};
+ const old={format:"dk-seedbank-v1",journal:[{plant:"Basil",date:"2026-11-12"}]};
+ assert.equal(backup.validate(old).growthMeasurements,0);
+ const valid={format:"dk-seedbank-v1",journal:[{plant:"Basil",date:"2026-11-12",growthMeasurements:[sample]}]};
+ assert.equal(backup.validate(valid).growthMeasurements,1);
+ assert.throws(()=>backup.validate({...valid,journal:[{...valid.journal[0],growthMeasurements:[sample,sample]}]}),/Invalid growth measurement/);
+ assert.throws(()=>backup.validate({...valid,journal:[{...valid.journal[0],growthMeasurements:[{...sample,date:"2026-02-30"}]}]}),/Invalid growth measurement date/);
+ assert.throws(()=>backup.validate({...valid,journal:[{...valid.journal[0],growthMeasurements:[{...sample,heightCm:-2}]}]}),/Invalid growth measurement/);
+});
+test("growth measurement UI remains user-controlled with no forced care reminders",()=>{
+ const js=read("assets/seedbank-growth-measurements.js");
+ for(const term of ["data-measure-form","data-measure-unit","data-measure-edit","data-measure-delete","dk-measure-chart",
+  "dkseedbank:journal-rendered","Growth measurements","Измерения роста","no schedule or reminders","без расписания и напоминаний",
+  "preserveAspectRatio","polyline","aria-label","inputmode=\"decimal\""]){
+  assert.ok(js.includes(term),term+" missing");
+ }
+ assert.match(read("assets/seedbank-resilience.js"),/growthMeasurements/);
+ assert.match(read("assets/seedbank-cards.js"),/Измерения высоты/);
 });

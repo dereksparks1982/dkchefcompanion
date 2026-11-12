@@ -1,0 +1,52 @@
+/* Optional per-planting growth records and line charts, mobile-first. */
+.dk-measure{margin:12px 0 14px;border:1px solid #d3e2d3;border-radius:12px;background:#fafdfa;overflow:hidden}
+.dk-measure>summary{display:flex;align-items:center;gap:8px;min-height:46px;padding:11px 45px 11px 14px;font-size:.88rem;font-weight:800;color:#26573d;background:#edf5ed}
+.dk-measure>summary small{font-size:.72rem;font-weight:600;color:#5b7965}
+.dk-measure[open]>summary{border-bottom:1px solid #d3e2d3}
+.dk-measure-body{padding:12px 14px 15px}
+.dk-measure-guidance{font-size:.78rem;color:#5e7764;margin:0 0 12px}
+.dk-measure-form{display:grid;grid-template-columns:minmax(100px,1.1fr) minmax(90px,1fr) minmax(110px,1fr);gap:9px;align-items:end}
+.dk-measure-form label{display:flex;flex-direction:column;gap:5px;font-size:.75rem;font-weight:750;color:#3c6549;min-width:0}
+.dk-measure-form input,.dk-measure-form select,.dk-measure-chart-unit select{width:100%;min-width:0;min-height:43px;padding:8px 9px;border:1px solid #b5ccba;border-radius:8px;background:#fff;color:#20452f;font:inherit;font-size:.84rem}
+.dk-measure-form .dk-measure-note{grid-column:1/-1}
+.dk-measure-form-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+.dk-measure-form-actions button,.dk-measure-row-actions button,.dk-measure-history>button{border:1px solid #adcbb6;border-radius:8px;background:#eff8ef;color:#25543b;font-size:.79rem;font-weight:700;padding:8px 11px;min-height:38px;cursor:pointer}
+.dk-measure-form-actions .dk-measure-save{background:#296442;color:#fff;border-color:#296442}
+.dk-measure-row-actions button:last-child{background:#fff5f5;border-color:#ead3d3;color:#8a393e}
+.dk-measure-status{font-size:.8rem;color:#774b32;min-height:1px;margin:8px 0}
+.dk-measure-stats{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 10px}
+.dk-measure-stats span{background:#edf6ee;border:1px solid #d8e6d8;border-radius:8px;color:#526e59;font-size:.76rem;padding:7px 9px}
+.dk-measure-stats strong{color:#254e32;white-space:nowrap}
+.dk-measure-chart-unit{display:flex;align-items:center;gap:9px;margin:8px 0 6px;color:#44664f;font-size:.78rem;font-weight:700}
+.dk-measure-chart-unit select{width:auto;min-height:36px;min-width:100px}
+.dk-measure-chart{border:1px solid #dce8dc;border-radius:10px;padding:9px 8px;background:#fff;overflow:hidden}
+.dk-measure-chart svg{width:100%;height:auto;display:block;max-height:330px}
+.dk-measure-empty{color:#6b806b;font-size:.8rem;background:#f4f9f4;border-radius:9px;padding:15px 9px}
+.dk-measure-history{margin-top:13px}
+.dk-measure-history h5{font-size:.83rem;margin:0 0 7px;color:#28553b}
+.dk-measure-rows{display:grid;gap:5px}
+.dk-measure-row{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:8px 9px;background:#fff;border:1px solid #e2ece1;border-radius:7px;font-size:.8rem;color:#3c6248}
+.dk-measure-row>span:first-child{min-width:0;overflow-wrap:anywhere}
+.dk-measure-row strong{color:#315941}
+.dk-measure-row small{display:block;color:#5c6f5d;font-size:.75rem;margin-top:3px}
+.dk-measure-row-actions{display:flex;gap:6px;flex-shrink:0}
+.dk-measure-row-actions button{padding:6px 8px;min-height:34px}
+.dk-measure-history>button{margin:10px 0 0}
+html[lang="ru"] .dk-measure{border-color:#e8d1d7;background:#fffafb}
+html[lang="ru"] .dk-measure>summary{background:#f7eaf0;color:#853249}
+html[lang="ru"] .dk-measure-form-actions .dk-measure-save{background:#98273f;border-color:#98273f}
+html[lang="ru"] .dk-measure-chart svg polyline{stroke:#9b2b49}
+html[lang="ru"] .dk-measure-chart svg circle{fill:#9b2b49}
+@media(max-width:620px){
+ .dk-measure-body{padding:11px 10px 13px}
+ .dk-measure-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .dk-measure-form .dk-measure-note,.dk-measure-form-actions{grid-column:1/-1}
+ .dk-measure-row{align-items:flex-start;flex-direction:column}
+ .dk-measure-row-actions{align-self:flex-end}
+ .dk-measure-chart{padding:5px 3px}
+}
+@media(max-width:360px){
+ .dk-measure-form{grid-template-columns:1fr}
+ .dk-measure-form .dk-measure-note,.dk-measure-form-actions{grid-column:1}
+ .dk-measure-stats span{width:100%}
+}

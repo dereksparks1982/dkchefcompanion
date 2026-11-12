@@ -140,6 +140,40 @@ function createWindow(){
             }
           }
         }catch(error){console.error("Growth photo upload smoke failed:",error);}
+        let heightChartWorks=false;
+        try{
+          const record=window.DKSeedBankCore.journal()[0];
+          const oldIds=new Set((record.growthMeasurements||[]).map(item=>item.id));
+          try{
+            for(const [date,height,unit] of [["2026-11-12","5","in"],["2026-11-14","6","in"]]){
+              const form=document.querySelector(".journal-entry .dk-measure-form");
+              if(!form)throw Error("Measurement form missing");
+              form.elements.namedItem("date").value=date;
+              form.elements.namedItem("height").value=height;
+              form.elements.namedItem("unit").value=unit;
+              form.elements.namedItem("note").value="Smoke test";
+              form.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+            }
+            const saved=(window.DKSeedBankCore.journal().find(item=>item.id===record.id)?.growthMeasurements||[])
+              .filter(item=>!oldIds.has(item.id));
+            const chart=document.querySelector(".journal-entry .dk-measure-chart svg");
+            const text=document.querySelector(".journal-entry .dk-measure-stats");
+            const validBackup=window.DKSeedBankBackup.validate({
+              format:"dk-seedbank-v1",
+              journal:[{id:record.id,plant:record.plant,date:record.date,growthMeasurements:saved}],
+              photos:[]
+            }).growthMeasurements===2;
+            heightChartWorks=saved.length===2&&
+              saved.some(item=>Math.abs(item.heightCm-12.7)<0.001)&&
+              saved.some(item=>Math.abs(item.heightCm-15.24)<0.001)&&
+              chart?.querySelector("polyline")!==null&&
+              chart?.querySelectorAll("circle").length===2&&
+              !!text&&validBackup;
+          }finally{
+            for(const item of window.DKSeedBankCore.journal().find(x=>x.id===record.id)?.growthMeasurements||[])
+              if(!oldIds.has(item.id))window.DKSeedBankCore.deleteJournalMeasurement(record.id,item);
+          }
+        }catch(error){console.error("Height growth chart smoke failed:",error);}
         return {
           cards:document.querySelectorAll(".seed").length,
           selector:!!document.getElementById("dkLanguageSelect"),
@@ -160,6 +194,8 @@ function createWindow(){
           growthStorageAPI:!!window.DKSeedBankGrowthPhotos,
           growthJournalAPI:typeof window.DKSeedBankCore?.addJournalGrowthPhoto==="function",
           growthPhotoRoundtrip:growthUploadWorks,
+          growthMeasurementRoundtrip:heightChartWorks,
+          growthChartAPI:typeof window.DKSeedBankGrowthMath?.toCm==="function",
           exportBackup:!!document.getElementById("exportJournal"),
           importBackup:!!document.getElementById("importJournal"),
           backupValidation:!!window.DKSeedBankBackup,
