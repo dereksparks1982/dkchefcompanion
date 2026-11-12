@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v31/);
+ assert.match(source,/dk-seedbank-app-v32/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -370,7 +370,7 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
   assert.match(source,/seedbank-cards\.js\?v=20261112-finaldata4/);
  }
  const worker=read("sw.js");
- assert.match(worker,/dk-seedbank-app-v31/);
+ assert.match(worker,/dk-seedbank-app-v32/);
 });
 
 test("Monastery Garden displays title only with historical details inside",()=>{
@@ -410,4 +410,15 @@ test("Garden Planner quick-access actions use a collection selector and initiali
  assert.match(workbench,/\$\$\("\[data-wb-open\]",host\)\.forEach\(/);
  assert.doesNotMatch(workbench,/(?<!\$)\$\("\[data-wb-open\]",host\)\.forEach\(/);
  assert.match(workbench,/applyRecords\(\);refreshSelects\(\);renderAll\(\);/);
+});
+
+test("Cloud recovery prepares journal JSON before altering IndexedDB photos",()=>{
+ const source=read("assets/seedbank-cards.js");
+ assert.match(source,/transaction\.apply\(localStorage,\[/);
+ assert.match(source,/\],\(\)=>dbReplacePhotos\(media\)\)/);
+ for(const page of [read("index.html"),read("docs/index.html")]){
+  assert.match(page,/seedbank-storage-transaction\.js\?v=20261112-slice1/);
+  assert.ok(page.indexOf("seedbank-storage-transaction.js")<page.indexOf("seedbank-cards.js"));
+ }
+ assert.match(read("sw.js"),/"assets\/seedbank-storage-transaction\.js"/);
 });

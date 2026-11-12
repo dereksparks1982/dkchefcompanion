@@ -45,3 +45,7 @@ The web edition includes an offline application shell and optional offline refer
 Two-way cross-device sync, iPhone browser behavior, Google account authorization, offline recovery, and portable Linux packaging require checks in their actual environments. Source and simulated tests do not establish that every live Google account or device is working.
 
 This README intentionally contains **no personal seed packet lists or collection statistics**. Never commit private garden photographs, personal Google Drive content, access tokens, passwords, or other users' account data to this repository.
+
+### Recovery safety: browser quota / interrupted imports
+
+Google Drive sync now prepares changed local JSON records **before** its atomic IndexedDB photograph transaction. If browser quota blocks a JSON write or the photograph transaction fails, the app attempts to restore the previous JSON records and reports any rollback failure. A verified Google Drive recovery snapshot remains available. A sudden power or browser failure between different browser storage systems is not fully atomic; keep independent backups.

@@ -1246,13 +1246,19 @@ async function applySyncedBackup(data){
  for(const [key,mode] of Object.entries(data.photoPreferences||{})){
   if(names.has(key)&&["plant","packet","variety","none"].includes(mode))preferences[key]=mode;
  }
- // Commit photographs in one IndexedDB transaction, then persist each local record.
- if(!await dbReplacePhotos(media))throw Error("Unable to store synchronized photographs.");
+ // Prepare local JSON before touching photographs; preserve previous values
+ // if browser quota or an IndexedDB transaction prevents completing sync.
  const nextPhotoChanges=restorePhotoChanges(data.photoChanges);
- if(!save(storageKey,nextJournal)||!save(journalDeletesKey,nextDeletes)||
-    !save(settingsKey,nextSettings)||!save(remoteImageStorageKey,links)||
-    !save(photoPreferenceKey,preferences)||!save(photoChangesKey,nextPhotoChanges))
-  throw Error("Insufficient local storage for synchronization. Your Google Drive snapshots remain intact.");
+ const transaction=window.DKSeedBankStorageTransaction;
+ if(!transaction)throw Error("Local sync recovery helper missing. Reload the application.");
+ await transaction.apply(localStorage,[
+  [storageKey,nextJournal],
+  [journalDeletesKey,nextDeletes],
+  [settingsKey,nextSettings],
+  [remoteImageStorageKey,links],
+  [photoPreferenceKey,preferences],
+  [photoChangesKey,nextPhotoChanges]
+ ],()=>dbReplacePhotos(media));
  journal=nextJournal;journalDeletes=nextDeletes;settings=nextSettings;
  remoteImageUrls=links;photoPreferences=preferences;photoChanges=nextPhotoChanges;
  for(const url of [...userPhotos.values(),...packetPhotos.values()])URL.revokeObjectURL(url);
