@@ -35,3 +35,20 @@ test("every local asset referenced by the portable page is bundled",()=>{
   assert.ok(fs.existsSync(path.join(dir,item)),item+" is missing");
  }
 });
+
+test("generic Mint journal includes its culinary classification",()=>{
+ const source=fs.readFileSync(path.join(dir,"assets","seedbank-workbench.js"),"utf8");
+ const start=source.indexOf("function journalRoles(");
+ const end=source.indexOf("function journalEnhance(",start);
+ assert.ok(start>=0&&end>start,"Mint journal role helper missing");
+ const journalRoles=new Function("journalPlantGroup",source.slice(start,end)+"return journalRoles;")(
+  entry=>String(entry.plant||"").trim().toLowerCase()
+ );
+ const candidates=[
+  {card:{dataset:{tags:"Culinary herb|Pollinator"}}},
+  {card:{dataset:{tags:"Pollinator"}}}
+ ];
+ assert.deepEqual(journalRoles({plant:"Mint"},null,candidates),["Culinary herb","Pollinator"]);
+ assert.deepEqual(journalRoles({plant:"Oregano"},null,candidates),["Pollinator"]);
+ assert.deepEqual(journalRoles({plant:"Mint"},{card:{dataset:{tags:"Pollinator"}}},candidates),["Pollinator"]);
+});

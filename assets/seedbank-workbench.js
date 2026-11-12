@@ -539,6 +539,14 @@ function journalDetailsHTML(entry,linked,candidates,guide){
   '<h4>Growing instructions</h4>'+facts+
   (linked?'<button type="button" class="wb-small" data-wb-guide="'+esc(linked.key)+'">View full seed card and picture settings</button>':'');
 }
+function journalRoles(entry,linked,candidates){
+ const roles=linked?linked.card.dataset.tags.split("|"):
+  candidates.length?candidates.map(p=>p.card.dataset.tags.split("|")).reduce((acc,arr)=>acc.filter(role=>arr.includes(role))):
+  journalPlantGroup(entry)?["Culinary herb"]:[];
+ // A generic Mint journal entry is culinary even when its exact variety is unlinked.
+ if(!linked&&journalPlantGroup(entry)==="mint"&&!roles.includes("Culinary herb"))roles.unshift("Culinary herb");
+ return roles;
+}
 function journalEnhance(){
  const entries=core.journal().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  const cards=$$(".journal-entry",$("#journalEntries"));
@@ -546,9 +554,7 @@ function journalEnhance(){
   const entry=entries[i];if(!entry)return;
   const key=matchesName(entry),linked=key?item(key):null,candidates=journalCandidates(entry);
   const guide=journalGuide(entry,linked,candidates);
-  const roleList=linked?linked.card.dataset.tags.split("|"):
-   candidates.length?candidates.map(p=>p.card.dataset.tags.split("|")).reduce((acc,arr)=>acc.filter(role=>arr.includes(role))):
-   journalPlantGroup(entry)?["Culinary herb"]:[];
+  const roleList=journalRoles(entry,linked,candidates);
   const tags=[...new Set(roleList)].filter(r=>roleClass[r]).map(r=>
    '<button type="button" class="tag tag-'+roleClass[r]+' purpose-tag" data-purpose-tag="'+esc(r)+'" aria-pressed="false">'+esc(r)+'</button>').join("");
   const old=$(".wb-journal-overview",card);if(old)old.remove();
