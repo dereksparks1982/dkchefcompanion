@@ -372,3 +372,12 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
  const worker=read("sw.js");
  assert.match(worker,/dk-seedbank-app-v23/);
 });
+
+test("Monastery Garden displays title only with historical details inside",()=>{
+ const monastery=read("assets/seedbank-monastery.js");
+ assert.match(monastery,/<summary>🏛️ Medieval Monastery Garden<\/summary>/);
+ assert.doesNotMatch(monastery,/<summary>🏛️ Medieval Monastery Garden <small>/);
+ assert.match(monastery,/Historical reference, not an endorsement/);
+ for(const source of [read("index.html"),read("docs/index.html")])
+  assert.match(source,/seedbank-monastery\.js\?v=20261112-titleonly2/);
+});

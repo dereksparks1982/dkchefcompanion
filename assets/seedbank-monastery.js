@@ -26,7 +26,7 @@ function update(){
 }
 const guide=document.createElement("details");
 guide.id="monasteryGuide";guide.className="monastery-guide";
-guide.innerHTML='<summary>🏛️ Medieval Monastery Garden <small>Historical plant types · Saint Gall · herb garden, kitchen garden and orchard</small></summary>'+
+guide.innerHTML='<summary>🏛️ Medieval Monastery Garden</summary>'+
 '<div class="monastery-inner"><p>Historical reference, not an endorsement of ancient medicines and not proof that any modern packet or cultivar was available in the Middle Ages. The filter identifies <strong>plant types</strong> documented in pre-modern European gardening, not the age of your particular varieties.</p>'+
 '<div id="monasteryCounts" class="monastery-counts"></div>'+
 '<h3>Three parts of a monastery garden</h3><p><strong>Herbularius:</strong> medicinal and aromatic herbs such as rue, fennel, lovage, wormwood, sage and mint. <strong>Hortus:</strong> kitchen crops such as leeks, onions, parsley, cabbage and root vegetables. <strong>Orchard:</strong> fruit and nut trees and useful shrubs.</p>'+
