@@ -1,0 +1,78 @@
+name: Portable Linux AppImage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/linux-portable.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dk-seed-bank-linux-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Convert the exact DK green icon for Linux
+        run: |
+          python3 -m venv "${RUNNER_TEMP}/dk-icon-venv"
+          "${RUNNER_TEMP}/dk-icon-venv/bin/pip" install --disable-pip-version-check Pillow
+          "${RUNNER_TEMP}/dk-icon-venv/bin/python" - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          icon=Image.open("assets/dk-seedbank-green-96.webp").convert("RGBA")
+          base=Path("desktop/build/icons")
+          base.mkdir(parents=True,exist_ok=True)
+          for size in (64,128,256,512):
+              icon.resize((size,size),Image.Resampling.LANCZOS).save(base/f"{size}x{size}.png")
+          PY
+      - name: Install packaging dependencies on the build runner only
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+      - name: Check the desktop application
+        working-directory: desktop
+        run: |
+          npm run prepare:desktop
+          npm test
+      - name: Build the portable AppImage
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:linux
+      - name: Check packaged desktop startup
+        working-directory: desktop
+        run: |
+          xvfb-run -a timeout 45 ./dist/linux-unpacked/dk-seed-bank --no-sandbox --smoke-test
+      - name: Preserve the AppImage as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DK-Seed-Bank-Linux-AppImage
+          path: desktop/dist/*.AppImage
+          if-no-files-found: error
+      - name: Publish the portable Linux preview
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.9.0-linux-preview
+          name: DK Seed Bank 0.9.0 Linux portable preview
+          prerelease: true
+          generate_release_notes: false
+          files: desktop/dist/*.AppImage
+          body: |
+            Portable Linux x86-64 AppImage. No installer or manual dependency download.
+            Includes the full seed catalog and gardening tools for offline use.
+            Web-browser records are not automatically copied into the desktop app. Export a backup in the web app, then import it in the desktop app.
+            Downloaded AppImages may require a one-time "Allow executing file as program" checkbox in File Properties before double-clicking.
+            Personal desktop records remain in your Linux user profile when the AppImage is replaced.
