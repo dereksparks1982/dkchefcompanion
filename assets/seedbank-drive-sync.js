@@ -44,7 +44,7 @@ box.innerHTML='<summary>☁ Google Drive sync</summary>'+
 '<button type="button" id="dkDriveConnect"></button>'+
 '<button type="button" id="dkDriveNow"></button>'+
 '<button type="button" id="dkDriveDisconnect"></button></div>'+
-(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p></div>':'')+
+(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
 '<label class="dk-drive-auto"><input type="checkbox" id="dkDriveAuto"><span id="dkDriveAutoLabel"></span></label>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
 '<p id="dkDriveScope"></p>'+
@@ -90,6 +90,12 @@ function render(){
   $("dkDriveChooseFolder").textContent=t("Choose my Google Drive folder","Выбрать папку Google Диска");
   $("dkDriveChooseFolder").disabled=busy||!ready()||!visible?.pickerReady();
   const picked=visible?.folder();
+  const open=$("dkDriveOpenFolder");
+  open.hidden=!picked;
+  if(picked){
+   open.href="https://drive.google.com/drive/folders/"+encodeURIComponent(picked.id);
+   open.textContent=t("Open this folder in Google Drive","Открыть эту папку в Google Диске");
+  }
   $("dkDriveFolderState").textContent=picked?
    t("Visible photo folder: ","Папка с фотографиями: ")+picked.name:
    visible?.pickerReady()?
