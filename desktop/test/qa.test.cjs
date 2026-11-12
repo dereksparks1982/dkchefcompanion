@@ -370,7 +370,7 @@ test("Garden Planner stays on top; Medieval Monastery Garden follows Recipe Guid
   assert.match(source,/seedbank-cards\.js\?v=20261112-planner-top2/);
  }
  const worker=read("sw.js");
- assert.match(worker,/dk-seedbank-app-v26/);
+ assert.match(worker,/dk-seedbank-app-v27/);
 });
 
 test("Monastery Garden displays title only with historical details inside",()=>{
@@ -393,7 +393,14 @@ test("Drive reuse and timestamped private/photo backups remain independent",()=>
  assert.match(sync,/dkDriveLastVisible/);
  assert.match(sync,/saved\.lastVisibleSync=new Date\(\)\.toISOString\(\)/);
  for(const html of [read("index.html"),read("docs/index.html")]){
-  assert.match(html,/seedbank-drive-sync\.js\?v=20261112-history5/);
+  assert.match(html,/seedbank-drive-sync\.js\?v=20261112-history6/);
   assert.match(html,/seedbank-drive-visible\.js\?v=20261112-reusefolder4/);
  }
+});
+
+test("Visible backup timestamp is tied to the selected folder rather than another folder",()=>{
+ const sync=read("assets/seedbank-drive-sync.js");
+ assert.match(sync,/lastVisibleFolderId:saved\.lastVisibleFolderId\|\|""/);
+ assert.match(sync,/root\.DKSeedBankDriveVisible\?\.folder\(\)\?\.id===saved\.lastVisibleFolderId/);
+ assert.match(sync,/saved\.lastVisibleFolderId=published\.folder/);
 });
