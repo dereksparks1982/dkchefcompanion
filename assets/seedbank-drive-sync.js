@@ -69,7 +69,7 @@ box.innerHTML='<h3 id="dkDriveTitle">Google Drive</h3>'+
 '<button type="button" id="dkDriveConnect"></button>'+
 '<button type="button" id="dkDriveNow"></button>'+
 '<button type="button" id="dkDriveDisconnect"></button></div>'+
-(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button> <button type="button" id="dkDriveCreateFolder"></button> <button type="button" id="dkDriveClearFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
+(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveFindFolder"></button> <button type="button" id="dkDriveChooseFolder"></button> <button type="button" id="dkDriveCreateFolder"></button> <button type="button" id="dkDriveClearFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p><a id="dkDriveOpenFolder" target="_blank" rel="noopener noreferrer" hidden></a></div>':'')+
 '<label class="dk-drive-auto"><input type="checkbox" id="dkDriveAuto"><span id="dkDriveAutoLabel"></span></label>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
 '<p id="dkDriveScope"></p>'+
@@ -112,12 +112,17 @@ function render(){
   "Личные резервные копии хранятся в вашем аккаунте Google. При экспорте можно разрешить доступ к выбранной вами папке; доступ ко всем файлам не требуется.");
  if(!desktop){
   const visible=root.DKSeedBankDriveVisible;
+  const lookup=visible?.discoveryStatus()||"unchecked";
+  $("dkDriveFindFolder").textContent=t("Find existing folder","Найти существующую папку");
+  $("dkDriveFindFolder").disabled=busy||!ready();
   $("dkDriveChooseFolder").textContent=t("Choose my Google Drive folder","Выбрать папку Google Диска");
   $("dkDriveChooseFolder").disabled=busy||!ready()||!visible?.pickerReady();
   $("dkDriveCreateFolder").textContent=t("Create my DK Seed Bank folder","Создать свою папку DK Seed Bank");
-  $("dkDriveCreateFolder").disabled=busy||!ready();
+  $("dkDriveCreateFolder").hidden=lookup!=="missing";
+  $("dkDriveCreateFolder").disabled=busy||!ready()||lookup!=="missing";
   $("dkDriveClearFolder").textContent=t("Forget selected folder","Забыть выбранную папку");
-  $("dkDriveClearFolder").disabled=busy||!visible?.folder();
+  $("dkDriveClearFolder").hidden=lookup!=="found";
+  $("dkDriveClearFolder").disabled=busy||lookup!=="found";
   const picked=visible?.folder();
   const open=$("dkDriveOpenFolder");
   open.hidden=!picked;
@@ -126,10 +131,12 @@ function render(){
    open.textContent=t("Open this folder in Google Drive","Открыть эту папку в Google Диске");
   }
   $("dkDriveFolderState").textContent=picked?
-   t("Visible photo folder: ","Папка с фотографиями: ")+picked.name:
-   visible?.pickerReady()?
-    t("Choose an existing folder or create a DK Seed Bank folder in your own Drive. Hidden sync remains active.","Выберите существующую папку или создайте папку DK Seed Bank в своём Диске. Скрытая синхронизация работает."):
-    t("Visible folder connection is awaiting Google Picker setup by DK Softworks. Your existing photo sync still works.","Подключение видимой папки ожидает настройки Google Picker разработчиком. Текущая синхронизация фотографий работает.");
+   t("Connected to existing folder: ","Подключена существующая папка: ")+picked.name:
+   lookup==="checking"?t("Checking this account for an existing DK Seed Bank folder…","Проверяем существующую папку DK Seed Bank…"):
+   lookup==="multiple"?t("Multiple DK Seed Bank folders found. Choose the correct folder. New folder creation is blocked.","Найдено несколько папок DK Seed Bank. Выберите нужную. Создание новой заблокировано."):
+   lookup==="error"?t("Folder check failed. Retry Find existing folder; no new folder will be created.","Не удалось проверить папку. Повторите поиск. Новая папка не будет создана."):
+   lookup==="missing"?t("No DK Seed Bank folder accessible to this app was found in this account.","В этом аккаунте не найдена папка DK Seed Bank, доступная приложению."):
+   t("Connect Google Drive to locate your existing folder.","Подключите Google Диск для поиска существующей папки.");
  }
  $("dkDriveState").textContent=lastStatus||(
   connected?(ready()?t("Connected. Ready to synchronize.","Подключено. Можно синхронизировать."):
@@ -230,6 +237,10 @@ async function syncNow(){
  busy=true;lastStatus=t("Checking Drive snapshots and merging records…","Проверка файлов и объединение записей…");render();
  try{
   if(!navigator.onLine)throw Error(t("You are offline. Changes remain saved here.","Нет интернета. Изменения сохранены на устройстве."));
+  if(!desktop&&root.DKSeedBankDriveVisible){
+   try{await root.DKSeedBankDriveVisible.discover(token);}
+   catch(error){/* Hidden app-data sync still proceeds; visible export remains unverified. */}
+  }
   const before=await core.exportForSync();
   backup.validate(before);
   const files=await listFiles();
@@ -293,6 +304,12 @@ async function connect(){
   persist();connected=true;cacheSession();
   lastStatus=t("Google connected. Use Sync now to transfer records.",
    "Google подключён. Нажмите «Синхронизировать сейчас» для передачи записей.");
+  if(!desktop&&root.DKSeedBankDriveVisible){
+   try{
+    const found=await root.DKSeedBankDriveVisible.discover(token);
+    if(found.status==="found")lastStatus=t("Existing Google Drive folder reused.","Используется существующая папка Google Диска.");
+   }catch(error){lastStatus=t("Drive folder check failed: ","Ошибка проверки папки: ")+error.message;}
+  }
  }catch(error){
   if(!desktop){token="";expires=0;connected=false;cacheSession();}
   lastStatus=t("Could not connect: ","Не удалось подключиться: ")+error.message;
@@ -309,18 +326,31 @@ async function disconnect(){
     root.google.accounts.oauth2.revoke(token,()=>{});
    token="";expires=0;tokenClient=null;cacheSession();
   }
+  if(!desktop)root.DKSeedBankDriveVisible?.resetVerification();
   connected=false;lastStatus=t("Disconnected. Local planting records remain on this device.",
    "Отключено. Локальные записи растений остаются на устройстве.");
  }catch(error){lastStatus=t("Could not disconnect: ","Не удалось отключить: ")+error.message;}
  finally{busy=false;render();}
 }
+if(!desktop)$("dkDriveFindFolder").addEventListener("click",async event=>{
+ event.preventDefault();event.stopPropagation();
+ if(busy||!ready())return;
+ busy=true;lastStatus=t("Checking your existing Drive folder…","Проверяем существующую папку…");render();
+ try{
+  const found=await root.DKSeedBankDriveVisible.discover(token);
+  lastStatus=found.status==="found"?t("Existing Drive folder found and connected.","Существующая папка найдена и подключена."):
+   found.status==="multiple"?t("Multiple folders found. Choose the correct existing one.","Найдено несколько папок. Выберите нужную."):
+   t("No DK Seed Bank folder accessible to this app was found.","Приложению не удалось найти доступную папку DK Seed Bank.");
+ }catch(error){lastStatus=t("Folder check failed: ","Ошибка проверки папки: ")+error.message;}
+ finally{busy=false;render();}
+});
 if(!desktop)$("dkDriveCreateFolder").addEventListener("click",async event=>{
  event.preventDefault();event.stopPropagation();
  if(busy||!ready())return;
- busy=true;lastStatus=t("Creating a folder in your Google Drive…","Создаём папку в Google Диске…");render();
+ busy=true;lastStatus=t("Checking Drive before creating a folder…","Проверяем Google Диск перед созданием папки…");render();
  try{
   const created=await root.DKSeedBankDriveVisible.createFolder(token);
-  lastStatus=t("Folder created in your Drive: ","Папка создана в вашем Диске: ")+created.name+
+  lastStatus=t(created.created?"Folder created in your Drive: ":"Existing folder reused: ",created.created?"Папка создана в вашем Диске: ":"Используется существующая папка: ")+created.name+
    t(". Select Sync now to copy your photos and backup.",". Нажмите «Синхронизировать сейчас», чтобы сохранить фото и копию.");
  }catch(error){lastStatus=t("Could not create folder: ","Не удалось создать папку: ")+error.message;}
  finally{busy=false;render();}
@@ -366,6 +396,12 @@ if(desktop){
 }
 // Load Google's official sign-in library before the first user click.
 if(!desktop&&navigator.onLine)gis().catch(()=>{});
+// Restore folder association after a refresh with an unexpired OAuth session.
+if(!desktop&&ready()&&root.DKSeedBankDriveVisible){
+ root.DKSeedBankDriveVisible.discover(token).then(()=>render()).catch(error=>{
+  lastStatus=t("Drive folder lookup failed: ","Не удалось найти папку Google Диска: ")+error.message;render();
+ });
+}
 syncTimer=setInterval(()=>{
  if(saved.auto&&connected&&ready()&&!busy&&document.visibilityState==="visible"&&navigator.onLine)
   syncNow();
