@@ -166,8 +166,8 @@ test("all expandable headings use a right-hand chevron and have no left triangle
  assert.match(css,/rotate\(180deg\)/);
  assert.match(css,/\.seed-details\s*>\s*summary::before/);
  assert.match(css,/\.wb-journal-details\s*>\s*summary::before/);
- assert.match(html,/assets\/seedbank-chevrons\.css\?v=20261112-chevron1/);
- assert.match(mirrored,/\.\.\/assets\/seedbank-chevrons\.css\?v=20261112-chevron1/);
+ assert.match(html,/assets\/seedbank-chevrons\.css\?v=20261112-chevron2/);
+ assert.match(mirrored,/\.\.\/assets\/seedbank-chevrons\.css\?v=20261112-chevron2/);
  assert.ok(html.lastIndexOf("seedbank-chevrons.css") > html.lastIndexOf("seedbank-i18n.css"));
  assert.ok(mirrored.lastIndexOf("seedbank-chevrons.css") > mirrored.lastIndexOf("seedbank-i18n.css"));
  assert.match(worker,/"assets\/seedbank-chevrons\.css"/);
