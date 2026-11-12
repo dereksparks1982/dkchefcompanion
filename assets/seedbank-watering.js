@@ -11,10 +11,11 @@ const dateValue=s=>/^\d{4}-\d\d-\d\d$/.test(String(s))?new Date(s+"T12:00:00"):n
 const addDays=(s,n)=>{const d=dateValue(s);if(!d||Number.isNaN(d.getTime()))return "";d.setDate(d.getDate()+n);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");};
 const iso=s=>/^\d{4}-\d\d-\d\d$/.test(String(s))&&!!dateValue(s)&&!Number.isNaN(dateValue(s).getTime());
 const newId=()=>Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9);
-const defaultState=()=>({version:1,records:[],preferences:{}});
+const defaultState=()=>({version:1,records:[],preferences:{},deletedRecords:[]});
 let state=defaultState();
 try{const raw=JSON.parse(localStorage.getItem(key)||"null");if(raw&&typeof raw==="object"&&!Array.isArray(raw))state={...state,...raw};}catch(e){}
 if(!Array.isArray(state.records))state.records=[];
+if(!Array.isArray(state.deletedRecords))state.deletedRecords=[];
 if(!state.preferences||typeof state.preferences!=="object"||Array.isArray(state.preferences))state.preferences={};
 function save(){try{localStorage.setItem(key,JSON.stringify(state));return true;}catch(e){alert("Watering records could not be saved. Check browser storage and export a backup.");return false;}}
 const types={
@@ -223,8 +224,10 @@ panel.addEventListener("click",e=>{
  if(btn.hasAttribute("data-wm-remove")){
   const r=state.records.find(x=>x.id===btn.dataset.wmRemove);
   if(!r||!confirm("Delete this watering record?"))return;
-  const oldRecords=state.records;state.records=state.records.filter(x=>x.id!==r.id);
-  if(!save()){state.records=oldRecords;return;}
+  const oldRecords=state.records,oldDeletes=state.deletedRecords;
+   state.records=state.records.filter(x=>x.id!==r.id);
+   state.deletedRecords=[...state.deletedRecords,{id:r.id,deletedAt:new Date().toISOString()}].slice(-20000);
+  if(!save()){state.records=oldRecords;state.deletedRecords=oldDeletes;return;}
   if(editing===r.id)endEdit();
   renderDue();history();feed.textContent="Watering record deleted.";
  }
@@ -256,7 +259,9 @@ function importData(value){
  if(!value||typeof value!=="object"||Array.isArray(value))return false;
  const records=Array.isArray(value.records)?value.records.filter(r=>r&&typeof r.id==="string"&&typeof r.plantingId==="string"&&iso(r.date)).slice(0,20000):[];
  const preferences=value.preferences&&typeof value.preferences==="object"&&!Array.isArray(value.preferences)?value.preferences:{};
- const previous=state;state={version:1,records,preferences};
+ const deletedRecords=Array.isArray(value.deletedRecords)?value.deletedRecords.filter(x=>
+  x&&typeof x.id==="string"&&typeof x.deletedAt==="string").slice(-20000):[];
+ const previous=state;state={version:1,records,preferences,deletedRecords};
  if(!save()){state=previous;return false;}renderAll();return true;
 }
 window.DKSeedBankWatering=Object.freeze({exportData:()=>JSON.parse(JSON.stringify(state)),importData,guideFor,openFor});
