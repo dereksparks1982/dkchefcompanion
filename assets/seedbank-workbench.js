@@ -739,7 +739,7 @@ function importData(data,options={}){
  return true;
 }
 window.DKSeedBankWorkbench=Object.freeze({exportData:()=>structuredClone(state),importData});
-$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
+$$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
  const panel=document.getElementById(button.dataset.wbOpen);
  if(!panel)return;
  if(panel===document.getElementById("dkSyncBackup")){
