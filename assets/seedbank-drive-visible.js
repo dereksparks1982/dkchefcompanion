@@ -74,7 +74,7 @@ async function list(token,parent){
  const all=[];let page="";
  do{
   const p=new URLSearchParams({q:"'"+parent+"' in parents and trashed = false",
-   fields:"nextPageToken,files(id,name,mimeType,size)",pageSize:"100"});
+   fields:"nextPageToken,files(id,name,mimeType,size,description)",pageSize:"100"});
   if(page)p.set("pageToken",page);
   const json=await (await request(token,DRIVE+"?"+p)).json();
   all.push(...(json.files||[]));
@@ -88,32 +88,46 @@ async function createItem(token,name,mimeType,parent){
  return (await (await request(token,DRIVE+"?fields=id,name,mimeType","POST",
   JSON.stringify(metadata),"application/json")).json());
 }
-async function unusedCreateResumable(token,name,mimeType,parent){
- const response=await request(token,UPLOAD+"?uploadType=resumable&fields=id,name","POST",
-  JSON.stringify({name,mimeType,parents:[parent]}),"application/json; charset=UTF-8");
- const location=response.headers.get("Location");
- if(!location)throw Error("Google did not return an upload location.");
- return location;
-}
-async function write(token,existing,name,mimeType,parent,blob){
+async function write(token,existing,name,mimeType,parent,blob,digest){
  // The upload session keeps binary photo data intact.
  const url=existing?UPLOAD+"/"+encodeURIComponent(existing.id)+"?uploadType=resumable&fields=id,name":
   UPLOAD+"?uploadType=resumable&fields=id,name";
  const headers={Authorization:"Bearer "+token,"Content-Type":"application/json; charset=UTF-8",
    "X-Upload-Content-Type":mimeType,"X-Upload-Content-Length":String(blob.size)};
- const metadata=existing?{}:{name,mimeType,parents:[parent]};
+ const metadata=existing?{description:"dk-seedbank-sha256:"+digest}:{name,mimeType,parents:[parent],description:"dk-seedbank-sha256:"+digest};
  const start=await fetch(url,{method:existing?"PATCH":"POST",headers,body:JSON.stringify(metadata)});
  if(!start.ok)throw Error("Could not begin visible Drive photo upload ("+start.status+").");
  const location=start.headers.get("Location");
  if(!location)throw Error("Google did not return a photo upload location.");
- const upload=await fetch(location,{method:"PUT",headers:{"Content-Type":mimeType},body:blob});
+ const upload=await fetch(location,{method:"PUT",headers:{"Content-Type":mimeType,Authorization:"Bearer "+token},body:blob});
  if(!upload.ok)throw Error("Could not finish visible Drive photo upload ("+upload.status+").");
  return upload.json();
 }
-async function safeName(key){
- // Stable short digest avoids invalid filenames and discloses no seed names.
- const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(key));
- return "photo-"+Array.from(new Uint8Array(bytes)).map(b=>b.toString(16).padStart(2,"0")).join("")+".jpg";
+async function digest(value){
+ const bytes=typeof value==="string"?new TextEncoder().encode(value):await value.arrayBuffer();
+ const result=await crypto.subtle.digest("SHA-256",bytes);
+ return Array.from(new Uint8Array(result)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function friendlyName(snapshot,key){
+ let label="Plant photograph";
+ if(key.startsWith("journal-photo|")){
+  const parts=key.split("|");
+  let id="";
+  try{id=decodeURIComponent(parts[1]||"");}catch(e){}
+  const journal=(snapshot.journal||[]).find(entry=>entry.id===id);
+  const meta=(journal?.growthPhotos||[]).find(p=>p.id===parts[2]);
+  if(journal)label=[journal.plant||"Plant",meta?.date||journal.date||"",meta?.stage||"growth"].filter(Boolean).join(" - ");
+ }else{
+  const packet=key.endsWith("|packet");
+  const clean=packet?key.slice(0,-7):key;
+  const sep=clean.indexOf("|");
+  label=(sep>=0?clean.slice(sep+1):clean)+" - "+(packet?"seed packet":"plant");
+ }
+ return label.replace(/[\/\\<>:"|?*\u0000-\u001f]/g," ").replace(/\s+/g," ").trim().slice(0,104)||"Plant photograph";
+}
+async function photoName(snapshot,key,mime){
+ const ext=mime==="image/jpeg"?"jpg":mime==="image/png"?"png":"webp";
+ return friendlyName(snapshot,key)+" - "+(await digest(key)).slice(0,12)+"."+ext;
 }
 async function mirror(token,snapshot){
  if(!selected)return {skipped:true};
@@ -132,15 +146,17 @@ async function mirror(token,snapshot){
   if(!photo||typeof photo.data!=="string"||typeof photo.key!=="string")continue;
   const mime=(photo.data.match(/^data:(image\/(?:png|jpeg|webp));base64,/)||[])[1];
   if(!mime)throw Error("An uploaded photograph is not in a supported format.");
-  const filename=(await safeName(photo.key)).replace(/\.jpg$/,"."+mime.split("/")[1]);
+  const filename=await photoName(snapshot,photo.key,mime);
   const image=await (await fetch(photo.data)).blob();
+  const hash=await digest(image);
   const prev=photoNames.get(filename);
-  // Update existing files so that new images are actually reflected.
-  await write(token,prev,filename,mime,photoFolder.id,image);
+  // Only skip a photo if the existing file was uploaded by us and matches.
+  if(prev?.description==="dk-seedbank-sha256:"+hash){saved++;continue;}
+  await write(token,prev,filename,mime,photoFolder.id,image,hash);
   saved++;
  }
  const data=new Blob([JSON.stringify(snapshot)],{type:"application/json"});
- await write(token,backup,name,"application/json",target,data);
+ await write(token,backup,name,"application/json",target,data,await digest(data));
  return {skipped:false,photos:saved,folder:target,name:selected.name};
 }
 root.DKSeedBankDriveVisible=Object.freeze({scope:SCOPE,choose,folder,mirror,pickerReady:()=>!!apiKey&&!!appId});
