@@ -54,10 +54,12 @@ const uploadPath="https://www.googleapis.com/upload/drive/v3/files";
 const filename=filePrefix+saved.deviceId+".json";
 const journal=document.getElementById("seedJournal");
 if(!journal)return;
-const box=document.createElement("details");
+const box=document.createElement("section");
 box.id="dkDriveSync";box.className="dk-drive-sync";
 box.setAttribute("data-dk-no-translate","");
-box.innerHTML='<summary>☁ Google Drive sync</summary>'+
+box.setAttribute("role","region");
+box.setAttribute("aria-labelledby","dkDriveTitle");
+box.innerHTML='<h3 id="dkDriveTitle">Google Drive</h3>'+
 '<div class="dk-drive-body">'+
 '<p id="dkDriveExplain"></p>'+
 (desktop?'<label class="dk-drive-client-label" for="dkDriveClient"></label>':'')+
@@ -72,15 +74,15 @@ box.innerHTML='<summary>☁ Google Drive sync</summary>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
 '<p id="dkDriveScope"></p>'+
 '</div>';
-const position=document.getElementById("dkResilience");
-if(position)position.insertAdjacentElement("afterend",box);
+const position=document.getElementById("dkSyncBackupDriveSlot");
+if(position)position.appendChild(box);
 else journal.insertAdjacentElement("afterend",box);
 const $=id=>document.getElementById(id);
 if(desktop)$("dkDriveClient").value=saved.clientId||"";
 $("dkDriveAuto").checked=!!saved.auto;
 const ready=()=>connected&&(desktop||!!token&&Date.now()<expires-60000);
 function render(){
- box.querySelector("summary").textContent=t("☁ Google Drive sync","☁ Синхронизация с Google Диском");
+ $("dkDriveTitle").textContent=t("Google Drive synchronization","Синхронизация с Google Диском");
  $("dkDriveExplain").textContent=t(
   "Optional. Connect YOUR OWN Google account to share plantings, growth charts, photos and collection records between devices. No one else's Google Drive is connected.",
   "Необязательно. Подключите СВОЙ аккаунт Google, чтобы синхронизировать посадки, графики роста, фотографии и коллекцию между устройствами.");
@@ -308,12 +310,16 @@ async function disconnect(){
  }catch(error){lastStatus=t("Could not disconnect: ","Не удалось отключить: ")+error.message;}
  finally{busy=false;render();}
 }
-if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async()=>{
+if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async event=>{
+ event.preventDefault();
+ event.stopPropagation();
+ const pageY=window.scrollY;
  if(busy||!ready())return;
  const visible=root.DKSeedBankDriveVisible;
  if(!visible){lastStatus=t("Folder selection is unavailable in this version.","Выбор папки недоступен.");render();return;}
  try{
   const chosen=await visible.choose(token);
+  if(!chosen&&Math.abs(window.scrollY-pageY)>20)window.scrollTo({top:pageY,behavior:"instant"});
   if(chosen){lastStatus=t("Folder selected: ","Выбрана папка: ")+chosen.name+
    t(". Select Sync now to upload photos and the full backup.",". Нажмите «Синхронизировать сейчас», чтобы загрузить фотографии и копию.");
   }
