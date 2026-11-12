@@ -97,6 +97,15 @@ function validate(data){
    if(url.protocol!=="https:"||url.username||url.password)throw Error("Unsafe supplier URL.");
   }
  }
+ if(data.photoChanges!=null){
+  if(!isObject(data.photoChanges)||Object.keys(data.photoChanges).length>5000)
+   throw Error("Invalid photo change history.");
+  for(const [key,value] of Object.entries(data.photoChanges)){
+   if(key.length>320||!isObject(value)||typeof value.at!=="string"||
+      Number.isNaN(Date.parse(value.at))||typeof value.deleted!=="boolean")
+    throw Error("Invalid photo change marker.");
+  }
+ }
  for(const key of ["settings","workbench","watering","recipeGuide","photoUrls","photoPreferences"]){
   if(data[key]!=null&&!isObject(data[key]))throw Error("Invalid "+key+" section.");
  }
@@ -121,6 +130,8 @@ function validate(data){
  const keys=new Set();
  for(const record of photos){
   if(!isObject(record)||typeof record.key!=="string"||record.key.length>320||
+    (record.updatedAt!=null&&(typeof record.updatedAt!=="string"||
+     Number.isNaN(Date.parse(record.updatedAt))))||
     typeof record.data!=="string"||record.data.length>MAX_PHOTO_BYTES||
     !/^data:image\/(jpeg|png|webp);base64,/.test(record.data))
     throw Error("Invalid or oversized photo in backup.");
