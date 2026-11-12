@@ -237,6 +237,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Pyrethrum Daisy: 1 packet
 - Bishop's Flower: 1 packet
 - Pansy (Viola × wittrockiana): 1 packet
+- Blue Flax: 1 packet (exact species unverified; may be Linum perenne or Linum lewisii, not confirmed linen flax)
 
 ## Herbs and medicinal plants
 - Fenugreek (*Trigonella foenum-graecum*): 1 packet

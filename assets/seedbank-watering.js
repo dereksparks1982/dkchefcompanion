@@ -66,7 +66,7 @@ function profileFor(name,category){
  if(c==="Sunflowers")return "flower";
  if(c==="Alliums: chives, onions and leeks")return "root";
  if(c==="Grains and grasses"||c==="Fiber and historical crops")return "grain";
- if(/yarrow|echinacea|pyrethrum|edelweiss|sea holly|phlox|california poppy/.test(n))return "ornamentalDry";
+ if(/yarrow|echinacea|pyrethrum|edelweiss|sea holly|phlox|california poppy|blue flax/.test(n))return "ornamentalDry";
  if(c==="Herbs and medicinal plants")return "herbMoist";
  if(c==="Flowers and ornamentals"||c==="Wildflower mixes")return "flower";
  return "vegetable";
@@ -85,7 +85,7 @@ function checkEvery(entry){const pref=state.preferences[String(entry.id)]||{},p=
  return p.interval;
 }
 function formatPlant(entry){return entry.plant+(entry.variety&&entry.variety!==entry.plant&&!/standard type; exact cultivar not specified/i.test(entry.variety)?" · "+entry.variety:"")+(entry.location&&entry.location!=="Not recorded"?" · "+entry.location:"");}
-const panel=document.createElement("details");panel.id="waterManager";panel.className="water-manager";panel.open=true;
+const panel=document.createElement("details");panel.id="waterManager";panel.className="water-manager";panel.open=false;
 panel.innerHTML='<summary>💧 Garden Watering Manager <small>Plant-by-plant guidance · moisture checks · watering records</small></summary>'+
  '<div class="wm-inner"><p class="wm-intro">Check the soil first. A suggested check date is <strong>not</strong> an instruction to water. Rain, heat, mulch, soil, pot size and growth stage all affect needs. Records are saved in this browser; include them in your full Seed Bank backup.</p>'+
  '<div class="wm-summary" id="wmSummary" aria-live="polite"></div>'+
