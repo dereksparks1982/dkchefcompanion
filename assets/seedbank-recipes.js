@@ -99,7 +99,7 @@ function render(){
   (recipe.method?'<p class="rg-note"><strong>Preparation:</strong> '+esc(recipe.method)+'</p>':"")+
   (recipe.caution?'<p class="rg-note"><strong>Important:</strong> '+esc(recipe.caution)+'</p>':"")+
   (recipe.sources&&recipe.sources.length?'<p class="rg-source">References: '+recipe.sources.map(s=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(s[1])+'">'+esc(s[0])+'</a>').join(" · ")+'</p>':"")+
-  '<details class="rg-new" id="rg-new"><summary>＋ Add your own recipe</summary><form class="rg-form" id="rg-form">'+
+  '<details class="rg-new" id="rg-new"><summary>Add your own recipe</summary><form class="rg-form" id="rg-form">'+
    '<label>Recipe name<input name="recipe" required maxlength="120" placeholder="My herb bread"></label>'+
    '<label>Ingredients, one per line<textarea name="ingredients" required maxlength="3000" placeholder="garden: rosemary&#10;garden: thyme&#10;pantry: flour&#10;pantry: water"></textarea></label>'+
    '<p class="rg-note">Start each line with <strong>garden:</strong> to match your seed collection, or <strong>pantry:</strong> for other supplies. Your recipes and on-hand marks stay in this browser and are included in full backups.</p>'+

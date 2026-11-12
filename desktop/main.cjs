@@ -81,6 +81,13 @@ function createWindow(){
         i18n?.setLanguage("en",false);
         const english=i18n?.getLanguage()==="en"&&document.documentElement.lang==="en";
         const englishGreen=getComputedStyle(header).backgroundImage!=="none";
+        const jumpSummary=document.querySelector(".jumpbox > summary");
+        const backupSummary=document.querySelector(".dk-resilience > summary");
+        const panelSummary=document.querySelector(".wb-panel > summary");
+        const arrowVisible=Boolean(jumpSummary&&backupSummary&&panelSummary&&
+          [jumpSummary,backupSummary,panelSummary].every(summary=>
+            getComputedStyle(summary,"::after").content.includes("⌄")));
+        const seedChevronCount=document.querySelectorAll(".category > summary > .chevron").length;
         if(initial==="ru")i18n?.setLanguage("ru",false);
         return {
           cards:document.querySelectorAll(".seed").length,
@@ -92,6 +99,8 @@ function createWindow(){
           redLogo:redLogo?.getAttribute("src")==="assets/dk-seedbank-red-96.webp",
           russian,english,russianBlack,englishGreen,
           noCollectionEyebrow:!document.querySelector(".eyebrow"),
+          rightSideArrows:arrowVisible,
+          categoryArrows:seedChevronCount===19,
           exportBackup:!!document.getElementById("exportJournal"),
           importBackup:!!document.getElementById("importJournal"),
           backupValidation:!!window.DKSeedBankBackup,

@@ -1,0 +1,44 @@
+/* One chevron language for every expandable DK Seed Bank section.
+   Categories already contain their own right-hand chevron element. */
+details > summary{
+  list-style:none !important;
+  position:relative;
+  cursor:pointer;
+}
+details > summary::marker{content:"" !important;font-size:0}
+details > summary::-webkit-details-marker{display:none !important}
+/* Leave the existing colored seed-category chevron alone; don't add a second one. */
+details:not(.category) > summary{
+  padding-right:45px !important;
+}
+details:not(.category) > summary::after{
+  content:"⌄" !important;
+  display:block !important;
+  position:absolute !important;
+  top:50%;
+  right:16px;
+  margin:0 !important;
+  padding:0 !important;
+  float:none !important;
+  flex:none;
+  font-size:1.25rem;
+  font-weight:700;
+  line-height:1;
+  color:inherit;
+  transform:translateY(-50%) rotate(0deg);
+  transition:transform .18s ease;
+  pointer-events:none;
+}
+details:not(.category)[open] > summary::after{
+  content:"⌄" !important;
+  transform:translateY(-50%) rotate(180deg);
+}
+/* Remove the old left-side plus/minus markers from nested detail panels. */
+.seed-details > summary::before,
+.wb-journal-details > summary::before{
+  content:none !important;
+  display:none !important;
+}
+@media(prefers-reduced-motion:reduce){
+  details:not(.category)>summary::after{transition:none}
+}

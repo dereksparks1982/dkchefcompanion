@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v5/);
+ assert.match(source,/dk-seedbank-app-v6/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -101,7 +101,7 @@ test("service worker precaches the entire offline shell and uses a network timeo
 
 test("README stays concise and points at the portable Linux folder",()=>{
  const text=read("README.md");
- assert.ok(text.includes("v0.9.5-linux-portable/DK-Seed-Bank-0.9.5-Linux-x86_64.tar.gz"));
+ assert.ok(text.includes("v0.9.6-linux-portable/DK-Seed-Bank-0.9.6-Linux-x86_64.tar.gz"));
  assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
  assert.ok(!text.includes("inventory/"));
  assert.ok(!text.includes(".AppImage"));
@@ -151,4 +151,27 @@ test("export limits, normalized SHA-256 backup and user-controlled reminders",()
  const p=[{key:"mint",name:"Mint",count:5,used:0,archived:false}];
  assert.equal(alerts.assess({today:"2026-11-12",plants:p,lowStock:0}).counts.low,0);
  assert.equal(alerts.assess({today:"2026-11-12",plants:p,lowStock:10}).counts.low,1);
+});
+
+
+test("all expandable headings use a right-hand chevron and have no left triangle",()=>{
+ const css=read("assets/seedbank-chevrons.css");
+ const html=read("index.html");
+ const mirrored=read("docs/index.html");
+ const worker=read("sw.js");
+ assert.match(css,/details\s*>\s*summary::marker\{content:""\s*!important/);
+ assert.match(css,/details\s*>\s*summary::-webkit-details-marker/);
+ assert.match(css,/details:not\(\.category\)\s*>\s*summary::after/);
+ assert.match(css,/details:not\(\.category\)\[open\]\s*>\s*summary::after/);
+ assert.match(css,/rotate\(180deg\)/);
+ assert.match(css,/\.seed-details\s*>\s*summary::before/);
+ assert.match(css,/\.wb-journal-details\s*>\s*summary::before/);
+ assert.match(html,/assets\/seedbank-chevrons\.css\?v=20261112-chevron1/);
+ assert.match(mirrored,/\.\.\/assets\/seedbank-chevrons\.css\?v=20261112-chevron1/);
+ assert.ok(html.lastIndexOf("seedbank-chevrons.css") > html.lastIndexOf("seedbank-i18n.css"));
+ assert.ok(mirrored.lastIndexOf("seedbank-chevrons.css") > mirrored.lastIndexOf("seedbank-i18n.css"));
+ assert.match(worker,/"assets\/seedbank-chevrons\.css"/);
+ assert.equal((html.match(/class="category"/g)||[]).length,19);
+ assert.equal((html.match(/class="chevron"/g)||[]).length,19);
+ assert.doesNotMatch(read("assets/seedbank-recipes.js"),/<summary>＋ Add your own recipe<\/summary>/);
 });
