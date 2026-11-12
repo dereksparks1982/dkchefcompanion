@@ -580,14 +580,6 @@ function journalDetailsHTML(entry,linked,candidates,guide){
   '<h4>Growing instructions</h4>'+facts+
   (linked?'<button type="button" class="wb-small" data-wb-guide="'+esc(linked.key)+'">View full seed card and picture settings</button>':'');
 }
-function journalRoles(entry,linked,candidates){
- const roles=linked?linked.card.dataset.tags.split("|"):
-  candidates.length?candidates.map(p=>p.card.dataset.tags.split("|")).reduce((acc,arr)=>acc.filter(role=>arr.includes(role))):
-  journalPlantGroup(entry)?["Culinary herb"]:[];
- // A generic Mint journal entry is culinary even when its exact variety is unlinked.
- if(!linked&&journalPlantGroup(entry)==="mint"&&!roles.includes("Culinary herb"))roles.unshift("Culinary herb");
- return roles;
-}
 /* Align the same fields across cards sharing a grid row. Different tag counts
    and botanical captions must not stagger the next section in adjacent cards. */
 let journalAlignScheduled=false;
@@ -622,6 +614,14 @@ function scheduleJournalAlignment(){
 }
 window.addEventListener("resize",scheduleJournalAlignment);
 document.getElementById("dkLanguageSelect")?.addEventListener("change",scheduleJournalAlignment);
+function journalRoles(entry,linked,candidates){
+ const roles=linked?linked.card.dataset.tags.split("|"):
+  candidates.length?candidates.map(p=>p.card.dataset.tags.split("|")).reduce((acc,arr)=>acc.filter(role=>arr.includes(role))):
+  journalPlantGroup(entry)?["Culinary herb"]:[];
+ // A generic Mint journal entry is culinary even when its exact variety is unlinked.
+ if(!linked&&journalPlantGroup(entry)==="mint"&&!roles.includes("Culinary herb"))roles.unshift("Culinary herb");
+ return roles;
+}
 function journalEnhance(){
  const entries=core.journal().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  const cards=$$(".journal-entry",$("#journalEntries"));
