@@ -5,13 +5,16 @@ const core=window.DKSeedBankCore;
 if(!core)return;
 const term=document.getElementById("monasteryFilter");
 if(!term)return;
-const american=/tomato|tamarillo|pepper|paprika|jalapeño|cayenne|habanero|scotch bonnet|reaper|tabasco|sunflower|zinnia|marigold|california poppy|pumpkin|zucchini|cucamelon|butternut squash|squash|watermelon|corn\b|maize|quinoa|amaranth|blue agave|moringa|chocolate|peanut|soybean|lima bean|cowpea|pinto|kidney bean|pole bean|bush bean|garden bean|blueberry|serviceberry|huckleberry|golden|blue hopi|sweet potato|mint vanilla|black oil|henbane|ginseng|ashwagandha|tulsi|thailand|thai basil|mountain mint|nettleaf|nettleleaf horsemint|monarda|bergamot|blue flax/i;
-const medievalHerbs=/rue|hyssop|wormwood|lovage|fennel|spearmint|peppermint|pennyroyal|betony|sage|chervil|parsley|coriander|cilantro|dill|anise|caraway|cumin|savory|marjoram|oregano|horehound|comfrey|valerian|marsh mallow|calendula|borage|st john|john's wort|yarrow|mugwort|fenugreek|lemon balm|lavender|thyme|stinging nettle|nettle|basil/i;
+const american=/tomato|tamarillo|pepper|paprika|jalapeño|cayenne|habanero|scotch bonnet|reaper|tabasco|sunflower|zinnia|marigold|california poppy|pumpkin|zucchini|cucamelon|butternut squash|squash|quinoa|blue agave|tobacco|peanut|soybean|lima bean|cowpea|pinto|kidney bean|pole bean|bush bean|garden bean|blueberry|serviceberry|huckleberry|blue hopi|sweet potato|black oil|ginseng|ashwagandha|tulsi|thai basil|mountain mint|nettleleaf horsemint|monarda|bergamot/i;
+const medievalHerbs=/henbane|rue|hyssop|wormwood|lovage|fennel|spearmint|peppermint|pennyroyal|betony|sage|chervil|parsley|coriander|cilantro|dill|anise|caraway|cumin|savory|marjoram|oregano|horehound|comfrey|valerian|marsh mallow|calendula|borage|st john|john's wort|yarrow|mugwort|fenugreek|lemon balm|lavender|thyme|stinging nettle|nettle|basil/i;
 const oldWorldFlowers=/rose|lily|papaver somniferum|poppy, unknown|edelweiss/i;
 const medievalVeg=/lettuce|chicory|cress|arugula|endive|kale|spinach|collard|celery|radish|turnip|parsnip|beet|cabbage|broccoli|brussels|cauliflower|kohlrabi|carrot|onion|scallion|leek|cucumber|pea sugar snap|pea oregon|pea lincoln|pea little marvel|pea cascadia|lentil|strawberry|hazelnut|mulberry|winter rye|wheat|barley/i;
 function classify(p){
  const n=p.name.toLowerCase(),cat=p.cat;
  if(/blue flax|giant bamboo|unknown|unidentified|species unverified|spoken|unspecified|possibly|generic|dahlia moonflower|mache|mâche/.test(n))return "unverified";
+ if(c==="Grains and grasses"&&/corn\b|amaranth|quinoa/.test(n))return "later";
+ if(/corn salad|mâche/.test(n))return "unverified";
+ if(/watermelon/.test(n))return "unverified";
  if(american.test(n))return "later";
  if(medievalHerbs.test(n)||oldWorldFlowers.test(n)||medievalVeg.test(n))return "historical";
  if(["Tomatoes","Peppers","Sunflowers","Pumpkins and melons","Gourds and squash"].includes(cat))return "later";

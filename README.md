@@ -49,7 +49,7 @@ This includes the newly recorded **Blue Flax (1 commercial packet)**. Blue flax 
 - English ↔ Русский language selector in the **top-right**. The choice is remembered on this browser.
 - English retains the traditional green theme.
 - Russian uses official **DK Red**: `#9D1F32` (deep crimson), plus dark `#681422` and pale `#F8ECEF` supporting shades.
-- Plant names and scientific names are kept identifiable across both languages. Stored records and exports preserve their underlying identifiers regardless of display language.
+- Russian mode translates interface labels, plant descriptions and general planting/watering/safety guidance; original commercial cultivar labels and botanical Latin names are preserved for accurate identification. Plant names and scientific names are kept identifiable across both languages. Stored records and exports preserve their underlying identifiers regardless of display language.
 
 ## Storage, backups and privacy
 

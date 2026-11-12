@@ -1,5 +1,12 @@
 /* DK Seed Bank: distinct photos linked to external publishers, with source and match caveats. */
 window.DKSeedBankVarietyImages = Object.freeze({
+  "Flowers and ornamentals|Blue Flax": {
+    "file": "Perennial flax or linum perenne.jpg",
+    "author": "Johnathan J. Stegeman",
+    "license": "CC BY-SA 2.5",
+    "level": "example",
+    "note": "Representative Linum perenne photo, one of two distinct species called blue flax. Packet identification is not yet confirmed; may instead be Linum lewisii."
+  },
   "Sunflowers|Mammoth": {
     "file": "Bee and mammoth sunflower.jpg",
     "author": "Gardenkitty",
