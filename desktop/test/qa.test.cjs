@@ -404,3 +404,10 @@ test("Visible backup timestamp is tied to the selected folder rather than anothe
  assert.match(sync,/root\.DKSeedBankDriveVisible\?\.folder\(\)\?\.id===saved\.lastVisibleFolderId/);
  assert.match(sync,/saved\.lastVisibleFolderId=published\.folder/);
 });
+
+test("Garden Planner quick-access actions use a collection selector and initialize fully",()=>{
+ const workbench=read("assets/seedbank-workbench.js");
+ assert.match(workbench,/\$\$\("\[data-wb-open\]",host\)\.forEach\(/);
+ assert.doesNotMatch(workbench,/(?<!\$)\$\("\[data-wb-open\]",host\)\.forEach\(/);
+ assert.match(workbench,/applyRecords\(\);refreshSelects\(\);renderAll\(\);/);
+});
