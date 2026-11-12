@@ -9,7 +9,7 @@ const DRIVE="https://www.googleapis.com/drive/v3/files";
 const UPLOAD="https://www.googleapis.com/upload/drive/v3/files";
 const config=root.DKSeedBankPickerConfig||{};
 const apiKey=String(config.apiKey||"").trim();
-const appId=String(config.appId||"").trim();
+const appId=String(config.appId||"990130733984").trim();
 const lang=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
 let selected=null;
 try{selected=JSON.parse(localStorage.getItem(PREFIX)||"null");}catch(e){}
@@ -88,7 +88,7 @@ async function createItem(token,name,mimeType,parent){
  return (await (await request(token,DRIVE+"?fields=id,name,mimeType","POST",
   JSON.stringify(metadata),"application/json")).json());
 }
-async function createResumable(token,name,mimeType,parent){
+async function unusedCreateResumable(token,name,mimeType,parent){
  const response=await request(token,UPLOAD+"?uploadType=resumable&fields=id,name","POST",
   JSON.stringify({name,mimeType,parents:[parent]}),"application/json; charset=UTF-8");
  const location=response.headers.get("Location");
@@ -110,9 +110,10 @@ async function write(token,existing,name,mimeType,parent,blob){
  if(!upload.ok)throw Error("Could not finish visible Drive photo upload ("+upload.status+").");
  return upload.json();
 }
-function safeName(key){
- // UTF-8 filenames with stable percent-encoding avoid collisions.
- return "photo-"+Array.from(new TextEncoder().encode(key)).map(b=>b.toString(16).padStart(2,"0")).join("")+".jpg";
+async function safeName(key){
+ // Stable short digest avoids invalid filenames and discloses no seed names.
+ const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(key));
+ return "photo-"+Array.from(new Uint8Array(bytes)).map(b=>b.toString(16).padStart(2,"0")).join("")+".jpg";
 }
 async function mirror(token,snapshot){
  if(!selected)return {skipped:true};
@@ -131,7 +132,7 @@ async function mirror(token,snapshot){
   if(!photo||typeof photo.data!=="string"||typeof photo.key!=="string")continue;
   const mime=(photo.data.match(/^data:(image\/(?:png|jpeg|webp));base64,/)||[])[1];
   if(!mime)throw Error("An uploaded photograph is not in a supported format.");
-  const filename=safeName(photo.key).replace(/\.jpg$/,"."+mime.split("/")[1]);
+  const filename=(await safeName(photo.key)).replace(/\.jpg$/,"."+mime.split("/")[1]);
   const image=await (await fetch(photo.data)).blob();
   const prev=photoNames.get(filename);
   // Update existing files so that new images are actually reflected.
