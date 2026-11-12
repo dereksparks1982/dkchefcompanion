@@ -110,3 +110,19 @@ The original hidden app-data sync remains active whether or not a visible folder
 is selected; it is not removed or replaced. A failed visible-folder export is
 reported separately so that users can still see whether hidden sync succeeded.
 Visible photos are not exposed to other users of DK Seed Bank.
+
+## When Google Picker requests cookies or says access denied
+
+The fixed folder window now includes **Retry folders**. Some browsers require the
+embedded Google login/picker iframe to reload after third-party cookie permission
+is granted. Click **Retry folders** to reload only the picker; don't delete the app,
+clear site data, or re-upload the photographs.
+
+Google's current Picker documentation requires a website-restricted Google Picker
+browser API key that allows **both Google Picker API and Google Drive API**.
+If access is still denied, the DK Seed Bank publisher must open the existing
+**DK Seed Bank Picker** key in Google Cloud Console → APIs & Services → Credentials
+and select both of those APIs under **API restrictions**. Retain the website
+restrictions for `https://dereksparks1982.github.io/*` and
+`https://docs.google.com/*`. Save; do not create a replacement key or change the
+OAuth web client. These are developer-only changes, not end-user steps.
