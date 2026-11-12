@@ -63,3 +63,33 @@ Google API documentation:
 [web sign-in](https://developers.google.com/identity/oauth2/web/guides/use-token-model).
 
 **No personal collection or Google account identifiers belong in the project README.**
+
+## Visible folder photo export (pending publisher setup)
+
+DK Seed Bank now includes the code for a second copy of each synchronized photograph
+as a real image file in a user-selected, visible Google Drive folder, alongside the full
+collection JSON backup. This is **additional** to the original hidden app-data sync, which
+is preserved as the recovery source. No hidden data is deleted or migrated destructively.
+
+This uses Google's narrow `drive.file` authorization, not full access to users' files.
+A user selects **Choose my Google Drive folder** and chooses an existing folder via
+Google Picker; the selected folder ID stays on that device. This does not silently grant
+other people access to the publisher's personal Drive.
+
+### One remaining publisher-only configuration
+
+To activate folder selection the publisher must enable **Google Picker API** in the
+same Google Cloud project as DK Seed Bank's existing web OAuth client, create a
+browser API key restricted to `https://dereksparks1982.github.io/*` and
+`https://docs.google.com/*` and restricted to **Google Picker API**, then set
+`window.DKSeedBankPickerConfig={apiKey:"<API KEY>",appId:"990130733984"}`
+in the web application before loading `seedbank-drive-visible.js`.
+The developer must also add the `https://www.googleapis.com/auth/drive.file`
+permission in the Google OAuth configuration. These values are public application
+identifiers, **never** Google passwords or tokens. Restrict the API key before
+publication. Google requires the Picker API key for selecting a pre-existing folder.
+
+Until the publisher completes this, no visible-folder copy is uploaded. Existing
+hidden app-data synchronization is unchanged, and uploaded photos remain safe.
+Photo export is opt-in and only writes after a folder has been explicitly chosen.
+A failed visible-folder export is reported separately from successful hidden sync.
