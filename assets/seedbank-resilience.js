@@ -5,22 +5,32 @@ const journal=document.getElementById("seedJournal");
 if(!journal)return;
 const l=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
 const panel=document.createElement("details");
-panel.id="dkResilience";panel.className="dk-resilience";
+panel.id="dkSyncBackup";panel.className="dk-resilience dk-sync-backup";
+panel.setAttribute("data-dk-no-translate","");
 panel.innerHTML=
- '<summary id="dkResilienceTitle" data-dk-no-translate>🛡 Backups and offline readiness</summary>'+
+ '<summary id="dkResilienceTitle" data-dk-no-translate>☁ Sync &amp; Backup</summary>'+
  '<div class="dk-resilience-body" data-dk-no-translate>'+
  '<p id="dkRecoveryExplanation"></p>'+
+ '<div id="dkSyncBackupDriveSlot"></div>'+
+ '<section class="dk-sync-backup-section" aria-labelledby="dkRecoveryToolsTitle">'+
+ '<h3 id="dkRecoveryToolsTitle"></h3>'+
  '<p id="dkRecoveryLast" role="status" aria-live="polite"></p>'+
  '<div class="dk-resilience-actions">'+
  '<button type="button" id="dkRecoveryExport"></button>'+
  '<button type="button" id="dkRecoveryImport"></button>'+
  '<button type="button" id="dkRecoveryVerify"></button>'+
- '<input type="file" accept="application/json,.json" id="dkRecoveryVerifyInput" hidden>'+
+ '<input type="file" accept="application/json,.json" id="dkRecoveryVerifyInput" hidden></div>'+
+ '<p id="dkRecoveryProgress" role="status" aria-live="polite"></p></section>'+
+ '<section class="dk-sync-backup-section" aria-labelledby="dkRecoveryOfflineTitle">'+
+ '<h3 id="dkRecoveryOfflineTitle"></h3>'+
+ '<div id="dkSyncBackupOfflineSlot"></div>'+
+ '<div class="dk-resilience-actions">'+
  '<button type="button" id="dkRecoveryPersist"></button>'+
  '<button type="button" id="dkRecoveryPhotos"></button></div>'+
- '<p id="dkRecoveryProgress" role="status" aria-live="polite"></p>'+
- '<p id="dkRecoveryStorage"></p></div>';
+ '<p id="dkRecoveryStorage"></p></section></div>';
 journal.insertAdjacentElement("afterend",panel);
+const offlineStatus=document.getElementById("dkOfflineStatus");
+if(offlineStatus)document.getElementById("dkSyncBackupOfflineSlot").appendChild(offlineStatus);
 const $=id=>document.getElementById(id);
 let saving=false,stopped=false,photoStatus="",storageStatus="";
 function lastExport(){
@@ -36,10 +46,12 @@ function lastExport(){
   l(" · Confirm the file is in Downloads."," · Проверьте файл в «Загрузках».");
 }
 function render(){
- $("dkResilienceTitle").textContent=l("🛡 Backups and offline readiness","🛡 Резервные копии и офлайн-доступ");
+ $("dkResilienceTitle").textContent=l("☁ Sync & Backup","☁ Синхронизация и резервные копии");
  $("dkRecoveryExplanation").textContent=l(
-  "Keep a full JSON backup of your collection. To transfer records between devices, import a backup or optionally connect your own Google Drive account below for synchronization while the app is open.",
-  "Сохраняйте полную резервную копию JSON. Для переноса записей между устройствами загрузите резервную копию или по желанию подключите собственный аккаунт Google Диска для синхронизации, пока приложение открыто.");
+  "Keep your seed collection safe in one place: connect your own Google Drive, download or restore full backups, and prepare the app for offline use.",
+  "Храните коллекцию семян в безопасности: подключайте свой Google Диск, скачивайте или восстанавливайте полные резервные копии и готовьте приложение к работе без интернета.");
+ $("dkRecoveryToolsTitle").textContent=l("Local backups","Локальные резервные копии");
+ $("dkRecoveryOfflineTitle").textContent=l("Offline readiness","Готовность к работе без интернета");
  $("dkRecoveryLast").textContent=lastExport();
  $("dkRecoveryExport").textContent=l("↓ Export full backup","↓ Скачать полную резервную копию");
  $("dkRecoveryImport").textContent=l("↑ Restore backup","↑ Восстановить из копии");
