@@ -26,6 +26,29 @@ const persist=()=>{
 };
 try{persist();}catch(error){}
 let token="",expires=0,tokenClient=null,busy=false,connected=false,lastStatus="",syncTimer=null;
+const sessionKey="dk-seedbank-google-drive-web-session-v1";
+// A short-lived, tab-scoped access token survives refreshes, but not a deliberate
+// Google disconnect. Never place access tokens in permanent localStorage/backups.
+function cacheSession(){
+ if(desktop)return;
+ try{
+  if(token&&expires>Date.now()+60000)
+   sessionStorage.setItem(sessionKey,JSON.stringify({token,expires,clientId:webClientId,scope}));
+  else sessionStorage.removeItem(sessionKey);
+ }catch(error){/* Restricted browser storage: continue with in-memory auth. */}
+}
+function restoreSession(){
+ if(desktop)return;
+ try{
+  const item=JSON.parse(sessionStorage.getItem(sessionKey)||"null");
+  if(item&&item.clientId===webClientId&&item.scope===scope&&
+     typeof item.token==="string"&&item.token.length>16&&
+     Number.isFinite(item.expires)&&item.expires>Date.now()+60000){
+   token=item.token;expires=item.expires;connected=true;
+  }else sessionStorage.removeItem(sessionKey);
+ }catch(error){try{sessionStorage.removeItem(sessionKey);}catch(ignore){}}
+}
+restoreSession();
 const requestPath="https://www.googleapis.com/drive/v3/files";
 const uploadPath="https://www.googleapis.com/upload/drive/v3/files";
 const filename=filePrefix+saved.deviceId+".json";
@@ -126,16 +149,18 @@ function connectWeb(clientId){
   try{
    if(!root.google?.accounts?.oauth2)throw Error("Google Sign-In has not loaded.");
    tokenClient=root.google.accounts.oauth2.initTokenClient({
-    client_id:clientId,scope,prompt:"consent",
+    client_id:clientId,scope,prompt:"",
     callback:reply=>{
      if(!reply||reply.error||!reply.access_token){reject(Error("Google authorization was not granted."));return;}
      token=reply.access_token;
      expires=Date.now()+Math.max(0,Number(reply.expires_in)||3500)*1000;
+     cacheSession();
      resolve();
     },
     error_callback:()=>reject(Error(t("Google sign-in was closed or blocked.","Вход Google отменён или заблокирован.")))
    });
-   tokenClient.requestAccessToken({prompt:"consent"});
+   // Google shows consent when new access is genuinely required.
+   tokenClient.requestAccessToken({prompt:""});
   }catch(error){reject(error);}
  });
 }
@@ -150,7 +175,7 @@ async function driveRequest(url,method="GET",body,contentType="application/json"
   method,headers:{Authorization:"Bearer "+token,Accept:"application/json",
    ...(body!==undefined?{"Content-Type":contentType}:{})},body
  });
- if(response.status===401){token="";expires=0;lastStatus=t("Google session expired. Reconnect Google Drive to continue.","Сеанс Google истёк. Переподключите Google Диск.");}
+ if(response.status===401){token="";expires=0;connected=false;cacheSession();lastStatus=t("Google session expired. Reconnect Google Drive to continue.","Сеанс Google истёк. Переподключите Google Диск.");}
  if(!response.ok)throw Error("Google Drive API error ("+response.status+"): "+(await response.text()).slice(0,300));
  return response.text();
 }
@@ -259,11 +284,11 @@ async function connect(){
    await root.DKSeedBankDesktop.googleDrive.connect(clientId);
   }else await connectWeb(clientId);
   if(desktop)saved.clientId=clientId;
-  persist();connected=true;
+  persist();connected=true;cacheSession();
   lastStatus=t("Google connected. Use Sync now to transfer records.",
    "Google подключён. Нажмите «Синхронизировать сейчас» для передачи записей.");
  }catch(error){
-  if(!desktop){token="";expires=0;connected=false;}
+  if(!desktop){token="";expires=0;connected=false;cacheSession();}
   lastStatus=t("Could not connect: ","Не удалось подключиться: ")+error.message;
  }
  finally{busy=false;render();}
@@ -276,7 +301,7 @@ async function disconnect(){
   else{
    if(token&&root.google?.accounts?.oauth2?.revoke)
     root.google.accounts.oauth2.revoke(token,()=>{});
-   token="";expires=0;tokenClient=null;
+   token="";expires=0;tokenClient=null;cacheSession();
   }
   connected=false;lastStatus=t("Disconnected. Local planting records remain on this device.",
    "Отключено. Локальные записи растений остаются на устройстве.");
