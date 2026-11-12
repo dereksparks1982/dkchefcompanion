@@ -5,7 +5,9 @@
 const core=root.DKSeedBankCore,backup=root.DKSeedBankBackup,merge=root.DKSeedBankDriveMerge;
 if(!core||!backup||!merge)return;
 const appKey="dk-seedbank-google-sync-settings-v1";
-const scope="https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file";
+// Keep existing hidden backups available even before the folder picker is configured.
+const scope="https://www.googleapis.com/auth/drive.appdata"+
+ (!desktop&&root.DKSeedBankDriveVisible?.pickerReady()?" https://www.googleapis.com/auth/drive.file":"");
 const clientRx=/^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/;
 const filePrefix="dk-seedbank-sync-v1-";
 const desktop=!!root.DKSeedBankDesktop?.googleDrive;
@@ -81,16 +83,18 @@ function render(){
   "Синхронизировать автоматически, пока приложение открыто (не в фоне на iPhone)");
  $("dkDriveAuto").disabled=busy;
  $("dkDriveScope").textContent=t(
-  "Google permits DK Seed Bank to access only its private app-data area in the Google account YOU authorize. Your other Drive files and folders are not accessible. Synchronization does not share your data publicly.",
-  "Приложение получает доступ только к своему закрытому разделу данных в Google Диске ВАШЕГО аккаунта. Другие файлы и папки недоступны. Данные не становятся общедоступными.");
+  "Your private cloud sync stays in your own Google account. When folder export is enabled, you may additionally grant access to the Drive folder YOU choose; the app does not need access to all your files.",
+  "Личные резервные копии хранятся в вашем аккаунте Google. При экспорте можно разрешить доступ к выбранной вами папке; доступ ко всем файлам не требуется.");
  if(!desktop){
   const visible=root.DKSeedBankDriveVisible;
   $("dkDriveChooseFolder").textContent=t("Choose my Google Drive folder","Выбрать папку Google Диска");
-  $("dkDriveChooseFolder").disabled=busy||!ready();
+  $("dkDriveChooseFolder").disabled=busy||!ready()||!visible?.pickerReady();
   const picked=visible?.folder();
   $("dkDriveFolderState").textContent=picked?
    t("Visible photo folder: ","Папка с фотографиями: ")+picked.name:
-   t("No visible Drive folder selected yet. Existing hidden backups are preserved.","Папка для видимых файлов ещё не выбрана. Скрытые копии сохранены.");
+   visible?.pickerReady()?
+    t("Choose a folder to save visible photo files. Hidden sync remains active.","Выберите папку для сохранения файлов фотографий. Скрытая синхронизация работает."):
+    t("Visible folder connection is awaiting Google Picker setup by DK Softworks. Your existing photo sync still works.","Подключение видимой папки ожидает настройки Google Picker разработчиком. Текущая синхронизация фотографий работает.");
  }
  $("dkDriveState").textContent=lastStatus||(
   connected?(ready()?t("Connected. Ready to synchronize.","Подключено. Можно синхронизировать."):
