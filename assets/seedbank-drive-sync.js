@@ -21,7 +21,7 @@ if(!saved.deviceId||!/^[a-z0-9-]{15,90}$/.test(saved.deviceId)){
 }
 const persist=()=>{
  localStorage.setItem(appKey,JSON.stringify({
-  deviceId:saved.deviceId,clientId:saved.clientId||"",auto:!!saved.auto,lastSync:saved.lastSync||"",lastVisibleSync:saved.lastVisibleSync||""
+  deviceId:saved.deviceId,clientId:saved.clientId||"",auto:!!saved.auto,lastSync:saved.lastSync||"",lastVisibleSync:saved.lastVisibleSync||"",lastVisibleFolderId:saved.lastVisibleFolderId||""
  }));
 };
 try{persist();}catch(error){}
@@ -143,7 +143,8 @@ function render(){
  $("dkDriveLastPrivate").textContent=validTime(saved.lastSync)?
   t("Last successful private cloud sync on this device: ","Последняя успешная личная синхронизация на устройстве: ")+new Date(saved.lastSync).toLocaleString():
   t("No successful private cloud sync recorded on this device.","На устройстве ещё нет подтверждённой синхронизации.");
- $("dkDriveLastVisible").textContent=validTime(saved.lastVisibleSync)?
+ $("dkDriveLastVisible").textContent=validTime(saved.lastVisibleSync)&&
+  !desktop&&root.DKSeedBankDriveVisible?.folder()?.id===saved.lastVisibleFolderId?
   t("Last successful photo-folder backup on this device: ","Последняя успешная копия фотографий в папке на устройстве: ")+new Date(saved.lastVisibleSync).toLocaleString():
   t("No successful visible-folder backup recorded on this device.","На устройстве ещё нет подтверждённой копии в видимой папке.");
  $("dkDriveState").textContent=lastStatus||(
@@ -272,6 +273,7 @@ async function syncNow(){
    try{
     const published=await visible.mirror(token,result);
     saved.lastVisibleSync=new Date().toISOString();
+    saved.lastVisibleFolderId=published.folder;
     visibleMessage=t(" · Visible photos: "," · Видимые фото: ")+published.photos;
    }catch(error){
     visibleMessage=t(" · Visible-folder copy FAILED: "," · Не удалось сохранить в папку: ")+error.message;
