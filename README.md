@@ -44,4 +44,4 @@ The web edition includes an offline application shell and optional offline refer
 
 Two-way cross-device sync, iPhone browser behavior, Google account authorization, offline recovery, and portable Linux packaging require checks in their actual environments. Source and simulated tests do not establish that every live Google account or device is working.
 
-This repository intentionally contains **application source, documentation, and generic examples**, not any individual's personal seed inventory, photos, private Google Drive data, account identifiers, or access tokens.
+This README intentionally contains **no personal seed packet lists or collection statistics**. Never commit private garden photographs, personal Google Drive content, access tokens, passwords, or other users' account data to this repository.
