@@ -6,6 +6,7 @@ const cats=Array.from(document.querySelectorAll(".category"));
 const search=document.getElementById("search");
 const storageKey="dk-seed-bank-journal-v1";
 const settingsKey="dk-seed-bank-growing-profile-v1";
+const journalDeletesKey="dk-seed-bank-journal-deletes-v1";
 const field=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback;}catch(e){return fallback;}};
 const save=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}};
 const esc=(v)=>String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -283,6 +284,8 @@ async function dbPut(key,blob){const db=await openDB();if(!db)return false;retur
 async function dbDelete(key){const db=await openDB();if(!db)return;return new Promise(resolve=>{const t=db.transaction("photos","readwrite");t.objectStore("photos").delete(key);t.oncomplete=resolve;t.onerror=resolve;});}
 async function dbAll(){const db=await openDB();if(!db)return [];return new Promise(resolve=>{try{const t=db.transaction("photos","readonly").objectStore("photos"), req=t.getAllKeys();req.onsuccess=()=>{const keys=req.result;Promise.all(keys.map(key=>new Promise(r=>{const request=t.get(key);request.onsuccess=()=>r([key,request.result]);request.onerror=()=>r(null);}))).then(x=>resolve(x.filter(Boolean)));};req.onerror=()=>resolve([]);}catch(e){resolve([]);}});}
 let journal=field(storageKey,null);
+let journalDeletes=field(journalDeletesKey,[]);
+if(!Array.isArray(journalDeletes))journalDeletes=[];
 const initialNames=["Basil","Chives","Oregano","Dill","Thyme","Mint","Coriander","Parsley"];
 const initialEntries=initialNames.map((plant,i)=>({id:"2026-11-11-"+i,plant:plant,variety:"Standard type; exact cultivar not specified",date:"2026-11-11",time:"12:00",approxTime:true,minSeeds:20,maxSeeds:30,soakHours:24,medium:"Peat moss tablets in burlap sacks",location:"Not recorded",status:"Sown",sprouted:"",germinatedCount:null,survivedCount:null,notes:"Seeds soaked for 24 hours before planting. Approximately 20–30 seeds of this herb."}));
 if(!Array.isArray(journal)){journal=initialEntries.slice();save(storageKey,journal);}
@@ -673,7 +676,9 @@ function updateJournalGrowth(id,photo,remove=false){
  if(remove&&!existing.some(item=>item.id===photo.id))return false;
  const growthPhotos=remove?existing.filter(item=>item.id!==photo.id):[...existing,photo];
  const updated=journal.slice();
- updated[index]={...current,growthPhotos};
+ const removed=remove?[...(Array.isArray(current.growthPhotosRemoved)?current.growthPhotosRemoved:[]),
+  {id:photo.id,at:new Date().toISOString()}]:current.growthPhotosRemoved||[];
+ updated[index]={...current,growthPhotos,growthPhotosRemoved:removed,syncUpdatedAt:new Date().toISOString()};
  if(!save(storageKey,updated))return false;
  journal=updated;renderJournal();return true;
 }
@@ -686,7 +691,11 @@ function updateJournalMeasurement(id,record,remove=false){
  if(!remove&&found<0&&existing.length>=500)return false;
  const next=remove?existing.filter(item=>item.id!==record.id):
   found>=0?existing.map(item=>item.id===record.id?record:item):[...existing,record];
- const updated=journal.slice();updated[index]={...journal[index],growthMeasurements:next};
+ const current=journal[index];
+ const removed=remove?[...(Array.isArray(current.growthMeasurementsRemoved)?current.growthMeasurementsRemoved:[]),
+  {id:record.id,at:new Date().toISOString()}]:current.growthMeasurementsRemoved||[];
+ const updated=journal.slice();updated[index]={...current,growthMeasurements:next,
+  growthMeasurementsRemoved:removed,syncUpdatedAt:new Date().toISOString()};
  if(!save(storageKey,updated))return false;
  journal=updated;renderJournal();return true;
 }
@@ -730,6 +739,9 @@ journalList.addEventListener("click",event=>{
    const remaining=journal.filter(x=>x.id!==item.id);
    if(!save(storageKey,remaining)){alert("Unable to delete planting: local storage is unavailable.");return;}
    journal=remaining;
+   journalDeletes=[...journalDeletes.filter(row=>row.id!==item.id),
+    {id:item.id,deletedAt:new Date().toISOString()}];
+   save(journalDeletesKey,journalDeletes);
    document.dispatchEvent(new CustomEvent("dkseedbank:journal-deleted",{detail:{entry:item}}));
    renderJournal();
   }
@@ -752,8 +764,11 @@ journalForm.addEventListener("submit",event=>{
   const previous=journal.find(x=>x.id===editId);
   if(Array.isArray(previous?.growthPhotos))item.growthPhotos=previous.growthPhotos;
   if(Array.isArray(previous?.growthMeasurements))item.growthMeasurements=previous.growthMeasurements;
+  if(Array.isArray(previous?.growthPhotosRemoved))item.growthPhotosRemoved=previous.growthPhotosRemoved;
+  if(Array.isArray(previous?.growthMeasurementsRemoved))item.growthMeasurementsRemoved=previous.growthMeasurementsRemoved;
+  item.syncUpdatedAt=new Date().toISOString();
   journal=journal.map(x=>x.id===editId?item:x);
- }else journal.push(item);
+ }else {item.syncUpdatedAt=new Date().toISOString();journal.push(item);}
  if(!save(storageKey,journal))alert("This browser blocked local storage. Export a backup to preserve your entries.");
  editId=null;journalForm.hidden=true;renderJournal();
 });
@@ -996,7 +1011,7 @@ async function createFullBackup(){
  // This also strips undefined values that cannot survive a round trip through a file.
  const draft={
   format:"dk-seedbank-v1",backupSchema:2,exportedAt:new Date().toISOString(),
-  journal,settings,photoUrls:remoteImageUrls,photoPreferences,
+  journal,journalDeletes,settings,photoUrls:remoteImageUrls,photoPreferences,
   workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,
   watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,
   recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,
@@ -1091,6 +1106,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   // Commit all stored images in one atomic IndexedDB transaction.
   if(!await dbReplacePhotos(photos))throw Error("Unable to restore uploaded photos. Existing journal was not replaced.");
   const nextJournal=data.journal.map(x=>({...x}));
+  const nextDeletes=Array.isArray(data.journalDeletes)?data.journalDeletes:[];
   const nextSettings={...settings};
   if(data.settings){
    for(const name of ["region","environment","lastFrost"]){
@@ -1100,6 +1116,8 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   if(!save(storageKey,nextJournal)||!save(settingsKey,nextSettings))
    throw Error("Local browser storage is full or blocked. Check your safety backup.");
   journal=nextJournal;settings=nextSettings;
+  journalDeletes=nextDeletes;
+  save(journalDeletesKey,nextDeletes);
   if(data.photoUrls){
    const links={};
    for(const [key,record] of Object.entries(data.photoUrls)){
@@ -1150,6 +1168,83 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
 });
 
 
+
+async function applySyncedBackup(data){
+ const helper=window.DKSeedBankBackup;
+ if(!helper)throw Error("Backup validation is unavailable.");
+ helper.validate(data);
+ await helper.verify(data);
+ const nextJournal=data.journal.map(entry=>({...entry}));
+ const nextDeletes=Array.isArray(data.journalDeletes)?data.journalDeletes:[];
+ const names=new Set(plants.keys());
+ for(const addition of data.workbench?.additions||[]){
+  if(addition&&typeof addition.category==="string"&&typeof addition.name==="string")
+   names.add(addition.category+"|"+addition.name);
+ }
+ const media=[];
+ for(const image of data.photos||[]){
+  const isGrowth=helper.isGrowthPhotoKey(image.key,nextJournal);
+  const seedKey=image.key.endsWith("|packet")?image.key.slice(0,-7):image.key;
+  if(!isGrowth&&!names.has(seedKey))continue;
+  const blob=await (await fetch(image.data)).blob();
+  if(blob.size>6000000)throw Error("An uploaded photo exceeds the 6 MB limit.");
+  media.push([image.key,blob]);
+ }
+ const nextSettings={...settings};
+ if(data.settings){
+  for(const name of ["region","environment","lastFrost"])
+   if(typeof data.settings[name]==="string")nextSettings[name]=data.settings[name];
+ }
+ const links={};
+ for(const [key,record] of Object.entries(data.photoUrls||{})){
+  if(!names.has(key)||!record||typeof record!=="object")continue;
+  for(const kind of ["plant","packet"]){
+   if(validImageLink(record[kind])){
+    if(!links[key])links[key]={};
+    links[key][kind]=record[kind];
+   }
+  }
+ }
+ const preferences={};
+ for(const [key,mode] of Object.entries(data.photoPreferences||{})){
+  if(names.has(key)&&["plant","packet","variety","none"].includes(mode))preferences[key]=mode;
+ }
+ // Commit photographs in one IndexedDB transaction, then persist each local record.
+ if(!await dbReplacePhotos(media))throw Error("Unable to store synchronized photographs.");
+ if(!save(storageKey,nextJournal)||!save(journalDeletesKey,nextDeletes)||
+    !save(settingsKey,nextSettings)||!save(remoteImageStorageKey,links)||
+    !save(photoPreferenceKey,preferences))
+  throw Error("Insufficient local storage for synchronization. Your Google Drive snapshots remain intact.");
+ journal=nextJournal;journalDeletes=nextDeletes;settings=nextSettings;
+ remoteImageUrls=links;photoPreferences=preferences;
+ for(const url of [...userPhotos.values(),...packetPhotos.values()])URL.revokeObjectURL(url);
+ userPhotos.clear();packetPhotos.clear();
+ for(const [key,blob] of media){
+  if(helper.isGrowthPhotoKey(key,nextJournal))continue;
+  const packet=key.endsWith("|packet"),plantKey=packet?key.slice(0,-7):key;
+  (packet?packetPhotos:userPhotos).set(plantKey,URL.createObjectURL(blob));
+ }
+ if(data.watering&&window.DKSeedBankWatering&&
+    JSON.stringify(window.DKSeedBankWatering.exportData())!==JSON.stringify(data.watering)&&
+    !window.DKSeedBankWatering.importData(data.watering))
+  throw Error("Watering records could not be synchronized.");
+ if(data.recipeGuide&&window.DKSeedBankRecipes&&
+    JSON.stringify(window.DKSeedBankRecipes.exportData())!==JSON.stringify(data.recipeGuide)&&
+    !window.DKSeedBankRecipes.importData(data.recipeGuide))
+  throw Error("Recipe records could not be synchronized.");
+ const oldWorkbench=window.DKSeedBankWorkbench?.exportData();
+ const changeWorkbench=data.workbench&&window.DKSeedBankWorkbench&&
+    JSON.stringify(oldWorkbench)!==JSON.stringify(data.workbench);
+ if(changeWorkbench&&!window.DKSeedBankWorkbench.importData(data.workbench,{noReload:true}))
+  throw Error("Inventory changes could not be synchronized.");
+ document.getElementById("regionSelect").value=settings.region;
+ document.getElementById("envSelect").value=settings.environment;
+ document.getElementById("frostDate").value=settings.lastFrost||"";
+ plants.forEach(plant=>refreshPhoto(plant));
+ updatePlanner();renderJournal();requestFiltering();
+ document.dispatchEvent(new Event("dkseedbank:backup-restored"));
+ return {reload:!!changeWorkbench};
+}
 const seedRoleClasses={"Food crop":"food","Culinary herb":"culinary","Pollinator":"pollinator","Ornamental":"ornamental","Tree / woody":"tree","Grain":"grain","Fiber / heritage":"fiber","Botanical / traditional":"botanical","Caution":"caution"};
 function patchInventoryCard(key,patch){
  const p=plants.get(key);if(!p)return false;
@@ -1234,7 +1329,9 @@ function setJournalSeedKey(entryId,key){
 }
 window.DKSeedBankCore=Object.freeze({
  plants:()=>plants,cards:()=>cards.slice(),categories:()=>cats.map(x=>x.dataset.category),
- journal:()=>journal.slice(),settings:()=>({...settings}),renderJournal,guideFor:resolveGuide,setJournalSeedKey,
+ exportForSync:createFullBackup,applySyncedBackup,
+ journal:()=>journal.slice(),journalDeletes:()=>journalDeletes.slice(),
+ settings:()=>({...settings}),renderJournal,guideFor:resolveGuide,setJournalSeedKey,
  addJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta),
  removeJournalGrowthPhoto:(id,meta)=>updateJournalGrowth(id,meta,true),
  saveJournalMeasurement:(id,record)=>updateJournalMeasurement(id,record),

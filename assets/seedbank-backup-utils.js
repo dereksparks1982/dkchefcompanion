@@ -28,9 +28,30 @@ function isGrowthPhotoKey(key,journal){
 function validate(data){
  if(!isObject(data)||data.format!=="dk-seedbank-v1")throw Error("Not a DK Seed Bank backup.");
  if(!Array.isArray(data.journal)||data.journal.length>3000)throw Error("Invalid or oversized planting journal.");
+ if(data.journalDeletes!=null){
+  if(!Array.isArray(data.journalDeletes)||data.journalDeletes.length>3000)throw Error("Invalid deleted plantings.");
+  const ids=new Set();
+  for(const item of data.journalDeletes){
+   if(!isObject(item)||typeof item.id!=="string"||item.id.length>150||
+    typeof item.deletedAt!=="string"||Number.isNaN(Date.parse(item.deletedAt))||ids.has(item.id))
+    throw Error("Invalid deleted planting marker.");
+   ids.add(item.id);
+  }
+ }
  for(const record of data.journal){
   if(!isObject(record)||typeof record.plant!=="string"||record.plant.length>300||
     typeof record.date!=="string"||record.date.length>32)throw Error("Invalid planting record in backup.");
+  if(record.syncUpdatedAt!=null&&(typeof record.syncUpdatedAt!=="string"||
+   Number.isNaN(Date.parse(record.syncUpdatedAt))))throw Error("Invalid planting change time.");
+  for(const key of ["growthPhotosRemoved","growthMeasurementsRemoved"]){
+   if(record[key]==null)continue;
+   if(!Array.isArray(record[key])||record[key].length>500)throw Error("Invalid removed growth records.");
+   for(const item of record[key]){
+    if(!isObject(item)||typeof item.id!=="string"||item.id.length>100||
+     typeof item.at!=="string"||Number.isNaN(Date.parse(item.at)))
+     throw Error("Invalid removed growth record.");
+   }
+  }
   if(record.growthMeasurements!=null){
    const measurements=record.growthMeasurements;
    if(!Array.isArray(measurements)||measurements.length>500)throw Error("Invalid growth measurements.");

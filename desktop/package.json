@@ -1,7 +1,7 @@
 {
   "name": "dk-seed-bank-desktop",
   "productName": "DK Seed Bank",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "private": true,
   "description": "Portable offline seed inventory and planting journal for Linux",
   "main": "main.cjs",
@@ -27,6 +27,7 @@
     "files": [
       "main.cjs",
       "preload.cjs",
+      "google-drive-auth.cjs",
       "update-check.cjs",
       "web-path.cjs",
       "package.json",

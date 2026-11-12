@@ -6,4 +6,6 @@ Organize seed varieties, packets and saved seed lots; view planting guides and r
 
 **Web app:** https://dereksparks1982.github.io/seedrepo/
 
-**Standalone Linux desktop download:** https://github.com/dereksparks1982/seedrepo/releases/download/v0.9.8-linux-portable/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz
+**Standalone Linux desktop download:** https://github.com/dereksparks1982/seedrepo/releases/download/v0.9.9-linux-portable/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz
+
+Optional per-user Google Drive synchronization (requires Google OAuth setup): [setup and privacy guide](docs/GOOGLE_DRIVE_SYNC.md).

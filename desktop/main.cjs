@@ -5,6 +5,7 @@ const {pathToFileURL}=require("node:url");
 const {app,BrowserWindow,protocol,net,shell,ipcMain}=require("electron");
 const {resolveWebPath}=require("./web-path.cjs");
 const {selectLatest}=require("./update-check.cjs");
+const {createAuth}=require("./google-drive-auth.cjs");
 
 const APP_URL="dkseed://app/index.html";
 const ICON_PATH=path.join(__dirname,"build","icons","256x256.png");
@@ -16,6 +17,7 @@ protocol.registerSchemesAsPrivileged([{
 
 app.setName("DK Seed Bank");
 app.setPath("userData",path.join(app.getPath("appData"),"DK Seed Bank"));
+const googleAuth=createAuth({userData:app.getPath("userData"),openExternal:url=>shell.openExternal(url)});
 const singleInstance=app.requestSingleInstanceLock();
 if(!singleInstance){app.quit();}
 
@@ -174,6 +176,16 @@ function createWindow(){
               if(!oldIds.has(item.id))window.DKSeedBankCore.deleteJournalMeasurement(record.id,item);
           }
         }catch(error){console.error("Height growth chart smoke failed:",error);}
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+        const alignedJournalCards=[...document.querySelectorAll(".journal-entry")]
+          .filter(card=>card.querySelector(".wb-journal-details"));
+        const firstRow=alignedJournalCards.length?[alignedJournalCards[0]]:[];
+        const firstTop=firstRow[0]?.getBoundingClientRect().top||0;
+        for(const card of alignedJournalCards.slice(1))
+          if(Math.abs(card.getBoundingClientRect().top-firstTop)<3)firstRow.push(card);
+        const journalGuideAlignment=firstRow.length<2||firstRow.every(card=>
+          Math.abs(card.querySelector(".wb-journal-details").getBoundingClientRect().top-
+            firstRow[0].querySelector(".wb-journal-details").getBoundingClientRect().top)<=3);
         return {
           cards:document.querySelectorAll(".seed").length,
           selector:!!document.getElementById("dkLanguageSelect"),
@@ -202,7 +214,11 @@ function createWindow(){
           seedCareAlerts:!!window.DKSeedBankAlerts,
           backupPanel:!!document.getElementById("dkResilience"),
           backupVerify:!!document.getElementById("dkRecoveryVerify"),
-          desktopUpdater:typeof window.DKSeedBankDesktop?.checkForUpdates==="function"
+          desktopUpdater:typeof window.DKSeedBankDesktop?.checkForUpdates==="function",
+          driveBridge:typeof window.DKSeedBankDesktop?.googleDrive?.request==="function",
+          driveUIPresent:!!document.getElementById("dkDriveSync"),
+          driveSyncAPI:typeof window.DKSeedBankDriveSync?.syncNow==="function",
+          journalGuideAlignment
         };
       })()
     `);
@@ -222,6 +238,18 @@ function createWindow(){
 
 app.on("second-instance",()=>{if(mainWindow){mainWindow.show();mainWindow.focus();}});
 app.whenReady().then(()=>{
+ const desktopOnly=event=>{
+  if(!event.sender.getURL().startsWith("dkseed://app/"))
+   throw Error("Blocked Google Drive request from an untrusted source.");
+ };
+ ipcMain.handle("dkseed:google-status",event=>{desktopOnly(event);return googleAuth.status();});
+ ipcMain.handle("dkseed:google-connect",(event,clientId)=>{
+  desktopOnly(event);return googleAuth.connect(clientId);
+ });
+ ipcMain.handle("dkseed:google-disconnect",event=>{desktopOnly(event);return googleAuth.disconnect();});
+ ipcMain.handle("dkseed:google-request",(event,request)=>{
+  desktopOnly(event);return googleAuth.request(request);
+ });
  ipcMain.handle("dkseed:check-updates",async event=>{
   if(!event.sender.getURL().startsWith("dkseed://app/"))return {status:"unavailable"};
   const controller=new AbortController();

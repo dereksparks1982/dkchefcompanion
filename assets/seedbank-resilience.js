@@ -38,8 +38,8 @@ function lastExport(){
 function render(){
  $("dkResilienceTitle").textContent=l("🛡 Backups and offline readiness","🛡 Резервные копии и офлайн-доступ");
  $("dkRecoveryExplanation").textContent=l(
-  "To transfer your collection between iPhone, browser and Linux: export the full JSON backup on one device, then import it on the other. Data does not sync automatically.",
-  "Чтобы перенести коллекцию между iPhone, браузером и Linux, выгрузите полную резервную копию JSON и загрузите её на другом устройстве. Автоматической синхронизации нет.");
+  "Keep a full JSON backup of your collection. To transfer records between devices, import a backup or optionally connect your own Google Drive account below for synchronization while the app is open.",
+  "Сохраняйте полную резервную копию JSON. Для переноса записей между устройствами загрузите резервную копию или по желанию подключите собственный аккаунт Google Диска для синхронизации, пока приложение открыто.");
  $("dkRecoveryLast").textContent=lastExport();
  $("dkRecoveryExport").textContent=l("↓ Export full backup","↓ Скачать полную резервную копию");
  $("dkRecoveryImport").textContent=l("↑ Restore backup","↑ Восстановить из копии");

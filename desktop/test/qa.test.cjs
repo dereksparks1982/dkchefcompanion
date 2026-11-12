@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v9/);
+ assert.match(source,/dk-seedbank-app-v10/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -101,7 +101,7 @@ test("service worker precaches the entire offline shell and uses a network timeo
 
 test("README stays concise and points at the portable Linux folder",()=>{
  const text=read("README.md");
- assert.ok(text.includes("v0.9.8-linux-portable/DK-Seed-Bank-0.9.8-Linux-x86_64.tar.gz"));
+ assert.ok(text.includes("v0.9.9-linux-portable/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz"));
  assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
  assert.ok(!text.includes("inventory/"));
  assert.ok(!text.includes(".AppImage"));
@@ -310,4 +310,47 @@ test("growth measurement UI remains user-controlled with no forced care reminder
  }
  assert.match(read("assets/seedbank-resilience.js"),/growthMeasurements/);
  assert.match(read("assets/seedbank-cards.js"),/Измерения высоты/);
+});
+
+
+test("Drive sync is included in both web editions, desktop and offline app cache",()=>{
+ const html=read("index.html"),docs=read("docs/index.html"),sw=read("sw.js");
+ for(const content of [html,docs]){
+  assert.match(content,/seedbank-drive-merge\.js\?v=20261112-drive1/);
+  assert.match(content,/seedbank-drive-sync\.js\?v=20261112-drive1/);
+  assert.match(content,/seedbank-drive-sync\.css\?v=20261112-drive1/);
+  assert.ok(content.indexOf("seedbank-drive-sync.js")>content.indexOf("seedbank-resilience.js"));
+  assert.equal((content.match(/<article class="seed"/g)||[]).length,319);
+ }
+ for(const asset of ["seedbank-drive-merge.js","seedbank-drive-sync.js","seedbank-drive-sync.css"]){
+  assert.match(sw,new RegExp('assets/'+asset.replaceAll(".","\\.")));
+  assert.ok(fs.existsSync(path.join(bundle,"assets",asset)),asset+" not in offline desktop app");
+ }
+});
+test("Google Drive sync integrates full photo backup and journal without losing existing records",()=>{
+ const cards=read("assets/seedbank-cards.js");
+ for(const snippet of ["exportForSync:createFullBackup","applySyncedBackup",
+  "journalDeletesKey","journalDeletes:()=>journalDeletes.slice()",
+  "growthPhotosRemoved","growthMeasurementsRemoved",
+  "dkseedbank:backup-restored", "noReload:true"]){
+  assert.ok(cards.includes(snippet),snippet+" missing");
+ }
+ assert.match(read("assets/seedbank-workbench.js"),/if\(!options\.noReload\)/);
+ const main=read("desktop/main.cjs"),preload=read("desktop/preload.cjs");
+ for(const item of ["google-status","google-connect","google-disconnect","google-request"])
+  assert.ok(main.includes('dkseed:'+item),item+" bridge missing");
+ assert.match(preload,/googleDrive:Object\.freeze/);
+ assert.match(main,/driveSyncAPI:/);
+});
+
+
+test("planting journal rows align their tags, growing-guide headers and action areas",()=>{
+ const source=read("assets/seedbank-workbench.js");
+ assert.match(source,/function alignJournalRows\(\)/);
+ assert.match(source,/journalAlignScheduled/);
+ assert.match(source,/tags\.style\.minHeight=/);
+ assert.match(source,/overview\.style\.minHeight=/);
+ assert.match(source,/requestAnimationFrame\(alignJournalRows\)/);
+ assert.match(source,/window\.addEventListener\("resize",scheduleJournalAlignment\)/);
+ assert.match(read("desktop/main.cjs"),/journalGuideAlignment/);
 });

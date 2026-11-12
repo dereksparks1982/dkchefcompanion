@@ -588,6 +588,40 @@ function journalRoles(entry,linked,candidates){
  if(!linked&&journalPlantGroup(entry)==="mint"&&!roles.includes("Culinary herb"))roles.unshift("Culinary herb");
  return roles;
 }
+/* Align the same fields across cards sharing a grid row. Different tag counts
+   and botanical captions must not stagger the next section in adjacent cards. */
+let journalAlignScheduled=false;
+function alignJournalRows(){
+ journalAlignScheduled=false;
+ const cards=$(".journal-entry",$("#journalEntries"));
+ for(const card of cards){
+  const tags=$(".wb-journal-tags",card),overview=$(".wb-journal-overview",card);
+  if(tags)tags.style.minHeight="";
+  if(overview)overview.style.minHeight="";
+ }
+ const rows=new Map();
+ for(const card of cards){
+  const overview=$(".wb-journal-overview",card),tags=$(".wb-journal-tags",card);
+  if(!overview||!tags||card.getBoundingClientRect().width===0)continue;
+  const top=Math.round(card.getBoundingClientRect().top);
+  if(!rows.has(top))rows.set(top,[]);
+  rows.get(top).push({overview,tags});
+ }
+ for(const row of rows.values()){
+  if(row.length<2)continue;
+  const tagHeight=Math.max(...row.map(item=>item.tags.getBoundingClientRect().height));
+  row.forEach(item=>item.tags.style.minHeight=Math.ceil(tagHeight)+"px");
+  const overviewHeight=Math.max(...row.map(item=>item.overview.getBoundingClientRect().height));
+  row.forEach(item=>item.overview.style.minHeight=Math.ceil(overviewHeight)+"px");
+ }
+}
+function scheduleJournalAlignment(){
+ if(journalAlignScheduled)return;
+ journalAlignScheduled=true;
+ requestAnimationFrame(alignJournalRows);
+}
+window.addEventListener("resize",scheduleJournalAlignment);
+document.getElementById("dkLanguageSelect")?.addEventListener("change",scheduleJournalAlignment);
 function journalEnhance(){
  const entries=core.journal().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
  const cards=$$(".journal-entry",$("#journalEntries"));
@@ -640,6 +674,7 @@ function journalEnhance(){
   overview.appendChild(body);
   card.insertBefore(overview,expanded);
  });
+ scheduleJournalAlignment();
 }
 document.addEventListener("change",event=>{
  const control=event.target.closest?.("select[data-journal-link]");
@@ -679,7 +714,7 @@ function renderPlantWarnings(){
 function renderAll(){
  renderPlantWarnings();renderSummary();renderLots();renderSuccession();renderViability();renderBeds();renderHarvests();renderSavedSeeds();renderLabels();showMonth();journalEnhance();updateBackToTop();
 }
-function importData(data){
+function importData(data,options={}){
  if(!data||typeof data!=="object"||Array.isArray(data))return false;
  const fresh=defaultState();
  for(const key of ["additions","lots","beds","harvests","savedSeeds","tests","succession"]){
@@ -692,7 +727,7 @@ function importData(data){
  if(!persist())return false;
  // Reload from the HTML baseline so an imported backup can also remove
  // custom seeds and reset overrides from the previous browser collection.
- setTimeout(()=>window.location.reload(),500);
+ if(!options.noReload)setTimeout(()=>window.location.reload(),500);
  return true;
 }
 window.DKSeedBankWorkbench=Object.freeze({exportData:()=>structuredClone(state),importData});
