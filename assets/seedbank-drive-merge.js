@@ -77,10 +77,17 @@ function mergeSnapshots(inputs){
  const growthKeys=new Set(journal.flatMap(entry=>array(entry.growthPhotos).map(photo=>
   "journal-photo|"+encodeURIComponent(entry.id)+"|"+photo.id)));
  const photos=[...photoMap.values()].filter(photo=>!photo.key.startsWith("journal-photo|")||growthKeys.has(photo.key));
+ // Collect favorites from the user's own snapshots. No supplier data is publicized.
+ const supplierMap=new Map();
+ for(const snapshot of snapshots)for(const item of array(snapshot.suppliers)){
+  if(item&&typeof item.name==="string"&&typeof item.url==="string")
+   supplierMap.set(item.url.toLowerCase(),{name:item.name,url:item.url});
+ }
+ const suppliers=[...supplierMap.values()].slice(0,40);
  const output={
   format:"dk-seedbank-v1",backupSchema:3,exportedAt:new Date().toISOString(),
   journal,journalDeletes,settings:object(local.settings),
-  workbench,watering,recipeGuide:object(local.recipeGuide),
+  workbench,watering,recipeGuide:object(local.recipeGuide),suppliers,
   photoUrls:Object.assign({},...snapshots.map(s=>object(s.photoUrls))),
   photoPreferences:Object.assign({},...snapshots.map(s=>object(s.photoPreferences))),
   photos

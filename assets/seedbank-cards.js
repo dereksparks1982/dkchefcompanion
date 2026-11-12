@@ -1015,6 +1015,7 @@ async function createFullBackup(){
   workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,
   watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,
   recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,
+  suppliers:window.DKSeedBankSuppliers?window.DKSeedBankSuppliers.exportData():[],
   photos:serialized
  };
  const serializedBackup=JSON.stringify(draft);
@@ -1151,6 +1152,8 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
    throw Error("Watering records could not be restored.");
   if(data.recipeGuide&&window.DKSeedBankRecipes&&!window.DKSeedBankRecipes.importData(data.recipeGuide))
    throw Error("Recipe checklist could not be restored.");
+  if(data.suppliers&&window.DKSeedBankSuppliers&&!window.DKSeedBankSuppliers.importData(data.suppliers))
+   throw Error("Favorite supplier links could not be restored.");
   if(data.workbench&&window.DKSeedBankWorkbench&&!window.DKSeedBankWorkbench.importData(data.workbench))
    throw Error("Inventory changes could not be restored.");
   requestFiltering();
@@ -1232,6 +1235,10 @@ async function applySyncedBackup(data){
     JSON.stringify(window.DKSeedBankRecipes.exportData())!==JSON.stringify(data.recipeGuide)&&
     !window.DKSeedBankRecipes.importData(data.recipeGuide))
   throw Error("Recipe records could not be synchronized.");
+ if(data.suppliers&&window.DKSeedBankSuppliers&&
+    JSON.stringify(window.DKSeedBankSuppliers.exportData())!==JSON.stringify(data.suppliers)&&
+    !window.DKSeedBankSuppliers.importData(data.suppliers))
+  throw Error("Favorite supplier links could not be synchronized.");
  const oldWorkbench=window.DKSeedBankWorkbench?.exportData();
  const changeWorkbench=data.workbench&&window.DKSeedBankWorkbench&&
     JSON.stringify(oldWorkbench)!==JSON.stringify(data.workbench);

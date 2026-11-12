@@ -87,6 +87,16 @@ function validate(data){
    }
   }
  }
+ if(data.suppliers!=null){
+  if(!Array.isArray(data.suppliers)||data.suppliers.length>40)throw Error("Invalid favorite suppliers.");
+  for(const item of data.suppliers){
+   if(!isObject(item)||typeof item.name!=="string"||!item.name.trim()||item.name.length>100||
+      typeof item.url!=="string"||item.url.length>500||!item.url.startsWith("https://"))
+    throw Error("Invalid supplier link.");
+   let url;try{url=new URL(item.url);}catch(e){throw Error("Invalid supplier website.");}
+   if(url.protocol!=="https:"||url.username||url.password)throw Error("Unsafe supplier URL.");
+  }
+ }
  for(const key of ["settings","workbench","watering","recipeGuide","photoUrls","photoPreferences"]){
   if(data[key]!=null&&!isObject(data[key]))throw Error("Invalid "+key+" section.");
  }
