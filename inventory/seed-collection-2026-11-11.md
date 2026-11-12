@@ -139,6 +139,19 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Cowpea California Blackeye: 2 packets
 - Soybean Disoy: 1 packet
 - Soybean Chiba Green: 1 packet
+- Pea Sugar Snap: 5 packets
+- Pea Oregon Sugar Pod II: 1 packet
+- Pea Lincoln Homestead: 1 packet
+- Pea Little Marvel: 1 packet
+- Pea Cascadia: 1 packet
+- Pole Bean Bingo: 1 packet
+- Wild Jungle Peanut (Arachis hypogaea): 1 packet
+- Bush Bean Venture: 1 packet
+- Bush Bean Blue Lake 156: 1 packet
+- Bush Bean Royal Burgundy: 1 packet
+- Pole Bean Blue Lake: 1 packet
+- Pole Bean Rattlesnake: 1 packet
+- Garden Bean Kentucky Wonder: 3 packets
 
 ## Pumpkins and melons
 - Pumpkin, harvested from store pumpkin: 1 loose batch

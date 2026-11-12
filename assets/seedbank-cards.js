@@ -52,6 +52,13 @@ const guides={
 
  soyField:def("1–1½ in","3–6 in for field soybeans","Full sun","5–10 days","65–85°F","Direct sow after frost when soil is consistently warm","Fertile, well-drained outdoor garden soil","Keep consistently moist while plants establish and pods fill","Approximately 90–120 days for mature dry grain (varies with day length and location)","direct-warm","outdoor","90–120 days","Disoy is an Iowa-developed Glycine max cultivar (USDA PI 548550). Field-type soybeans are not necessarily suitable for green edamame harvest. Soy is a major food allergen; cook beans properly before eating."),
  soyEdamame:def("1–1½ in","4–6 in","Full sun","5–10 days","65–85°F","Direct sow after frost when soil is warm; sow in blocks for an orderly harvest","Fertile, well-drained bed with good air circulation","Regular moisture while pods form and fill","Around 82–83 days to harvest green edamame pods","direct-warm","outdoor","82–83 days","Chiba Green is a Glycine max edible green soybean (edamame). Harvest pods when plump and green; cook edamame before eating. Soy is a major food allergen."),
+
+ peaSnap:def("1 in","2–4 in","Full sun / partial sun","7–14 days","40–70°F","Direct sow when spring soil is workable, then again in cool fall where possible","Well-drained garden soil; Sugar Snap uses a tall trellis, Cascadia shorter support","Keep evenly moist through flowering and pod fill","60–75 days; harvest pods when plump, tender and sweet","direct-cool","outdoor","60–75 days","Sugar Snap is tall and climbing; Cascadia is compact. Snap pea pods and peas are both edible."),
+ peaSnow:def("1 in","2–4 in","Full sun / light shade","7–14 days","40–70°F","Direct sow in early spring; peas prefer cool weather","Well-drained bed; short trellis or brush support helpful","Water steadily during pod development","60–70 days; harvest edible pods flat and tender","direct-cool","outdoor","60–70 days","Oregon Sugar Pod II is a snow pea. Pick before peas swell, unlike shelling or snap varieties."),
+ peaShell:def("1 in","2–4 in","Full sun / light shade","7–14 days","40–70°F","Direct sow as spring soil can be worked","Fertile well-drained bed; dwarf plants can use short supports","Keep evenly moist","60–75 days; harvest full pods and shell peas for eating","direct-cool","outdoor","60–75 days","Lincoln Homestead and Little Marvel are shelling peas; the tough pods are not eaten like snap-pea pods."),
+ beanBush:def("1 in","3–6 in","Full sun","5–10 days","65–85°F","Direct sow after last spring frost once the soil is warm; succession sow in suitable seasons","Sunny, well-drained garden bed; no tall trellis needed","Water regularly around flowering; avoid saturated roots","50–65 days; harvest tender pods regularly","direct-warm","outdoor","50–65 days","Venture, Blue Lake 156 and Royal Burgundy are bush beans. Royal Burgundy pods turn green upon cooking."),
+ beanPole:def("1 in","4–6 in along trellis","Full sun","5–10 days","65–85°F","Direct sow after frost into warm soil; place supports before planting","Sunny, well-drained bed with a sturdy 5–8 ft trellis","Consistent moisture during pod formation","60–80 days for green pods; shell/dry varieties take longer","direct-warm","outdoor","60–80+ days","Blue Lake pole, Kentucky Wonder and Rattlesnake climb. Bingo is often described as an Italian borlotto-type climbing bean that may be grown for mature beans."),
+ peanut:def("1–2 in","6–12 in","Full sun","7–14 days","70–90°F","Sow unroasted, untreated peanut kernels only after frost when soil is thoroughly warm","Loose sandy well-drained soil; leave room for pegs to grow into soil, long hot season required","Water during flowering and pod development without waterlogging","Often 120–150 days; lift plants then dry/cure pods promptly and safely","direct-warm","protected","120–150 days","Arachis hypogaea is the cultivated peanut species. Wild Jungle Peanut is preserved from the packet name, not a confirmed wild species. Peanut allergies can be severe."),
  generic:def("Check packet","Check species","Check packet","Varies","Varies","Follow species and packet guidance","Unknown until species is confirmed","Keep evenly moist during germination, avoid saturation","Varies","unknown","verify","Varies","General botanical guidance only; this variety needs verification."),
  tomato:def("¼ in","24–36 in","Full sun","5–10 days","75–85°F","Start indoors about 5–8 weeks before last spring frost","Warm bed or greenhouse; harden off before transplanting","Water evenly, especially during fruiting","Typically 65–90 days from transplant","indoor","protected", "65–90 days","Support vining plants; long-season cultivars often benefit from protected growing."),
  pepper:def("¼ in","12–24 in","Full sun","7–21 days","75–90°F","Start indoors about 8–10 weeks before last spring frost","Warm greenhouse or sheltered bed; transplant after soil warms","Keep consistently moist; good drainage","Roughly 60–120 days from transplant","indoor","protected","60–120 days","Very hot varieties can mature slowly; provide extra warmth in short seasons."),
@@ -100,7 +107,7 @@ function resolveGuide(name,cat){
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?guides.pumpkin:guides.melon;
  if(cat==="Gourds and squash")return n.includes("cucumber")?guides.cucumber:n.includes("loofah")?guides.tropical:guides.squash;
  if(cat==="Other vegetables")return n.includes("okra")?guides.okra:n.includes("artichoke")?guides.artichoke:guides.generic;
- if(cat==="Beans and legumes")return n.includes("soybean")?(n.includes("chiba")?guides.soyEdamame:guides.soyField):n.includes("njahi")?guides.njahi:n.includes("lentil")?guides.lentil:n.includes("cowpea")?guides.cowpea:n.includes("lima")?guides.lima:guides.commonBean;
+ if(cat==="Beans and legumes")return n.startsWith("pea ")?n.includes("oregon sugar pod")?guides.peaSnow:/lincoln|little marvel/.test(n)?guides.peaShell:guides.peaSnap:n.includes("peanut")?guides.peanut:n.startsWith("bush bean")?guides.beanBush:/^pole bean|kentucky wonder/.test(n)?guides.beanPole:n.includes("soybean")?(n.includes("chiba")?guides.soyEdamame:guides.soyField):n.includes("njahi")?guides.njahi:n.includes("lentil")?guides.lentil:n.includes("cowpea")?guides.cowpea:n.includes("lima")?guides.lima:guides.commonBean;
  if(cat==="Trees and woody plants")return n.includes("white mulberry")?guides.mulberry:n.includes("english ivy")?guides.englishIvy:/date palm|moringa/.test(n)?guides.tropical:guides.tree;
   if(cat==="Berries and fruit")return n.includes("strawberry")?guides.strawberry:n.includes("saskatoon")?guides.serviceberry:n.includes("elderberry")?guides.elderberry:n.includes("lowbush blueberry")?guides.blueberry:n.includes("evergreen huckleberry")?guides.huckleberry:n.includes("garden huckleberry")?guides.gardenHuckleberry:guides.generic;
  if(cat==="Flowers and ornamentals")return /poppy/.test(n)?guides.poppy:guides.flower;
@@ -147,7 +154,7 @@ function wikiFor(name,cat){
  if(cat==="Roots and brassicas")return n.includes("rapini")?"Rapini":n.includes("brussels")?"Brussels sprout":n.includes("cauliflower")?"Cauliflower":n.includes("broccoli")?"Broccoli":n.includes("cabbage")?"Cabbage":n.includes("parsnip")?"Parsnip":n.includes("radish")?"Radish":n.includes("kohlrabi")?"Kohlrabi":n.includes("turnip")?"Turnip":"Beetroot";
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?"Pumpkin":n.includes("cucamelon")?"Melothria scabra":n.includes("watermelon")?"Watermelon":"Cantaloupe";
  if(cat==="Other vegetables")return n.includes("okra")?"Okra":"Artichoke";
- if(cat==="Beans and legumes")return n.includes("soybean")?(n.includes("chiba")?"Edamame":"Soybean"):n.includes("njahi")?"Lablab purpureus":n.includes("lentil")?"Lentil":n.includes("cowpea")?"Cowpea":n.includes("lima")?"Lima bean":"Common bean";
+ if(cat==="Beans and legumes")return n.startsWith("pea ")?"Pea":n.includes("peanut")?"Peanut":n.includes("soybean")?(n.includes("chiba")?"Edamame":"Soybean"):n.includes("njahi")?"Lablab purpureus":n.includes("lentil")?"Lentil":n.includes("cowpea")?"Cowpea":n.includes("lima")?"Lima bean":"Common bean";
  if(cat==="Gourds and squash")return n.includes("cucumber")?"Cucumber":n.includes("loofah")?"Luffa aegyptiaca":n.includes("zucchini")?"Zucchini":n.includes("butternut")?"Butternut squash":n.includes("delicata")?"Delicata squash":"Summer squash";
  if(cat==="Berries and fruit")return n.includes("strawberry")?"Strawberry":n.includes("serviceberry")?"Amelanchier alnifolia":n.includes("elderberry")?"Sambucus canadensis":n.includes("blueberry")?"Vaccinium angustifolium":n.includes("evergreen huckleberry")?"Vaccinium ovatum":n.includes("garden huckleberry")?"Solanum scabrum":"Berry";
   if(cat==="Trees and woody plants")return n.includes("mulberry")?"Morus alba":n.includes("english ivy")?"Hedera helix":n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
@@ -159,6 +166,13 @@ function wikiFor(name,cat){
  return commonWiki[cat]||null;
 }
 const referenceGuides={
+ peaSnap:["Oregon State University Extension · Snap peas","https://extension.oregonstate.edu/imported-publication/snap-peas"],
+ peaSnow:["Utah State University Extension · Peas","https://extension.usu.edu/yardandgarden/research/peas-in-the-garden"],
+ peaShell:["Utah State University Extension · Peas","https://extension.usu.edu/yardandgarden/research/peas-in-the-garden"],
+ beanPole:["Cornell · Kentucky Wonder beans","https://vegvariety.cce.cornell.edu/main/detail.php?filterBy=0&variety_id=2834"],
+ beanBush:["University of Minnesota Extension · Beans","https://extension.umn.edu/vegetables/growing-beans"],
+ peanut:["University of Georgia Extension","https://extension.uga.edu/"],
+
  pepper:["University of Minnesota Extension · Growing peppers","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-peppers"],
  pumpkin:["University of Minnesota Extension · Pumpkins and squash","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/pumpkins-and-winter-squash"],
  squash:["University of Minnesota Extension · Pumpkins and squash","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/pumpkins-and-winter-squash"],
@@ -185,6 +199,9 @@ function seedFallbackMarkup(name,cat){
  if(/\bcantaloupe\b|\bhoneydew\b/.test(n))return '🍈';
  if(/\bpumpkin\b/.test(n))return '🎃';
  if(/\bcucumber\b/.test(n))return '🥒';
+ if(/^pea\b/.test(n))return '🫛';
+ if(/\bpeanut\b/.test(n))return '🥜';
+ if(/\b(bush bean|pole bean|garden bean)\b/.test(n))return '🫘';
  if(/\b(okra|artichoke)\b/.test(n))return '🌿';
  if(/\b(njahi|lentil|pinto|kidney bean|lima bean|cowpea|beans)\b/.test(n))return '🫘';
  if(/\b(broccoli|rapini|cauliflower|brussels)\b/.test(n))return '🥦';
@@ -337,6 +354,13 @@ const seedCautionInfo={
   "who": "Gardeners handling wet tobacco, children, pets and livestock.",
   "source": "https://www.cdc.gov/niosh/"
  }
+,
+ "Wild Jungle Peanut (Arachis hypogaea)": {
+ "why": "Peanuts are a major food allergen and can cause anaphylaxis. Improperly dried or damp-stored peanut pods can develop molds that produce aflatoxins.",
+ "how": "Do not serve or expose peanuts to anyone with a known peanut allergy. Harvest mature pods, cure and store promptly in clean, dry conditions; discard spoiled, damp or moldy peanuts instead of tasting them. Avoid consuming untreated planting seeds.",
+ "who": "People with peanut allergies, including children, and anyone eating improperly stored nuts.",
+ "source": "https://www.fda.gov/food/food-labeling-nutrition/food-allergies"
+}
 };
 function safetyForSeed(name,tags){
  const flagged=String(tags||"").split("|").includes("Caution");
