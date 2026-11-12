@@ -585,7 +585,7 @@ function journalDetailsHTML(entry,linked,candidates,guide){
 let journalAlignScheduled=false;
 function alignJournalRows(){
  journalAlignScheduled=false;
- const cards=$(".journal-entry",$("#journalEntries"));
+ const cards=Array.from(document.querySelectorAll("#journalEntries .journal-entry"));
  for(const card of cards){
   const tags=$(".wb-journal-tags",card),overview=$(".wb-journal-overview",card);
   if(tags)tags.style.minHeight="";
