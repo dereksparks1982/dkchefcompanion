@@ -84,6 +84,24 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Swiss Chard Ruby Red (*Beta vulgaris*): packet count **unconfirmed**
 - Swiss Chard Large White (*Beta vulgaris*): packet count **unconfirmed**
 - Mâche / Corn Salad (*Valerianella locusta*): packet count **unconfirmed**
+- Kale Black Magic Dinosaur: 1 packet
+- Kale Dwarf Siberian: 1 packet
+- Kale Winter Red: 1 packet
+- Spinach Bloomsdale Long Standing: 2 packets
+- Lettuce Grand Rapids: 1 packet
+- Lettuce Red Romaine: 1 packet
+- Lettuce Lollo Rosso Dark: 1 packet
+- Lettuce Iceberg: 1 packet (dictated as Iceburg)
+- Lettuce Green Romaine: 1 packet
+- Lettuce Black Seeded Simpson: 1 packet
+- Lettuce Cimarron Red: 1 packet
+- Lettuce Buttercrunch: 2 packets
+- Lettuce Gourmet Blend: 1 packet
+- Endive Curled Ruffec: 1 packet
+- Collard Georgia Southern: 1 packet
+- Cress Curled: 1 packet
+- Arugula Roquette: 1 packet
+- Celery Tall Utah: 3 packets
 
 ## Roots and brassicas
 - Kohlrabi White Vienna: 1
@@ -98,6 +116,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Beet Bull's Blood: 1
 - Beet Detroit Dark Red: 3
 - Beet Early Wonder Tall Top: 1
+- Cabbage Copenhagen Market Early: 1 packet
+- Cabbage Golden Acre: 2 packets
 
 ## Pumpkins and melons
 - Pumpkin, harvested from store pumpkin: 1 loose batch
@@ -211,6 +231,7 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 - Winter Savory: 1 commercial packet
 - Summer Savory: 1 commercial packet
 - Big Italy Parsley (packet name as spoken): 1 commercial packet
+- Chervil Curled: 1 packet
 
 ## Alliums: chives, onions and leeks
 - Garlic Chives (white flowers): 1 commercial packet

@@ -18,6 +18,16 @@ const guides={
  chard:def("½ in","8–12 in","Full sun / partial shade","5–14 days","50–85°F","Direct sow 2–4 weeks before last frost and for fall","Fertile outdoor bed or large container","Water consistently to keep leaves tender","Baby leaves about 25–35 days; mature stalks 50–65 days","direct-cool","outdoor","25–65 days","Beta vulgaris (leaf beet). Harvest outside leaves for repeated picking. Ruby Red has red ribs; Large White has broad white ribs."),
  mache:def("¼ in","4–6 in","Full sun / partial shade","7–21 days","40–65°F","Sow in cool early spring or late summer through autumn","Outdoor cool bed or container; avoid hot soil","Moist, well-drained soil; germination slows in warmth","Small rosettes about 45–65 days","direct-cool","outdoor","45–65 days","Mâche / corn salad is Valerianella locusta, not maize. Best flavor and germination in cool weather."),
  fenugreek:def("¼–½ in","4–6 in for greens","Full sun / light shade","5–10 days","60–80°F","Direct sow after the risk of hard frost; repeat for leaf harvests","Sunny garden bed or container with drainage","Water regularly until established; avoid waterlogging","Tender leaves in 25–40 days; dry seeds about 90–120 days","direct-warm","outdoor","25–120 days","Trigonella foenum-graecum (Fabaceae). Edible greens (methi) and aromatic seeds; traditional uses are not medical advice."),
+ kale:def("¼–½ in","12–18 in","Full sun / partial shade","5–10 days","50–75°F","Direct sow early spring or late summer for fall","Cool-season fertile bed or large container","Maintain even moisture for tender leaves","Baby leaves 25–35 days; mature leaves about 50–75 days","direct-cool","outdoor","25–75 days","Dwarf Siberian kale can belong to Brassica napus; Black Magic and Winter Red packet identities should be verified."),
+ spinach:def("½–1 in","3–6 in","Full sun / partial shade","5–14 days","40–70°F","Direct sow as soil becomes workable in early spring, then late summer","Cool outdoor garden bed","Keep soil moist; use cool-season succession sowing","Baby leaves 25–35 days; mature leaves 40–55 days","direct-cool","outdoor","25–55 days","Bloomsdale Long Standing is a savoy-leaf spinach; hot weather can cause bolting."),
+ lettuce:def("⅛–¼ in; shallow cover","6–12 in; heads need more room","Full sun / afternoon shade","4–14 days","45–75°F","Sow in cool spring and again for autumn; protect seedlings from heat","Cool outdoor bed or containers","Keep consistently moist to prevent bitter, tough leaves","Baby leaves in 25–35 days; mature heads around 55–85 days","direct-cool","outdoor","25–85 days","Leaf, romaine, butterhead and crisphead cultivars vary in spacing and maturity. Iceberg heads need a longer cool spell."),
+ endive:def("¼ in","8–12 in","Full sun / part shade","5–14 days","55–75°F","Direct sow in cool spring or late summer for fall","Rich, well-drained outdoor soil","Even moisture keeps leaves tender","Approximately 60–85 days","direct-cool","outdoor","60–85 days","Curled Ruffec is Cichorium endivia, not Belgian endive."),
+ collard:def("¼–½ in","12–18 in","Full sun / partial shade","5–10 days","50–80°F","Sow early spring or late summer for harvest into cool weather","Compost-rich outdoor bed","Maintain regular moisture","Baby leaves 30–40 days; mature 60–80 days","direct-cool","outdoor","30–80 days","Georgia Southern collards tolerate light frost and can become sweeter in cool weather."),
+ cress:def("⅛ in; very light cover","2–4 in","Full sun / partial shade","3–7 days","50–75°F","Succession sow during cool spring or autumn","Outdoor bed or windowsill tray with suitable light","Keep seedbed evenly moist","Young leaves typically 10–20 days","direct-cool","outdoor","10–20 days","Curled garden cress is Lepidium sativum; harvest before stems turn fibrous."),
+ arugula:def("¼ in","4–6 in","Full sun / part shade","4–10 days","45–75°F","Sow in early spring or late summer; repeat every few weeks","Cool-season outdoor garden bed","Consistent moisture moderates peppery bitterness","Baby leaves 20–30 days; mature leaves 35–50 days","direct-cool","outdoor","20–50 days","Roquette is arugula (Eruca vesicaria); heat hastens bolting."),
+ celery:def("Surface sow; press into seed mix","8–12 in","Full sun / partial shade","14–28 days","65–75°F","Start indoors 10–12 weeks before last frost; transplant after hardening","Rich, moisture-retentive soil; long cool season","Needs reliably even moisture","Often 100–130 days from transplant","indoor","protected","100–130 days","Tall Utah celery is a long-season crop; do not bury tiny seeds deeply. Needs consistent moisture and nutrition."),
+ cabbage:def("¼–½ in","12–18 in","Full sun","5–10 days","60–80°F","Start indoors 4–6 weeks before last frost for spring or start midsummer for fall","Cool-season fertile outdoor bed","Keep evenly moist and protect from cabbage pests","Early heads often 60–90 days from transplant","indoor","outdoor","60–90 days","Golden Acre and Copenhagen Market Early are early heading cabbages. Avoid sowing directly into hot weather."),
+ chervil:def("¼ in","6–8 in","Partial shade / cool sun","10–21 days","50–70°F","Direct sow in cool spring and fall; repeat succession sowings","Moist, well-drained herb bed or container","Never let young plants dry out","Tender leaves about 6–8 weeks","direct-cool","outdoor","40–60 days","Curled chervil (Anthriscus cerefolium) bolts in heat and resents root disturbance."),
  generic:def("Check packet","Check species","Check packet","Varies","Varies","Follow species and packet guidance","Unknown until species is confirmed","Keep evenly moist during germination, avoid saturation","Varies","unknown","verify","Varies","General botanical guidance only; this variety needs verification."),
  tomato:def("¼ in","24–36 in","Full sun","5–10 days","75–85°F","Start indoors about 5–8 weeks before last spring frost","Warm bed or greenhouse; harden off before transplanting","Water evenly, especially during fruiting","Typically 65–90 days from transplant","indoor","protected", "65–90 days","Support vining plants; long-season cultivars often benefit from protected growing."),
  pepper:def("¼ in","12–24 in","Full sun","7–21 days","75–90°F","Start indoors about 8–10 weeks before last spring frost","Warm greenhouse or sheltered bed; transplant after soil warms","Keep consistently moist; good drainage","Roughly 60–120 days from transplant","indoor","protected","60–120 days","Very hot varieties can mature slowly; provide extra warmth in short seasons."),
@@ -61,8 +71,8 @@ function resolveGuide(name,cat){
  if(cat==="Sunflowers")return guides.sunflower;
  if(cat==="Eggplant")return guides.eggplant;
  if(cat==="Wildflower mixes")return guides.flower;
- if(cat==="Leafy greens")return /pak choi|bok choy/.test(n)?guides.pakChoi:n.includes("catalogna")?guides.chicory:n.includes("winter purslane")?guides.purslaneWinter:n.includes("swiss chard")?guides.chard:n.includes("corn salad")?guides.mache:guides.generic;
- if(cat==="Roots and brassicas")return n.includes("parsnip")?guides.parsnip:n.includes("kohlrabi")?guides.kohlrabi:n.includes("turnip")?guides.turnip:n.includes("radish")?guides.radish:guides.beet;
+ if(cat==="Leafy greens")return /pak choi|bok choy/.test(n)?guides.pakChoi:n.includes("catalogna")?guides.chicory:n.includes("winter purslane")?guides.purslaneWinter:n.includes("swiss chard")?guides.chard:n.includes("corn salad")?guides.mache:/^kale\b/.test(n)?guides.kale:/^spinach\b/.test(n)?guides.spinach:/^lettuce\b/.test(n)?guides.lettuce:/^endive\b/.test(n)?guides.endive:/^collard\b/.test(n)?guides.collard:/^cress\b/.test(n)?guides.cress:/^arugula\b/.test(n)?guides.arugula:/^celery\b/.test(n)?guides.celery:guides.generic;
+ if(cat==="Roots and brassicas")return n.includes("cabbage")?guides.cabbage:n.includes("parsnip")?guides.parsnip:n.includes("kohlrabi")?guides.kohlrabi:n.includes("turnip")?guides.turnip:n.includes("radish")?guides.radish:guides.beet;
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?guides.pumpkin:guides.melon;
  if(cat==="Gourds and squash")return n.includes("loofah")?guides.tropical:guides.squash;
  if(cat==="Trees and woody plants")return /date palm|moringa/.test(n)?guides.tropical:guides.tree;
@@ -72,6 +82,7 @@ function resolveGuide(name,cat){
  if(cat==="Alliums: chives, onions and leeks")return n.includes("chives")?guides.chives:n.includes("leek")?guides.leek:/scallion|bunching/.test(n)?guides.scallion:guides.onion;
  if(cat==="Herbs and medicinal plants"){
   if(n.includes("fenugreek"))return guides.fenugreek;
+   if(n.includes("chervil"))return guides.chervil;
   for(const k of ["basil","chives","thyme","oregano","dill","coriander","cilantro","parsley","mint","fennel"])if(n.includes(k))return guides[k==="cilantro"?"coriander":k];
   if(n.includes("marjoram"))return guides.oregano;
   if(n.includes("anise")||n.includes("caraway")||n.includes("cumin"))return guides.coriander;
@@ -90,9 +101,10 @@ const commonWiki={
 function wikiFor(name,cat){
  const n=name.toLowerCase();
  if(cat==="Wildflower mixes")return n.includes("butterfly")?"Butterfly gardening":"Wildflower";
- if(cat==="Leafy greens")return /bok choy|pak choi/.test(n)?"Bok choy":n.includes("catalogna")?"Chicory":n.includes("winter purslane")?"Claytonia perfoliata":n.includes("swiss chard")?"Chard":n.includes("corn salad")?"Valerianella locusta":"Leaf vegetable";
+ if(cat==="Leafy greens")return /bok choy|pak choi/.test(n)?"Bok choy":n.includes("catalogna")?"Chicory":n.includes("winter purslane")?"Claytonia perfoliata":n.includes("swiss chard")?"Chard":n.includes("corn salad")?"Valerianella locusta":n.includes("kale")?"Kale":n.includes("spinach")?"Spinach":n.includes("lettuce")?"Lettuce":n.includes("endive")?"Endive":n.includes("collard")?"Collard greens":n.includes("cress")?"Garden cress":n.includes("arugula")?"Arugula":n.includes("celery")?"Celery":"Leaf vegetable";
  if(n.includes("fenugreek"))return "Fenugreek";
- if(cat==="Tomatoes"&&n.includes("tamarillo"))return "Tamarillo";
+ if(n.includes("chervil"))return "Chervil";
+  if(cat==="Tomatoes"&&n.includes("tamarillo"))return "Tamarillo";
  if(cat==="Peppers"){
   if(n.includes("ghost"))return "Bhut jolokia";
   if(n.includes("scotch bonnet"))return "Scotch bonnet";
@@ -105,7 +117,7 @@ function wikiFor(name,cat){
   if(n.includes("cayenne"))return "Cayenne pepper";
   return commonWiki[cat];
  }
- if(cat==="Roots and brassicas")return n.includes("parsnip")?"Parsnip":n.includes("radish")?"Radish":n.includes("kohlrabi")?"Kohlrabi":n.includes("turnip")?"Turnip":"Beetroot";
+ if(cat==="Roots and brassicas")return n.includes("cabbage")?"Cabbage":n.includes("parsnip")?"Parsnip":n.includes("radish")?"Radish":n.includes("kohlrabi")?"Kohlrabi":n.includes("turnip")?"Turnip":"Beetroot";
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?"Pumpkin":n.includes("cucamelon")?"Melothria scabra":n.includes("watermelon")?"Watermelon":"Cantaloupe";
  if(cat==="Gourds and squash")return n.includes("loofah")?"Luffa aegyptiaca":n.includes("zucchini")?"Zucchini":n.includes("butternut")?"Butternut squash":n.includes("delicata")?"Delicata squash":"Summer squash";
  if(cat==="Trees and woody plants")return n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
@@ -681,7 +693,7 @@ function downloadJSON(data){
 document.getElementById("exportJournal").addEventListener("click",async()=>{
  const photos=await dbAll();
  const serialized=await Promise.all(photos.map(async ([key,blob])=>({key,data:await fileToDataURL(blob)})));
- downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,photos:serialized.filter(x=>x.data)});
+ downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,photos:serialized.filter(x=>x.data)});
 });
 document.getElementById("importJournal").addEventListener("change",async e=>{
  const f=e.target.files&&e.target.files[0];if(!f)return;
@@ -718,6 +730,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
    photoPreferences=Object.assign(photoPreferences,data.photoPreferences);save(photoPreferenceKey,photoPreferences);
   }
   if(data.workbench&&window.DKSeedBankWorkbench)window.DKSeedBankWorkbench.importData(data.workbench);
+   if(data.recipeGuide&&window.DKSeedBankRecipes)window.DKSeedBankRecipes.importData(data.recipeGuide);
   requestFiltering();
   document.getElementById("regionSelect").value=settings.region;
   document.getElementById("envSelect").value=settings.environment;
