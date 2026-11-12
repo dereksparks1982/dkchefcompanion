@@ -1,0 +1,76 @@
+/* DK Seed Bank backup validation, summaries and optional SHA-256 integrity. */
+(function(root){
+"use strict";
+const isObject=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
+const array=value=>Array.isArray(value)?value:[];
+const MAX_PHOTOS=3000;
+const MAX_PHOTO_BYTES=8000000;
+const MAX_TOTAL_PHOTO_CHARS=130000000;
+function validate(data){
+ if(!isObject(data)||data.format!=="dk-seedbank-v1")throw Error("Not a DK Seed Bank backup.");
+ if(!Array.isArray(data.journal)||data.journal.length>3000)throw Error("Invalid or oversized planting journal.");
+ for(const record of data.journal){
+  if(!isObject(record)||typeof record.plant!=="string"||record.plant.length>300||
+    typeof record.date!=="string"||record.date.length>32)throw Error("Invalid planting record in backup.");
+ }
+ for(const key of ["settings","workbench","watering","recipeGuide","photoUrls","photoPreferences"]){
+  if(data[key]!=null&&!isObject(data[key]))throw Error("Invalid "+key+" section.");
+ }
+ for(const key of ["additions","lots","beds","harvests","savedSeeds","tests","succession"]){
+  const section=data.workbench?.[key];
+  if(section!=null&&(!Array.isArray(section)||section.length>3000||section.some(x=>!isObject(x))))
+   throw Error("Invalid inventory section: "+key);
+ }
+ if(data.photos!=null&&!Array.isArray(data.photos))throw Error("Invalid photo section.");
+ const photos=array(data.photos);
+ if(photos.length>MAX_PHOTOS)throw Error("Too many photos in backup.");
+ let chars=0;
+ const keys=new Set();
+ for(const record of photos){
+  if(!isObject(record)||typeof record.key!=="string"||record.key.length>320||
+    typeof record.data!=="string"||record.data.length>MAX_PHOTO_BYTES||
+    !/^data:image\/(jpeg|png|webp);base64,/.test(record.data))
+    throw Error("Invalid or oversized photo in backup.");
+  if(keys.has(record.key))throw Error("Duplicate photo in backup.");
+  keys.add(record.key);
+  chars+=record.data.length;
+  if(chars>MAX_TOTAL_PHOTO_CHARS)throw Error("Photos exceed the backup size limit.");
+ }
+ if(data.integrity!=null&&
+   (!isObject(data.integrity)||data.integrity.algorithm!=="SHA-256"||
+    !/^[a-f0-9]{64}$/.test(String(data.integrity.digest))))
+  throw Error("Unsupported backup integrity information.");
+ if(data.photoUrls&&Object.keys(data.photoUrls).length>6000)throw Error("Too many image links.");
+ return summarize(data);
+}
+function summarize(data){
+ const workbench=isObject(data.workbench)?data.workbench:{};
+ return {
+  plantings:array(data.journal).length,
+  addedVarieties:array(workbench.additions).length,
+  seedLots:array(workbench.lots).length,
+  germinationTests:array(workbench.tests).length,
+  harvests:array(workbench.harvests).length,
+  wateringChecks:array(data.watering?.records).length,
+  uploadedPhotos:array(data.photos).length,
+  photoLinks:isObject(data.photoUrls)?Object.keys(data.photoUrls).length:0,
+  exportedAt:typeof data.exportedAt==="string"?data.exportedAt:"Unknown"
+ };
+}
+async function checksum(data){
+ if(!root.crypto?.subtle||typeof TextEncoder==="undefined")return null;
+ const serialized=new TextEncoder().encode(JSON.stringify(data));
+ const buffer=await root.crypto.subtle.digest("SHA-256",serialized);
+ return Array.from(new Uint8Array(buffer),byte=>byte.toString(16).padStart(2,"0")).join("");
+}
+async function verify(data){
+ validate(data);
+ if(!data.integrity)return {verified:false,reason:"Legacy backup without checksum"};
+ const {integrity,...payload}=data;
+ const digest=await checksum(payload);
+ if(!digest)throw Error("Cannot verify this backup on this device.");
+ if(digest!==integrity.digest)throw Error("Backup integrity check failed. The file may be damaged.");
+ return {verified:true,reason:"SHA-256 verified"};
+}
+root.DKSeedBankBackup=Object.freeze({validate,summarize,checksum,verify});
+})(window);

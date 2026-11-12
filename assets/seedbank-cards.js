@@ -943,59 +943,159 @@ async function restorePhotos(){
 }
 restorePhotos().then(()=>requestFiltering());
 function fileToDataURL(blob){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>resolve(null);r.readAsDataURL(blob);});}
-function downloadJSON(data){
- const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="dk-seedbank-backup-"+today()+".json";document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-}
-document.getElementById("exportJournal").addEventListener("click",async()=>{
+async function createFullBackup(){
  const photos=await dbAll();
- const serialized=await Promise.all(photos.map(async ([key,blob])=>({key,data:await fileToDataURL(blob)})));
- downloadJSON({format:"dk-seedbank-v1",exportedAt:new Date().toISOString(),journal,settings,photoUrls:remoteImageUrls,photoPreferences,workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,photos:serialized.filter(x=>x.data)});
-});
-document.getElementById("importJournal").addEventListener("change",async e=>{
- const f=e.target.files&&e.target.files[0];if(!f)return;
- if(f.size>100000000){alert("Backup file is too large.");return;}
+ const serialized=[];
+ for(const [key,blob] of photos){
+  const data=await fileToDataURL(blob);
+  if(!data)throw Error("Could not read an uploaded photo. No incomplete backup was downloaded.");
+  serialized.push({key,data});
+ }
+ const snapshot={
+  format:"dk-seedbank-v1",backupSchema:2,exportedAt:new Date().toISOString(),
+  journal,settings,photoUrls:remoteImageUrls,photoPreferences,
+  workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,
+  watering:window.DKSeedBankWatering?window.DKSeedBankWatering.exportData():null,
+  recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,
+  photos:serialized
+ };
+ const helper=window.DKSeedBankBackup;
+ if(!helper)throw Error("Backup protection tools are unavailable. Reload before exporting.");
+ helper.validate(snapshot);
+ const digest=await helper.checksum(snapshot);
+ if(digest)snapshot.integrity={algorithm:"SHA-256",digest};
+ return snapshot;
+}
+function downloadJSON(data,prefix="dk-seedbank-backup"){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),link=document.createElement("a");
+ link.href=url;link.download=prefix+"-"+today()+".json";
+ document.body.appendChild(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+function backupLanguage(en,ru){return document.documentElement.lang==="ru"?ru:en;}
+document.getElementById("exportJournal").addEventListener("click",async()=>{
+ const button=document.getElementById("exportJournal");
+ if(button.disabled)return;
+ button.disabled=true;
  try{
-  const data=JSON.parse(await f.text());
-  if(data.format!=="dk-seedbank-v1"||!Array.isArray(data.journal))throw Error("Not a DK Seed Bank backup");
-  if(!window.confirm("Replace your local journal and growing settings with this backup?"))return;
-  journal=data.journal.filter(x=>x&&typeof x.plant==="string"&&typeof x.date==="string").slice(0,3000);
-  settings=Object.assign(settings,data.settings||{});
-  save(storageKey,journal);save(settingsKey,settings);
-  if(data.photoUrls&&typeof data.photoUrls==="object"&&!Array.isArray(data.photoUrls)){
+  const snapshot=await createFullBackup();
+  downloadJSON(snapshot);
+  try{localStorage.setItem("dk-seedbank-last-export-v1",new Date().toISOString());}catch(error){}
+  document.dispatchEvent(new Event("dkseedbank:backup-exported"));
+ }catch(error){
+  alert(backupLanguage("Backup could not be prepared: ","Не удалось создать резервную копию: ")+error.message);
+ }finally{button.disabled=false;}
+});
+async function dbReplacePhotos(entries){
+ const db=await openDB();
+ if(!db)return entries.length===0;
+ return new Promise(resolve=>{
+  try{
+   const tx=db.transaction("photos","readwrite"),store=tx.objectStore("photos");
+   store.clear();
+   entries.forEach(([key,blob])=>store.put(blob,key));
+   tx.oncomplete=()=>resolve(true);
+   tx.onerror=()=>resolve(false);
+   tx.onabort=()=>resolve(false);
+  }catch(error){resolve(false);}
+ });
+}
+document.getElementById("importJournal").addEventListener("change",async e=>{
+ const file=e.target.files&&e.target.files[0];
+ if(!file)return;
+ try{
+  if(file.size>100000000)throw Error("Backup file is too large (limit 100 MB).");
+  const data=JSON.parse(await file.text());
+  const helper=window.DKSeedBankBackup;
+  if(!helper)throw Error("Backup protection tools are unavailable. Reload and try again.");
+  const summary=helper.validate(data);
+  const integrity=await helper.verify(data);
+  const review=backupLanguage(
+   "Review backup before replacing local records:\n","Проверьте резервную копию перед заменой записей:\n")+
+   backupLanguage("Plantings: ","Посадки: ")+summary.plantings+"\n"+
+   backupLanguage("Custom varieties: ","Добавленные сорта: ")+summary.addedVarieties+"\n"+
+   backupLanguage("Seed lots: ","Партии семян: ")+summary.seedLots+"\n"+
+   backupLanguage("Uploaded photos: ","Загруженные фотографии: ")+summary.uploadedPhotos+"\n"+
+   (integrity.verified?backupLanguage("Integrity check passed.\n","Проверка целостности пройдена.\n"):
+    backupLanguage("Older backup without a checksum.\n","Старая копия без контрольной суммы.\n"))+
+   backupLanguage("A safety copy of your current records will be downloaded before restoration. Continue?",
+   "Перед восстановлением будет загружена резервная копия текущих записей. Продолжить?");
+  if(!window.confirm(review))return;
+  // A safety export is created before any local content is replaced.
+  const previous=await createFullBackup();
+  downloadJSON(previous,"dk-seedbank-before-restore");
+  const keys=new Set(plants.keys());
+  for(const addition of data.workbench?.additions||[]){
+   if(addition&&typeof addition.category==="string"&&typeof addition.name==="string")
+    keys.add(addition.category+"|"+addition.name);
+  }
+  const photos=[];
+  for(const image of data.photos||[]){
+   const key=image.key.endsWith("|packet")?image.key.slice(0,-7):image.key;
+   if(!keys.has(key))continue;
+   const blob=await (await fetch(image.data)).blob();
+   if(blob.size>6000000)throw Error("An uploaded photo exceeds the 6 MB limit.");
+   photos.push([image.key,blob]);
+  }
+  // Commit all stored images in one atomic IndexedDB transaction.
+  if(!await dbReplacePhotos(photos))throw Error("Unable to restore uploaded photos. Existing journal was not replaced.");
+  const nextJournal=data.journal.map(x=>({...x}));
+  const nextSettings={...settings};
+  if(data.settings){
+   for(const name of ["region","environment","lastFrost"]){
+    if(typeof data.settings[name]==="string")nextSettings[name]=data.settings[name];
+   }
+  }
+  if(!save(storageKey,nextJournal)||!save(settingsKey,nextSettings))
+   throw Error("Local browser storage is full or blocked. Check your safety backup.");
+  journal=nextJournal;settings=nextSettings;
+  if(data.photoUrls){
+   const links={};
    for(const [key,record] of Object.entries(data.photoUrls)){
-    if(!plants.has(key)||!record||typeof record!=="object")continue;
+    if(!keys.has(key)||!record||typeof record!=="object")continue;
     for(const kind of ["plant","packet"]){
      if(validImageLink(record[kind])){
-      if(!remoteImageUrls[key])remoteImageUrls[key]={};
-      remoteImageUrls[key][kind]=record[kind];
+      if(!links[key])links[key]={};
+      links[key][kind]=record[kind];
      }
     }
    }
-   saveImageLinks();
+   remoteImageUrls=links;
+   if(!saveImageLinks())throw Error("Could not save image links.");
   }
-  for(const item of data.photos||[]){
-   if(!item||typeof item.key!=="string"||!(plants.has(item.key)||item.key.endsWith("|packet")&&plants.has(item.key.slice(0,-7)))||typeof item.data!=="string"||!/^data:image\/(jpeg|png|webp);base64,/.test(item.data))continue;
-   const blob=await (await fetch(item.data)).blob();if(blob.size>6000000)continue;
-   await dbPut(item.key,blob);const isPacket=item.key.endsWith("|packet"),photoKey=isPacket?item.key.slice(0,-7):item.key,p=plants.get(photoKey);const old=isPacket?packetPhotos.get(photoKey):userPhotos.get(photoKey);if(old)URL.revokeObjectURL(old);
-   const url=URL.createObjectURL(blob);
-   if(isPacket){packetPhotos.set(photoKey,url);}
-   else{userPhotos.set(photoKey,url);}
-   if(p)refreshPhoto(p);
+  if(data.photoPreferences){
+   const preferences={};
+   for(const [key,mode] of Object.entries(data.photoPreferences)){
+    if(keys.has(key)&&["plant","packet","variety","none"].includes(mode))preferences[key]=mode;
+   }
+   photoPreferences=preferences;
+   if(!save(photoPreferenceKey,preferences))throw Error("Could not save photo preferences.");
   }
-  if(data.photoPreferences&&typeof data.photoPreferences==="object"){
-   photoPreferences=Object.assign(photoPreferences,data.photoPreferences);save(photoPreferenceKey,photoPreferences);
+  for(const url of [...userPhotos.values(),...packetPhotos.values()])URL.revokeObjectURL(url);
+  userPhotos.clear();packetPhotos.clear();
+  for(const [key,blob] of photos){
+   const packet=key.endsWith("|packet"),plantKey=packet?key.slice(0,-7):key,photo=URL.createObjectURL(blob);
+   (packet?packetPhotos:userPhotos).set(plantKey,photo);
   }
-  if(data.watering&&window.DKSeedBankWatering)window.DKSeedBankWatering.importData(data.watering);
-  if(data.workbench&&window.DKSeedBankWorkbench)window.DKSeedBankWorkbench.importData(data.workbench);
-   if(data.recipeGuide&&window.DKSeedBankRecipes)window.DKSeedBankRecipes.importData(data.recipeGuide);
+  if(data.watering&&window.DKSeedBankWatering&&!window.DKSeedBankWatering.importData(data.watering))
+   throw Error("Watering records could not be restored.");
+  if(data.recipeGuide&&window.DKSeedBankRecipes&&!window.DKSeedBankRecipes.importData(data.recipeGuide))
+   throw Error("Recipe checklist could not be restored.");
+  if(data.workbench&&window.DKSeedBankWorkbench&&!window.DKSeedBankWorkbench.importData(data.workbench))
+   throw Error("Inventory changes could not be restored.");
   requestFiltering();
   document.getElementById("regionSelect").value=settings.region;
   document.getElementById("envSelect").value=settings.environment;
   document.getElementById("frostDate").value=settings.lastFrost||"";
-  plants.forEach(p=>refreshPhoto(p));updatePlanner();renderJournal();requestFiltering();alert("Backup restored on this browser.");
- }catch(err){alert("Could not import this backup: "+err.message);}
- e.target.value="";
+  plants.forEach(p=>refreshPhoto(p));
+  updatePlanner();renderJournal();requestFiltering();
+  document.dispatchEvent(new Event("dkseedbank:backup-restored"));
+  alert(backupLanguage("Backup restored. Your previous records were downloaded as a safety copy.",
+   "Резервная копия восстановлена. Предыдущие записи сохранены отдельной копией."));
+ }catch(error){
+  alert(backupLanguage("Could not restore backup: ","Не удалось восстановить копию: ")+error.message);
+ }finally{e.target.value="";}
 });
 
 

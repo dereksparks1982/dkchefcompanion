@@ -376,17 +376,58 @@ $("#wbTestForm").addEventListener("submit",event=>{
 $("#wbLowStock").value=state.lowStock;
 $("#wbLowStock").addEventListener("change",e=>{state.lowStock=number(e.target.value);persist();renderAll();});
 function renderViability(){
- const last=[...state.tests].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- const tests=last.map(t=>{
-  const p=item(t.seedKey);if(!p)return "";
-  return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+esc(t.date)+' · <strong>'+Math.round(100*t.sprouted/t.tested)+'% sprouted</strong> ('+t.sprouted+'/'+t.tested+') <button type="button" class="wb-small" data-wb-delete="tests" data-id="'+esc(t.id)+'">Remove</button></div>';
+ const ru=document.documentElement.lang==="ru";
+ const l=(en,russian)=>ru?russian:en;
+ const latest=[...state.tests].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const tests=latest.map(t=>{
+  const p=item(t.seedKey);if(!p||!Number(t.tested))return "";
+  return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+esc(t.date)+' · <strong>'+
+   Math.round(100*number(t.sprouted)/number(t.tested))+
+   l('% sprouted','% взошло')+'</strong> ('+t.sprouted+'/'+t.tested+
+   ') <button type="button" class="wb-small" data-wb-delete="tests" data-id="'+esc(t.id)+'">'+
+   l("Remove","Удалить")+'</button></div>';
  }).join("");
- const low=[...core.plants()].filter(([k,p])=>p.card.dataset.archived!=="yes"&&countSeeds(k)>0&&Math.max(0,countSeeds(k)-usedSeeds(k))<=state.lowStock);
- const yearWarnings=state.lots.filter(l=>l.year&&new Date().getFullYear()-l.year>=3);
- $("#wbViabilityList").innerHTML='<h3>Recent germination tests</h3>'+(tests||'<p class="wb-empty">No viability tests recorded.</p>')+
- '<h3>Known low-stock seed counts</h3>'+(low.length?'<p>'+low.slice(0,40).map(([k,p])=>esc(p.name)+" ("+Math.max(0,countSeeds(k)-usedSeeds(k))+" seeds)").join(" · ")+'</p>':'<p class="wb-empty">No recorded lots are below the threshold. Unknown counts are not treated as zero.</p>')+
- (yearWarnings.length?'<p class="wb-note">'+yearWarnings.length+' seed lots are three or more years old. Consider germination tests; this does not mean they are dead.</p>':'');
+ const plants=[...core.plants()].map(([key,p])=>({
+  key,name:p.name,mode:p.guide.mode,archived:p.card.dataset.archived==="yes",
+  count:countSeeds(key),used:usedSeeds(key)
+ }));
+ const assessment=window.DKSeedBankAlerts?.assess({
+  plants,lots:state.lots,tests:state.tests,lowStock:state.lowStock,
+  lastFrost:core.settings().lastFrost,today:today(),locale:ru?"ru":"en"
+ });
+ const types={
+  weak:l("Low germination","Низкая всхожесть"),
+  low:l("Low stock","Мало семян"),
+  aging:l("Older seed lot","Старая партия"),
+  retest:l("Retest suggested","Повторить проверку"),
+  upcoming:l("Sowing window","Срок посева")
+ };
+ const reminders=assessment?.entries||[];
+ const summary=assessment?
+  '<p class="wb-note">'+l("Care priorities: ","Задачи по уходу: ")+reminders.length+
+  ' · '+l("Low stock","Мало семян")+': '+assessment.counts.low+
+  ' · '+l("Older lots","Старые партии")+': '+assessment.counts.aging+
+  ' · '+l("Germination checks","Проверки всхожести")+': '+
+  (assessment.counts.weak+assessment.counts.retest)+
+  ' · '+l("Upcoming sowing","Ближайший посев")+': '+assessment.counts.upcoming+'</p>':
+  '<p class="wb-note">'+l("Priority checks are unavailable.","Список задач недоступен.")+'</p>';
+ const notices=reminders.length?
+  '<div class="wb-alerts" role="list">'+reminders.slice(0,35).map(entry=>
+   '<div class="wb-record" role="listitem"><strong>'+esc(entry.name)+'</strong> · '+
+   '<span class="wb-note">'+esc(types[entry.type]||entry.type)+'</span>'+
+   '<p>'+esc(entry.detail)+'</p></div>').join("")+'</div>'+
+   (reminders.length>35?'<p class="wb-note">'+l("Showing first 35 of ","Показаны первые 35 из ")+reminders.length+'</p>':''):
+  '<p class="wb-empty">'+l("No urgent care reminders from the information recorded so far.",
+   "По имеющимся данным срочных задач нет.")+'</p>';
+ $("#wbViabilityList").innerHTML=
+  '<h3>'+l("Seed care priorities","Задачи по уходу за семенами")+'</h3>'+summary+notices+
+  '<h3>'+l("Recent germination tests","Последние проверки всхожести")+'</h3>'+
+  (tests||'<p class="wb-empty">'+l("No germination tests recorded.","Проверки всхожести пока не записаны.")+'</p>')+
+  '<p class="wb-note">'+l(
+   "Counts refer only to recorded seed lots. Sowing windows use your entered frost date and are estimates, not a weather forecast.",
+   "Учитываются только записанные партии семян. Сроки посева основаны на указанной дате последних заморозков и являются ориентировочными.")+'</p>';
 }
+$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(renderViability));
 $("#wbBedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  state.beds.push({id:id(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});

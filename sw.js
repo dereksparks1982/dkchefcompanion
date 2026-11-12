@@ -1,12 +1,12 @@
 /* DK Seed Bank offline app shell and previously viewed external photos.
    Personal records remain in their existing browser storage. */
 "use strict";
-const APP_CACHE="dk-seedbank-app-v2";
+const APP_CACHE="dk-seedbank-app-v3";
 const IMAGE_CACHE="dk-seedbank-images-v1";
 const CACHE_PREFIX="dk-seedbank-";
 const IMAGE_LIMIT=180;
 const SCOPE=new URL(self.registration.scope);
-const APP_FILES=["index.html","docs/index.html","assets/seedbank-cards.css","assets/seedbank-cards.js","assets/seedbank-i18n.css","assets/seedbank-i18n.js","assets/seedbank-monastery.js","assets/seedbank-recipes.css","assets/seedbank-recipes.js","assets/seedbank-variety-images.js","assets/seedbank-watering.css","assets/seedbank-watering.js","assets/seedbank-workbench.css","assets/seedbank-workbench.js","assets/dk-seedbank-green-96.webp","assets/dk-seedbank-red-96.webp","assets/seedbank-offline.js","manifest.webmanifest"];
+const APP_FILES=["index.html","docs/index.html","assets/seedbank-cards.css","assets/seedbank-cards.js","assets/seedbank-i18n.css","assets/seedbank-i18n.js","assets/seedbank-monastery.js","assets/seedbank-recipes.css","assets/seedbank-recipes.js","assets/seedbank-variety-images.js","assets/seedbank-watering.css","assets/seedbank-watering.js","assets/seedbank-workbench.css","assets/seedbank-workbench.js","assets/seedbank-backup-utils.js","assets/seedbank-alerts.js","assets/seedbank-resilience.css","assets/seedbank-resilience.js","assets/dk-seedbank-green-96.webp","assets/dk-seedbank-red-96.webp","assets/seedbank-offline.js","manifest.webmanifest"];
 const APP_URLS=APP_FILES.map(path=>new URL(path,SCOPE).href);
 const APP_PATHS=new Set(APP_URLS.map(url=>new URL(url).pathname));
 self.addEventListener("install",event=>{
@@ -26,8 +26,10 @@ self.addEventListener("activate",event=>{
 });
 async function appResponse(request){
   const cache=await caches.open(APP_CACHE);
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),8000);
   try{
-    const response=await fetch(request);
+    const response=await fetch(request,{signal:controller.signal});
     if(response.ok){
       try{await cache.put(request,response.clone());}catch(error){/* Cache quota may be exhausted. */}
     }
@@ -41,7 +43,7 @@ async function appResponse(request){
       if(fallback)return fallback;
     }
     return Response.error();
-  }
+  }finally{clearTimeout(timeout);}
 }
 async function photoResponse(request){
   const cache=await caches.open(IMAGE_CACHE);

@@ -2,8 +2,9 @@
 const path=require("node:path");
 const fs=require("node:fs");
 const {pathToFileURL}=require("node:url");
-const {app,BrowserWindow,protocol,net,shell}=require("electron");
+const {app,BrowserWindow,protocol,net,shell,ipcMain}=require("electron");
 const {resolveWebPath}=require("./web-path.cjs");
+const {selectLatest}=require("./update-check.cjs");
 
 const APP_URL="dkseed://app/index.html";
 const ICON_PATH=path.join(__dirname,"build","icons","256x256.png");
@@ -37,7 +38,7 @@ function createWindow(){
   show:false,
   autoHideMenuBar:true,
   icon:ICON_PATH,
-  webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,devTools:!app.isPackaged}
+  webPreferences:{preload:path.join(__dirname,"preload.cjs"),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,devTools:!app.isPackaged}
  });
  mainWindow=window;
  window.once("ready-to-show",()=>window.show());
@@ -88,7 +89,11 @@ function createWindow(){
           redLogo:redLogo?.getAttribute("src")==="assets/dk-seedbank-red-96.webp",
           russian,english,
           exportBackup:!!document.getElementById("exportJournal"),
-          importBackup:!!document.getElementById("importJournal")
+          importBackup:!!document.getElementById("importJournal"),
+          backupValidation:!!window.DKSeedBankBackup,
+          seedCareAlerts:!!window.DKSeedBankAlerts,
+          backupPanel:!!document.getElementById("dkResilience"),
+          desktopUpdater:typeof window.DKSeedBankDesktop?.checkForUpdates==="function"
         };
       })()
     `);
@@ -108,6 +113,22 @@ function createWindow(){
 
 app.on("second-instance",()=>{if(mainWindow){mainWindow.show();mainWindow.focus();}});
 app.whenReady().then(()=>{
+ ipcMain.handle("dkseed:check-updates",async event=>{
+  if(!event.sender.getURL().startsWith("dkseed://app/"))return {status:"unavailable"};
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),9000);
+  try{
+   const response=await net.fetch(
+    "https://api.github.com/repos/dereksparks1982/seedrepo/releases?per_page=12",
+    {headers:{Accept:"application/vnd.github+json"},signal:controller.signal}
+   );
+   if(!response.ok)return {status:"unavailable"};
+   const releases=await response.json();
+   const next=selectLatest(releases,app.getVersion());
+   return next?{status:"available",...next}:{status:"current",version:app.getVersion()};
+  }catch(error){return {status:"unavailable"};}
+  finally{clearTimeout(timeout);}
+ });
  protocol.handle("dkseed",request=>{
   const url=new URL(request.url);
   if(url.hostname!=="app")return new Response("Not found",{status:404});
