@@ -97,13 +97,27 @@ function mergeSnapshots(inputs){
  const waterings=snapshots.map(s=>object(s.watering));
  const watering={...object(local.watering)};
  watering.records=mergeRows(waterings.flatMap(w=>array(w.records)),row=>row.id);
+ // Prefer actual upload revisions to backup export times so an older
+ // photograph saved on another device cannot overwrite a recent replacement.
+ const photoChanges={};
+ for(const snapshot of snapshots)for(const [key,record] of Object.entries(object(snapshot.photoChanges))){
+  if(!record||typeof record.at!=="string")continue;
+  if(!photoChanges[key]||timestamp(record.at)>timestamp(photoChanges[key].at))photoChanges[key]=record;
+ }
  const photoMap=new Map();
  for(const snapshot of snapshots)for(const photo of array(snapshot.photos)){
-  if(photo&&typeof photo.key==="string")photoMap.set(photo.key,photo);
+  if(!photo||typeof photo.key!=="string")continue;
+  const previous=photoMap.get(photo.key);
+  if(!previous||timestamp(photo.updatedAt)>=timestamp(previous.updatedAt))
+   photoMap.set(photo.key,photo);
  }
  const growthKeys=new Set(journal.flatMap(entry=>array(entry.growthPhotos).map(photo=>
   "journal-photo|"+encodeURIComponent(entry.id)+"|"+photo.id)));
- const photos=[...photoMap.values()].filter(photo=>!photo.key.startsWith("journal-photo|")||growthKeys.has(photo.key));
+ const photos=[...photoMap.values()].filter(photo=>{
+  if(photo.key.startsWith("journal-photo|"))return growthKeys.has(photo.key);
+  const marker=photoChanges[photo.key];
+  return !marker||!marker.deleted||timestamp(photo.updatedAt)>timestamp(marker.at);
+ });
  // Collect favorites from the user's own snapshots. No supplier data is publicized.
  const supplierMap=new Map();
  for(const snapshot of snapshots)for(const item of array(snapshot.suppliers)){
@@ -115,6 +129,7 @@ function mergeSnapshots(inputs){
   format:"dk-seedbank-v1",backupSchema:3,exportedAt:new Date().toISOString(),
   journal,journalDeletes,settings:object(local.settings),
   workbench,watering,recipeGuide:object(local.recipeGuide),suppliers,
+  photoChanges,
   photoUrls:Object.assign({},...snapshots.map(s=>object(s.photoUrls))),
   photoPreferences:Object.assign({},...snapshots.map(s=>object(s.photoPreferences))),
   photos
