@@ -45,3 +45,11 @@ html[lang="en"] .dk-ru-growing,html[lang="en"] .dk-ru-water,html[lang="en"] .dk-
 html[lang="ru"] .dk-ru-safety{display:block;border-left:3px solid #a22139;padding:4px 9px}
 html[lang="ru"] .seed-safety-details .dk-ru-safety{background:#fff4f6}
 @media(max-width:640px){.dk-language-bar{float:none;justify-content:flex-end;margin:0 0 13px}.dk-colour-name{width:100%;text-align:right}.monastery-inner{padding:13px}}
+
+/* Product identity: icon and name follow selected language, color code is never advertised. */
+.dk-colour-name{display:none!important}
+.dk-app-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dk-app-title img{display:block;width:clamp(48px,6vw,68px);height:clamp(48px,6vw,68px);object-fit:contain;flex:none}
+html[lang="en"] .dk-logo-ru,html[lang="en"] .dk-title-ru{display:none!important}
+html[lang="ru"] .dk-logo-en,html[lang="ru"] .dk-title-en{display:none!important}
+html[lang="ru"] .dk-app-title{color:#fff}

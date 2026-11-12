@@ -19,6 +19,26 @@ const exactNames={
 "Date palm, harvested from dates":"Финиковая пальма (семена из фиников)","Hazelnut":"Лещина (фундук)","Pine, from cones, species unknown":"Сосна (семена из шишек; вид неизвестен)","Drumstick Tree / Moringa oleifera":"Моринга масличная","Giant Sequoia":"Секвойядендрон гигантский","Pecan":"Пекан","Sugar Maple":"Клён сахарный","Boxwood":"Самшит","White Mulberry":"Шелковица белая","English Ivy":"Плющ обыкновенный",
 "Common Cat Grass (species unspecified)":"Трава для кошек (вид не указан)","Black Ornamental Wheat / Black Night Wheat":"Пшеница декоративная чёрная","Unlabeled grain seeds (possibly barley; identification unconfirmed)":"Неопознанные злаки (возможно, ячмень)","Unidentified Wheat (variety unknown)":"Пшеница (сорт неизвестен)","Winter Rye":"Рожь озимая","Bio Bio Quinoa (spelled B-I-O B-I-O; also sounded like 'Bobo')":"Киноа «Bio Bio»","Mint Vanilla Quinoa":"Киноа «Mint Vanilla»","Bronze Amaranth":"Амарант бронзовый","Green Garnet Amaranth":"Амарант зелёный «Garnet»","Red Garnet Amaranth":"Амарант красный «Garnet»","Blue Fescue":"Овсяница голубая","Glass Gem Corn":"Кукуруза «Glass Gem»","Country Gentleman Corn":"Кукуруза «Country Gentleman»","Common Plantain (Plantago species; exact species unconfirmed)":"Подорожник (вид не уточнён)","Golden Bantam Corn":"Кукуруза «Golden Bantam»","Yellow Sweet Corn":"Кукуруза сладкая жёлтая","Oaxacan Green Indian Corn":"Кукуруза «Oaxacan Green»","Blue Hopi Corn":"Кукуруза «Blue Hopi»","Peaches and Cream Sweet Corn":"Кукуруза сладкая «Peaches and Cream»","Bloody Butcher Ornamental Corn":"Кукуруза декоративная «Bloody Butcher»",
 "Civil War Heirloom Red Cotton":"Хлопчатник красный старинный","Traditional White Cotton":"Хлопчатник белый традиционный","Gold Heirloom Cotton":"Хлопчатник золотистый старинный","Virginia Gold Tobacco (Nicotiana tabacum)":"Табак «Virginia Gold»"};
+
+/* Cyrillic display for seed names and cultivar labels. Never mutate stored English identifiers. */
+const dkTransWords={
+"sunflower":"подсолнечник","tomato":"томат","pepper":"перец","carrot":"морковь","bean":"фасоль","pea":"горох","corn":"кукуруза","pumpkin":"тыква","squash":"тыква","cucumber":"огурец","lettuce":"салат","radish":"редис","kale":"кейл","spinach":"шпинат","basil":"базилик","dill":"укроп","mint":"мята","lavender":"лаванда","flax":"лён","poppy":"мак","rose":"роза","thyme":"тимьян","oregano":"душица","coriander":"кориандр","cilantro":"кинза","parsley":"петрушка",
+"giant":"гигант","gray":"серый","grey":"серый","stripe":"полосатый","striped":"полосатый","red":"красный","green":"зелёный","purple":"фиолетовый","blue":"голубой","yellow":"жёлтый","black":"чёрный","white":"белый","pink":"розовый","gold":"золотой","golden":"золотой","orange":"оранжевый","dark":"тёмный","sweet":"сладкий","early":"ранний","late":"поздний","large":"крупный","little":"маленький","long":"длинный","short":"короткий","mammoth":"мамонт","beauty":"красавица","wonder":"чудо","queen":"королева","royal":"королевский","sun":"солнце","mix":"смесь","mixed":"смешанные","blend":"смесь","colors":"цвета","color":"цвет",
+"italian":"итальянский","english":"английский","american":"американский","russian":"русский","german":"немецкий","california":"Калифорния","afghan":"афганский","dwarf":"карликовый","bush":"кустовой","pole":"вьющийся",
+"and":"и","or":"или","with":"с","from":"из","the":"","of":"","for":"для","variety":"сорт","varieties":"сорта","species":"вид","unknown":"неизвестный","unspecified":"неуточнённый","unidentified":"неопознанный","seed":"семя","seeds":"семена","bag":"мешок","packet":"пакет","packets":"пакеты","commercial":"покупной","harvested":"собранный","grown":"выращенный","store":"магазин","derived":"полученный","generic":"обычный","label":"этикетка","verify":"уточнить","spoken":"продиктованный","name":"название","exact":"точный","type":"тип","garden":"сад",
+"sativum":"сативум","vulgaris":"вульгарис","officinalis":"официналис","annuus":"аннуус","perenne":"перенне","oleracea":"олерацеа","lewisii":"левизии",
+"dk":"ДК","media":"медиа","plus":"плюс"
+};
+function dkCyrillic(input){
+ const map={a:"а",b:"б",c:"к",d:"д",e:"е",f:"ф",g:"г",h:"х",i:"и",j:"дж",k:"к",l:"л",m:"м",n:"н",o:"о",p:"п",q:"к",r:"р",s:"с",t:"т",u:"у",v:"в",w:"в",x:"кс",y:"й",z:"з"};
+ return String(input||"").replace(/[A-Za-zÀ-ž]+(?:['’][A-Za-zÀ-ž]+)*/g,raw=>{
+  const word=raw.normalize("NFKD").replace(/[\u0300-\u036f]/g,""),lower=word.toLowerCase();
+  if(Object.prototype.hasOwnProperty.call(dkTransWords,lower))return dkTransWords[lower];
+  return word.replace(/sch/gi,"щ").replace(/sh/gi,"ш").replace(/ch/gi,"ч").replace(/zh/gi,"ж").replace(/kh/gi,"х").replace(/ph/gi,"ф").replace(/th/gi,"т").replace(/qu/gi,"кв").replace(/ck/gi,"к").replace(/ee/gi,"и").replace(/oo/gi,"у").replace(/ai/gi,"эй").replace(/ay/gi,"ей").replace(/ea/gi,"и").replace(/ou/gi,"ау").replace(/c(?=[eyi])/gi,"с").replace(/g(?=[eyi])/gi,"дж").replace(/[A-Za-z]/g,c=>map[c.toLowerCase()]||c).replace(/['’]/g,"");
+ });
+}
+function dkSeedDisplay(name,cat){return dkCyrillic(seedName(name,cat));}
+
 function seedName(name,cat){
  if(Object.prototype.hasOwnProperty.call(exactNames,name))return exactNames[name];
  const s=String(name||""),c=String(cat||"");
@@ -121,6 +141,29 @@ const fullParagraphs=new Map([
 for(const [en,ru] of fullParagraphs)dictionary.set(en,ru);
 const additionalTranslations=[["Language / Язык","Язык"],["grow","вырастить"],["not","не"],["an ingredient, not that it is already harvested or food-safe. Tick","ингредиент, но это ещё не означает, что он собран и безопасен в пищу. Отмечайте"],["Match recipes against your actual seed collection. Owning seeds means you can","Сверяйте рецепты с вашей коллекцией семян. Наличие семян позволяет"],["Your garden records stay in this browser. Use","Данные о саде сохраняются в этом браузере. Используйте"],["to move them to another device. Automatic cloud sync needs a private backend and is not enabled.","для переноса на другое устройство. Автоматическая облачная синхронизация требует закрытого сервера и сейчас не включена."],["Export full backup","Экспорт полной резервной копии"],["Check the soil first. A suggested check date is","Сначала проверьте влажность почвы. Рекомендуемая дата проверки"],["an instruction to water. Rain, heat, mulch, soil, pot size and growth stage all affect needs. Records are saved in this browser; include them in your full Seed Bank backup.","не является указанием обязательно поливать. Дождь, жара, мульча, состав грунта, размер горшка и стадия роста влияют на потребность во влаге. Записи хранятся в браузере; сохраняйте их в полной резервной копии."],["Guidance is a starting point, not a moisture sensor or live weather forecast. For in-ground vegetable beds, weekly totals include rainfall. For pots, water according to soil moisture and drainage rather than inches per week.","Рекомендации ориентировочные: приложение не измеряет влажность и не получает прогноз погоды в реальном времени. Для грядок недельная норма включает дождь. В горшках ориентируйтесь на влажность почвы и дренаж, а не только на нормы осадков."],["Guidance:","Рекомендации:"],["Iowa State Extension · Watering vegetables","Университет штата Айова · Полив овощей"],["UF/IFAS · Watering seedlings","Университет Флориды · Полив рассады"],["Historical reference, not an endorsement of ancient medicines and not proof that any modern packet or cultivar was available in the Middle Ages. The filter identifies","Историческая справка, а не одобрение древних лекарств и не доказательство существования современных сортов в Средние века. Фильтр выделяет"],["plant types","виды и группы культур"],["documented in pre-modern European gardening, not the age of your particular varieties.","известные в европейском садоводстве до Нового времени, а не возраст конкретных сортов из ваших пакетов."],["Herbularius:","Аптекарский огород:"],["medicinal and aromatic herbs such as rue, fennel, lovage, wormwood, sage and mint.","лечебные и ароматные травы: рута, фенхель, любисток, полынь, шалфей и мята."],["Hortus:","Кухонный огород:"],["kitchen crops such as leeks, onions, parsley, cabbage and root vegetables.","овощи и зелень: порей, лук, петрушка, капуста и корнеплоды."],["Orchard:","Плодовый сад:"],["fruit and nut trees and useful shrubs.","плодовые и орехоплодные деревья, полезные кустарники."],["Species and period matter: tomatoes, peppers, maize and most American squashes entered Europe after medieval times. Blue Flax is not confirmed as the linen flax (","Вид и эпоха имеют значение: томаты, стручковые перцы, кукуруза и многие американские тыквенные появились в Европе после Средневековья. Голубой лён не подтверждён как лён посевной для ткани ("],[") grown for fiber. Many named modern cultivars are historical","), выращиваемый ради волокна. Многие современные сорта относятся лишь к историческим"],["crop types","типам культур"],["only.","без подтверждения конкретного средневекового сорта."],["Safety:","Безопасность:"],["historically used medicinal plants such as henbane, belladonna and foxglove can be poisonous. Historical use never implies safety or edible status.","старинные лекарственные растения, например белена, белладонна и наперстянка, могут быть ядовиты. Историческое использование не означает безопасность или съедобность."],["Plan of Saint Gall","План монастыря Санкт-Галлен"],["Research on medieval monastic herb and kitchen gardens","Исследование средневековых монастырских огородов"],["Blue flax identification","Определение голубого льна"],["Calendar dates are approximations based on the last frost date in your Growing Planner, not local weather forecasts or packet-specific guarantees.","Календарные сроки приблизительные и основаны на дате последних заморозков в Планировщике, а не на прогнозе погоды или гарантиях на упаковке."],["A germination test is more useful than treating a seed packet date as an automatic expiration. Different species age differently.","Проверка всхожести полезнее, чем автоматическое признание старых семян негодными. Семена разных видов стареют по-разному."],["Crop-family warnings are a planning aid, not proof that a bed is disease-free. Rotation history should be verified.","Предупреждения о семействе культуры помогают планировать севооборот, но не гарантируют отсутствие болезней. Историю грядки проверяйте отдельно."],["Saved seed does not guarantee the parent traits, especially from hybrids or cross-pollinating plants.","Собранные семена могут не повторять свойства родительского растения, особенно у гибридов и переопыляемых культур."],["Print dialog opens in your browser; no print job is sent by DK Seed Bank.","Печать открывается в браузере. Само приложение не отправляет задания на принтер."],["Seed edits, lots, beds, tests, harvests and photos are saved locally on this browser. Your GitHub Pages website does not currently have a user database or encrypted sign-in, so","Редактирование коллекции, партии семян, грядки, тесты, урожай и фотографии хранятся в этом браузере. На GitHub Pages нет пользовательской базы данных и защищённых учётных записей, поэтому"],["live synchronization between devices is not available","синхронизация между устройствами недоступна"],["The full backup contains your journal, photos, customized picture URLs and all workbench records. Store it somewhere safe. Restoring can replace existing records: read the confirmation carefully.","Полная резервная копия содержит журнал, фотографии, ссылки на изображения и все записи садового учёта. Храните файл в безопасном месте. При восстановлении существующие данные могут быть заменены."],["Built-in seeds can be archived, not permanently erased. Newly added varieties remain in your browser until exported.","Исходные записи семян можно архивировать, но не удалять навсегда. Новые сорта сохраняются только в браузере до экспорта."],["A germination test is more useful than treating a seed packet date as an automatic expiration.","Проверка всхожести полезнее, чем признание семян негодными только по дате на упаковке."],["Plant a seed only when it is safe to grow in your local region.","Выращивайте растения с учётом безопасности и местных климатических условий."],["No active planting records. Use the Planting Journal to record what you actually sowed; every seed card already has a watering guide.","Активных посадок пока нет. Записывайте фактические посевы в Журнале; рекомендации по поливу уже есть у каждого растения."],["No watering or moisture checks recorded yet.","Записей о поливе или проверках почвы пока нет."],["First record an actual planting in the Planting Journal. Watering records attach to that planting, not merely to an unused seed packet.","Сначала запишите посадку в Журнале. Учёт полива привязан к реальной посадке, а не просто к пакету семян."],["No exact linked planting yet. Record a planting in the journal, then log its watering here.","Точной связанной посадки пока нет. Добавьте посадку в Журнал, затем записывайте полив."],["The next date is a soil check, not an automatic watering order.","Следующая дата означает проверку почвы, а не обязательный полив."],["Saved. The next date is a soil check, not an automatic watering order.","Сохранено. Следующая дата означает проверку почвы, а не обязательный полив."],["Watering record deleted.","Запись полива удалена."],["Edit cancelled.","Редактирование отменено."],["No watering or moisture checks recorded yet.","Пока нет записей о поливе или влажности почвы."],["Every ingredient has been checked on hand.","Все ингредиенты отмечены в наличии."],["Compare each ingredient with your seed inventory and pantry.","Сверяйте каждый ингредиент с коллекцией семян и продуктами на кухне."],["Custom ingredient checklist.","Собственный список ингредиентов."],["Start each line with","Начинайте каждую строку с"],["to match your seed collection, or","для сопоставления с коллекцией семян, или"],["for other supplies. Your recipes and on-hand marks stay in this browser and are included in full backups.","для прочих продуктов. Рецепты и отметки о наличии хранятся в браузере и входят в полную резервную копию."],["garden:","огород:"],["pantry:","кладовая:"],["My herb bread","Мой хлеб с травами"],["✓ Seeds recorded; ingredient not confirmed ready","✓ Семена записаны, но готовый ингредиент ещё не подтверждён"],["obtain/confirm supply","получить или подтвердить наличие"],["grow, harvest or otherwise obtain usable ingredient","вырастить, собрать или получить пригодный ингредиент"],["obtain the seed or prepared ingredient","получить семена или готовый ингредиент"],["Edit planting","Изменить посадку"],["Delete selected custom seed","Удалить добавленный сорт"],["Not recorded","Не записано"],["Count unconfirmed","Количество не подтверждено"],["Check variety","Уточнить сорт"],["Packaged seeds","Упакованные семена"],["No photo available","Фотография недоступна"],["Wikipedia","Википедия"]];
 for(const [en,ru] of additionalTranslations)dictionary.set(en,ru);
+
+const dkDynamicRules=[
+ [/Planting Journal/gi,"Журнал посадок"],
+ [/Growing Planner/gi,"Планировщик выращивания"],
+ [/Garden Workbench/gi,"Учёт садовых работ"],
+ [/Garden Watering Manager/gi,"Учёт полива сада"],
+ [/Medieval Monastery Garden/gi,"Средневековый монастырский сад"],
+ [/Recipe Guide/gi,"Сборник рецептов"],
+ [/(\d+)\s+recorded plantings?\b/gi,"$1 записанных посадок"],
+ [/(\d+)\s+active varieties\b/gi,"$1 активных сортов"],
+ [/(\d+)\s+plantings\b/gi,"$1 посадок"],
+ [/(\d+)\s+garden spaces\b/gi,"$1 мест выращивания"],
+ [/(\d+)\s+harvests\b/gi,"$1 сборов урожая"],
+ [/(\d+)\s+germination tests\b/gi,"$1 проверок всхожести"],
+ [/(\d+)\s+count\(s\) unconfirmed\b/gi,"$1 без уточнённого количества"],
+ [/(\d+)\s+packets?\b/gi,"$1 пакетов"],
+ [/(\d+)\s+saved lots?\b/gi,"$1 партий семян"],
+ [/\bLog planting\b/gi,"Записать посадку"],
+ [/\bManage photos\b/gi,"Управление фотографиями"]
+];
+function dkDynamic(text){let value=String(text||"");for(const [rule,replacement] of dkDynamicRules)value=value.replace(rule,replacement);return value;}
+for(const [en,rus] of Object.entries({"DK Seed Bank":"ДК Банк семян","DK Media Plus":"ДК Медиа Плюс","Try tomato, tomatoe, Peredovik, pollinator…":"Например: томат, Передовик, медоносы…","📔 Planting Journal":"📔 Журнал посадок","Planting Journal":"Журнал посадок","📷 Manage photos":"📷 Управление фотографиями","＋ Log planting":"＋ Записать посадку","Log planting":"Записать посадку","Manage photos":"Управление фотографиями","Seller's photo of named cultivar":"Фото сорта от продавца","Photo of named cultivar":"Фотография указанного сорта","One example of this seed blend":"Пример растения из этой смеси","No exact variety photo verified":"Точная фотография сорта не подтверждена","Named seed-packet photo (not growing carrots)":"Фото упаковки семян (не растущей моркови)","Growing Planner":"Планировщик выращивания","Garden Workbench":"Учёт садовых работ","Recipe Guide":"Сборник рецептов","Monastery Garden":"Монастырский сад","Garden Watering Manager":"Учёт полива сада","Track sowing, sprouting, transplanting and harvests. Entries and photos are stored in this browser, not automatically synced to GitHub or other devices. Export a backup to keep them safe.":"Записывайте посев, всходы, пересадки и урожай. Записи и фотографии хранятся в браузере, а не синхронизируются автоматически. Сохраняйте резервные копии.","Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.":"Выбирайте конкретный сорт, только если знаете, что именно он был посеян. По одной фотографии нельзя надёжно определить сорт.","Link exact variety from my Seed Bank":"Связать с точным сортом из коллекции","Clear search":"Очистить поиск","Clear entire search":"Очистить весь поиск","UAF · Alaska greenhouse gardening":"Университет Аляски: выращивание в теплице","⚠️ Why Caution:":"⚠️ Почему нужна осторожность:","⚠️ Caution: what is dangerous and what to do":"⚠️ Опасность растения и меры предосторожности","View full seed card and picture settings":"Открыть карточку семян и настройки фотографий","View photo for":"Просмотреть фото:","Add / replace plant photo":"Добавить или заменить фото растения","Add / replace packet photo":"Добавить или заменить фото упаковки","Your garden records stay in this browser. Use":"Данные о саде хранятся в этом браузере. Используйте","No photo available":"Фото недоступно","Photo by":"Автор фотографии:","Unknown":"Неизвестно","Not specified":"Не указано","Not recorded":"Не записано","Quantity not recorded":"Количество не записано","Edit planting":"Изменить посадку","Save planting":"Сохранить посадку","Date germinated":"Дата прорастания","Seeds germinated":"Проросло семян","Plants survived":"Выжило растений","No seed lots recorded yet. Add one above to track actual seed counts.":"Партии семян пока не добавлены. Добавьте партию выше для учёта количества.","No garden beds or containers created yet.":"Грядки и контейнеры пока не добавлены.","No harvests recorded yet.":"Записей об урожае пока нет.","No active planting records. Use the Planting Journal to record what you actually sowed; every seed card already has a watering guide.":"Активных посадок пока нет. Запишите фактические посевы в журнал. Инструкция по поливу доступна для каждого растения.","No watering or moisture checks recorded yet.":"Записей о поливе и проверках влажности пока нет.","Check soil today":"Проверить почву сегодня","No check recorded":"Проверок пока нет","Next check":"Следующая проверка","First record an actual planting in the Planting Journal. Watering records attach to that planting, not merely to an unused seed packet.":"Сначала запишите посадку в журнал. Учёт полива связан с фактической посадкой, а не просто с пакетом семян.","Added":"Добавлено","No matching records":"Нет подходящих записей","Try another name or clear filters.":"Введите другое название или сбросьте фильтры.","Not recorded in your collection":"Нет в вашей коллекции","No entries match these filters":"Ничего не найдено по выбранным фильтрам"}))dictionary.set(en,rus);
+
 const replacements=[
 [/\b(\d+)\s+packets?\b/gi,(_,n)=>n+" "+(n==="1"?"пакет":"пакета")],
 [/\b(\d+)\s+bags?\b/gi,(_,n)=>n+" пакетов"],
@@ -151,6 +194,7 @@ const replacements=[
 function generalTranslation(value){
  const raw=String(value||""),txt=raw.trim();if(!txt)return raw;
  if(dictionary.has(txt))return raw.replace(txt,dictionary.get(txt));
+ const mixed=dkDynamic(txt);if(mixed!==txt)return raw.replace(txt,mixed);
  if(/^(\d+)\s*(packet|packets|batch|batchs|lots|bags)$/.test(txt)){
   const m=txt.match(/^(\d+)\s*(packet|packets|batch|batchs|lots|bags)$/);
   return m[1]+" "+(m[2].startsWith("packet")?"пакетов":m[2].startsWith("bag")?"пакетов":"партий");
@@ -334,7 +378,7 @@ function appendRuGuides(){
     host.appendChild(block);
    }
   }
-  card.dataset.ruName=seedName(p.name,p.cat);
+  card.dataset.ruName=dkSeedDisplay(p.name,p.cat);
   card.dataset.ruCategory=ruCategories[p.cat]||p.cat;
  });
 }
@@ -343,23 +387,28 @@ let language="en",observer=null,scheduled=false;
 function isOwn(node){return node&&node.nodeType===1&&node.closest&&node.closest("[data-dk-ru]");}
 function translateText(value,el){
  if(!el||!String(value||"").trim())return value;
- if(el.closest("[data-dk-ru]"))return value;
+ if(el.closest("[data-dk-ru],[data-dk-no-translate]"))return value;
  const raw=String(value),trim=raw.trim();
  const seed=el.closest(".seed"),p=seed&&core.plants().get(seed.dataset.category+"|"+seed.dataset.name);
  let out=trim;
- if(el.classList.contains("seed-name")&&seed)out=seed.dataset.ruName||seedName(seed.dataset.name,seed.dataset.category);
- else if(el.tagName==="IMG"&&seed)out="Фото: "+(seed.dataset.ruName||seedName(seed.dataset.name,seed.dataset.category));
- else if(el.classList.contains("entry-note")&&p)out=noteFor(p);
+ if(el.classList.contains("seed-name")&&seed)out=dkSeedDisplay(seed.dataset.name,seed.dataset.category);
+ else if(el.tagName==="IMG"&&seed)out="Фото: "+dkSeedDisplay(seed.dataset.name,seed.dataset.category);
+ else if(el.classList.contains("entry-note")&&p)out=dkCyrillic(noteFor(p));
+ else if(el.classList.contains("seed-brief")&&p)out=dkCyrillic(generalTranslation(trim)).replace(/дип/gi,"глубина");
+ else if(el.classList.contains("seed-photo-state"))out=dictionary.get(trim)||"Иллюстрация растения. Уточните соответствие сорту.";
+ else if(el.matches(".journal-entry h3"))out=dkCyrillic(trim);
+ else if(el.matches(".wm-due-row strong,#wmSelectedGuide strong"))out=dkCyrillic(trim);
  else if(el.classList.contains("category-name"))out=ruCategories[trim]||trim;
  else if(el.classList.contains("category-count")||el.classList.contains("stock-badge"))out=generalTranslation(trim);
  else if(el.tagName==="OPTION"&&trim.includes(" · ")){
   const [category,...name]=trim.split(" · ");
   const originalName=name.join(" · "),item=[...core.plants().values()].find(z=>z.name===originalName&&z.cat===category);
-  out=(ruCategories[category]||category)+" · "+(item?seedName(item.name,item.cat):originalName);
- }else if(el.tagName==="OPTION"&&exactNames[trim])out=exactNames[trim];
+  out=(ruCategories[category]||category)+" · "+(item?dkSeedDisplay(item.name,item.cat):dkCyrillic(originalName));
+ }else if(el.tagName==="OPTION"&&exactNames[trim])out=dkCyrillic(exactNames[trim]);
  else if(el.tagName==="OPTION"&&ruCategories[trim])out=ruCategories[trim];
  else if(dictionary.has(trim))out=dictionary.get(trim);
  else out=generalTranslation(trim);
+ if(out===trim&&el.closest(".seed")&&/^[\w\s,.'’\-()/:;]{2,110}$/.test(trim))out=dkCyrillic(trim);
  if(out===trim)return value;
  return raw.replace(trim,out);
 }
@@ -410,11 +459,11 @@ function changeLang(value,persist=true){
  language=value==="ru"?"ru":"en";
  document.documentElement.lang=language;document.documentElement.dataset.dkLanguage=language;
  selector.value=language;
- const badge=document.querySelector(".dk-colour-name");if(badge)badge.hidden=language!=="ru";
+ 
  if(persist){try{localStorage.setItem(STORAGE,language);}catch(e){}}
  if(language==="ru")appendRuGuides();
  scan(document.body);
- document.title=language==="ru"?"DK Seed Bank | Коллекция семян":"DK Seed Bank | Seed Collection";
+ document.title=language==="ru"?"ДК Банк семян | Коллекция":"DK Seed Bank | Seed Collection";
  const search=document.getElementById("search");if(search)search.dispatchEvent(new Event("input",{bubbles:true}));
 }
 selector.addEventListener("change",()=>changeLang(selector.value));
