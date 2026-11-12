@@ -1,5 +1,5 @@
 
-/* DK Seed Bank Garden Workbench: local-first records, not a cloud account. */
+/* DK Seed Bank Garden Planner: local-first garden management and recordkeeping. */
 (function(){
 "use strict";
 const core=window.DKSeedBankCore;
@@ -98,11 +98,13 @@ function onionAdvice(p){
  if(/onion/.test(n))return "Check whether this cultivar is short-day, intermediate-day or long-day before planning bulb production.";
  return "";
 }
-const host=document.createElement("details");host.id="seedWorkbench";host.className="wb-main";
+const planner=document.getElementById("growPlanner");
+if(!planner)return;
+const host=document.createElement("div");host.id="seedWorkbench";host.className="wb-main wb-planner-tools";
 host.innerHTML=
- '<summary>🪴 Garden Workbench <small>Edit inventory · planting calendar · beds · harvests · seed saving · labels</small></summary>'+
- '<div class="wb-inner"><p class="wb-intro">Your garden records stay in this browser. Use <strong>Export full backup</strong> to move them to another device. Automatic cloud sync needs a private backend and is not enabled.</p>'+
- '<div class="wb-quick"><button type="button" data-wb-open="wb-inventory">＋ Add or edit seeds</button><button type="button" data-wb-open="wb-calendar">📅 This month</button><button type="button" data-wb-open="wb-beds">▦ Garden beds</button><button type="button" data-wb-open="wb-backup">↓ Backup</button></div>'+
+ '<div class="wb-inner"><h3 class="wb-tools-heading">Garden management tools</h3>'+
+ '<p class="wb-intro">Edit your garden records, plan sowing, track harvests, and save seed lots. For cloud synchronization or downloadable backups, open Sync &amp; Backup below.</p>'+
+ '<div class="wb-quick"><button type="button" data-wb-open="wb-inventory">＋ Add or edit seeds</button><button type="button" data-wb-open="wb-calendar">📅 This month</button><button type="button" data-wb-open="wb-beds">▦ Garden beds</button><button type="button" data-wb-open="dkSyncBackup">☁ Sync &amp; Backup</button></div>'+
  '<div class="wb-summary" id="wbSummary"></div>'+
  '<details class="wb-panel" id="wb-inventory"><summary>🌱 Inventory editor and seed lots</summary><div class="wb-panel-body">'+
  '<h3>Add a seed variety</h3><form id="wbAddSeed" class="wb-form">'+
@@ -132,7 +134,7 @@ host.innerHTML=
  '<button type="submit">Add seed lot</button></form><div id="wbLotList"></div>'+
  '</div></details>'+
  '<details class="wb-panel" id="wb-calendar"><summary>📅 Monthly planting assistant and succession reminders</summary><div class="wb-panel-body">'+
- '<p class="wb-note">Calendar dates are approximations based on the last frost date in your Growing Planner, not local weather forecasts or packet-specific guarantees.</p>'+
+ '<p class="wb-note">Calendar dates are approximations based on your last frost date in Garden Planner, not local weather forecasts or packet-specific guarantees.</p>'+
  '<div class="wb-inline"><label>Month<input id="wbMonth" type="month"></label><button type="button" id="wbShowMonth">See this month</button><button type="button" id="wbOpenPlanner">Change frost date</button></div><div id="wbMonthResults"></div>'+
  '<h3>Succession-sowing reminder</h3><form id="wbSuccessionForm" class="wb-form">'+
  '<label class="wb-span">Seed variety'+formSelect("seedKey")+'</label>'+
@@ -178,14 +180,9 @@ host.innerHTML=
  '<details class="wb-panel" id="wb-labels"><summary>🏷️ Printable seed packet labels</summary><div class="wb-panel-body">'+
  '<div class="wb-inline"><label>Variety'+formSelect("seedKey")+'</label><button type="button" id="wbAddLabel">Add label</button><button type="button" id="wbPrintLabels">Print selected labels</button><button type="button" id="wbClearLabels">Clear sheet</button></div>'+
  '<div id="wbLabelSheet" class="wb-label-sheet"></div><p class="wb-note">Print dialog opens in your browser; no print job is sent by DK Seed Bank.</p></div></details>'+
- '<details class="wb-panel" id="wb-backup"><summary>💾 Backups, moving devices and data safety</summary><div class="wb-panel-body">'+
- '<p>Seed edits, lots, beds, tests, harvests and photos are saved locally on this browser. Your GitHub Pages website does not currently have a user database or encrypted sign-in, so <strong>live synchronization between devices is not available</strong>.</p>'+
- '<div class="wb-quick"><button id="wbExport" type="button" class="wb-primary">↓ Export full backup</button><button id="wbImport" type="button">↑ Restore a backup</button></div>'+
- '<p class="wb-note">The full backup contains your journal, photos, customized picture URLs and all workbench records. Store it somewhere safe. Restoring can replace existing records: read the confirmation carefully.</p>'+
- '</div></details>'+
  '</div>';
-const journalNode=$("#seedJournal");
-(journalNode||document.querySelector(".controls")).insertAdjacentElement("afterend",host);
+// Keep one Garden Planner accordion and preserve all original subpanel IDs.
+planner.appendChild(host);
 const monthDialog=document.createElement("dialog");monthDialog.id="wbReminderDialog";
 monthDialog.innerHTML='<div class="wb-dialog"><h2>🌱 Your monthly seed-starting checklist</h2><p id="wbDialogIntro"></p><div id="wbDialogSuggestions"></div><div class="wb-quick"><button type="button" id="wbDialogSnooze">Dismiss for this month</button><button type="button" id="wbDialogJournal">Open planting journal</button><button type="button" id="wbDialogClose">Close</button></div></div>';
 document.body.appendChild(monthDialog);
@@ -282,7 +279,7 @@ function renderLots(){
 }
 function monthlyCandidates(year,month){
  const settings=core.settings(),frost=parseDate(settings.lastFrost);
- if(!frost)return {error:"Set your actual last spring frost date in Growing Planner first. Region alone is not accurate enough for a planting calendar.",items:[]};
+ if(!frost)return {error:"Set your actual last spring frost date in Garden Planner first. Region alone is not accurate enough for a planting calendar.",items:[]};
  frost.setFullYear(year);
  const start=new Date(year,month,1,12),end=new Date(year,month+1,0,12),env=settings.environment;
  const windows={
@@ -549,7 +546,7 @@ function journalGuide(entry,linked,candidates){
 function journalCalendar(guide){
  if(!guide)return "Choose a specific seed or confirm the plant species for a schedule.";
  const frost=parseDate(core.settings().lastFrost);
- if(!frost)return "Set a last spring frost date in Growing Planner for estimated planting windows.";
+ if(!frost)return "Set a last spring frost date in Garden Planner for estimated planting windows.";
  const offsets=guide.mode==="indoor"?[-70,-35]:guide.mode==="direct-cool"?[-35,14]:guide.mode==="direct-warm"?[7,45]:null;
  if(!offsets)return "Confirm species-specific timing; frost date alone is insufficient.";
  return "Approximate sowing window: "+dateText(dateOffset(frost,offsets[0]))+" to "+dateText(dateOffset(frost,offsets[1]))+". Check local weather and your packet.";
@@ -563,7 +560,7 @@ function journalDetailsHTML(entry,linked,candidates,guide){
   '<option value="'+esc(p.key)+'"'+(linked&&linked.key===p.key?' selected':'')+'>'+esc(p.name)+'</option>').join("");
  const chooser=candidates.length?
   '<label class="wb-journal-link-label">Link a specific variety only if you know it was planted<select data-journal-link="'+esc(entry.id)+'">'+options+'</select></label>':
-  '<p class="wb-note">No matching seed variety is currently listed. You can add one in Garden Workbench, but this journal record is preserved.</p>';
+  '<p class="wb-note">No matching seed variety is currently listed. You can add one in Garden Planner, but this journal record is preserved.</p>';
  let facts="";
  if(guide){
   const data=[["Depth",guide.depth],["Spacing",guide.spacing],["Sunlight",guide.light],["Germination",guide.germ],["Soil temperature",guide.soil],["Maturity / lifespan",guide.days]];
@@ -731,10 +728,16 @@ function importData(data,options={}){
  return true;
 }
 window.DKSeedBankWorkbench=Object.freeze({exportData:()=>structuredClone(state),importData});
-$("#wbExport").addEventListener("click",()=>$("#exportJournal").click());
-$("#wbImport").addEventListener("click",()=>$("#importJournal").click());
-$$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
- host.open=true;const panel=document.getElementById(button.dataset.wbOpen);if(panel){panel.open=true;panel.scrollIntoView({behavior:"smooth",block:"start"});}
+$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
+ const panel=document.getElementById(button.dataset.wbOpen);
+ if(!panel)return;
+ if(panel===document.getElementById("dkSyncBackup")){
+  panel.open=true;
+ }else{
+  planner.open=true;
+  panel.open=true;
+ }
+ panel.scrollIntoView({behavior:"smooth",block:"start"});
 }));
 function makeBackTopButton(className){
  const button=document.createElement("button");button.type="button";button.className=className;
