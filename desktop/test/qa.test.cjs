@@ -435,3 +435,13 @@ test("Each seed category has its own representative botanical icon before the ti
  assert.match(monastery,/<summary>🏛️ Monastic Garden<\/summary>/);
  assert.doesNotMatch(monastery,/<summary>🏛️ Monastic Garden <small>/);
 });
+
+test("Seed Suppliers sits directly below Monastic Garden, not below the collection",()=>{
+ const suppliers=read("assets/seedbank-suppliers.js");
+ assert.match(suppliers,/document\.getElementById\("monasteryGuide"\)/);
+ assert.match(suppliers,/monastic\.insertAdjacentElement\("afterend",panel\)/);
+ for(const source of [read("index.html"),read("docs/index.html")]){
+  assert.match(source,/seedbank-suppliers\.js\?v=20261112-position2/);
+  assert.ok(source.indexOf("seedbank-monastery.js")<source.indexOf("seedbank-suppliers.js"));
+ }
+});

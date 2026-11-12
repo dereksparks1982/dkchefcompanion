@@ -13,7 +13,7 @@
 - **Sync & Backup:** full JSON backups with verification, restore controls, local/offline storage tools, and opt-in Google Drive synchronization.
 - **Recipe Guide:** personal ingredient checklists and culinary references, separate from the actual seed inventory.
 - **Monastic Garden:** a standalone historical reference section immediately below Recipe Guide, with its explanatory material inside the section. Garden Planner remains near the top.
-- **Seed Suppliers:** website links to established seed suppliers plus user-added favorite links. No shopping checkout or global seed-variety catalog is built into the app.
+- **Seed Suppliers:** a standalone section directly below Monastic Garden, with website links to established seed suppliers plus user-added favorite links. No shopping checkout or global seed-variety catalog is built into the app.
 
 ## Your data and Google Drive
 
