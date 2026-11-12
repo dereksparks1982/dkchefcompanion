@@ -74,10 +74,13 @@ function createWindow(){
         localStorage.removeItem(key);
         const i18n=window.DKSeedBankI18n;
         const initial=i18n?.getLanguage();
+        const header=document.querySelector("header");
         i18n?.setLanguage("ru",false);
         const russian=i18n?.getLanguage()==="ru"&&document.documentElement.lang==="ru";
+        const russianBlack=getComputedStyle(header).backgroundColor==="rgb(0, 0, 0)";
         i18n?.setLanguage("en",false);
         const english=i18n?.getLanguage()==="en"&&document.documentElement.lang==="en";
+        const englishGreen=getComputedStyle(header).backgroundImage!=="none";
         if(initial==="ru")i18n?.setLanguage("ru",false);
         return {
           cards:document.querySelectorAll(".seed").length,
@@ -87,12 +90,14 @@ function createWindow(){
           offline:!!document.getElementById("dkOfflineStatus"),
           greenLogo:logo?.getAttribute("src")==="assets/dk-seedbank-green-96.webp",
           redLogo:redLogo?.getAttribute("src")==="assets/dk-seedbank-red-96.webp",
-          russian,english,
+          russian,english,russianBlack,englishGreen,
+          noCollectionEyebrow:!document.querySelector(".eyebrow"),
           exportBackup:!!document.getElementById("exportJournal"),
           importBackup:!!document.getElementById("importJournal"),
           backupValidation:!!window.DKSeedBankBackup,
           seedCareAlerts:!!window.DKSeedBankAlerts,
           backupPanel:!!document.getElementById("dkResilience"),
+          backupVerify:!!document.getElementById("dkRecoveryVerify"),
           desktopUpdater:typeof window.DKSeedBankDesktop?.checkForUpdates==="function"
         };
       })()

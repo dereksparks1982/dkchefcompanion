@@ -92,7 +92,7 @@ test("mobile and desktop bundles contain the new resilient interface",()=>{
 
 test("service worker precaches the entire offline shell and uses a network timeout",()=>{
  const source=read("sw.js");
- assert.match(source,/dk-seedbank-app-v3/);
+ assert.match(source,/dk-seedbank-app-v5/);
  for(const part of ["seedbank-backup-utils.js","seedbank-alerts.js","seedbank-resilience.js","seedbank-resilience.css"])
   assert.ok(source.includes(part),part+" not precached");
  assert.match(source,/new AbortController\(\)/);
@@ -101,8 +101,54 @@ test("service worker precaches the entire offline shell and uses a network timeo
 
 test("README stays concise and points at the portable Linux folder",()=>{
  const text=read("README.md");
- assert.ok(text.includes("v0.9.4-linux-portable/DK-Seed-Bank-0.9.4-Linux-x86_64.tar.gz"));
+ assert.ok(text.includes("v0.9.5-linux-portable/DK-Seed-Bank-0.9.5-Linux-x86_64.tar.gz"));
  assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
  assert.ok(!text.includes("inventory/"));
  assert.ok(!text.includes(".AppImage"));
+});
+
+
+test("English and Russian banners contain no collection eyebrow",()=>{
+ const english=read("index.html");
+ const russian=read("docs/index.html");
+ assert.doesNotMatch(english,/<div class="eyebrow">/);
+ assert.doesNotMatch(russian,/<div class="eyebrow">/);
+ assert.doesNotMatch(english,/My seed collection<\/div>/);
+ assert.doesNotMatch(russian,/My seed collection<\/div>/);
+ assert.match(english,/<span class="dk-title-en"/);
+ assert.match(english,/<span class="dk-title-ru"/);
+ assert.match(read("assets/seedbank-i18n.css"),/html\[lang="ru"\] header\{background:#000\}/);
+ assert.match(english,/header\{background:linear-gradient\(125deg,#163b2d,#286547\)/);
+});
+
+test("backups can be inspected without replacing stored records",()=>{
+ const script=read("assets/seedbank-resilience.js");
+ assert.match(script,/dkRecoveryVerifyInput/);
+ assert.match(script,/helper\.validate\(data\)/);
+ assert.match(script,/await helper\.verify\(data\)/);
+ assert.match(script,/No records were changed/);
+ assert.match(script,/Записи не изменены/);
+ assert.match(script,/file\.size>100000000/);
+});
+
+test("offline photo saver advances through consecutive batches",()=>{
+ const script=read("assets/seedbank-resilience.js");
+ assert.match(script,/return Array\.from\(seen\);/);
+ assert.doesNotMatch(script,/return Array\.from\(seen\)\.slice\(0,80\)/);
+ assert.match(script,/const maxStored=180,batchLimit=80/);
+ assert.match(script,/if\(stopped\|\|added>=limit\)break/);
+ assert.match(script,/await cache\.match\(request\)/);
+ assert.match(script,/Stop photo saving/);
+});
+
+test("export limits, normalized SHA-256 backup and user-controlled reminders",()=>{
+ const cards=read("assets/seedbank-cards.js");
+ assert.match(cards,/const serializedBackup=JSON\.stringify\(draft\)/);
+ assert.match(cards,/const snapshot=JSON\.parse\(serializedBackup\)/);
+ assert.match(cards,/new Blob\(\[serializedBackup\]\)\.size>95000000/);
+ assert.match(cards,/await helper\.checksum\(snapshot\)/);
+ const alerts=browserModule("seedbank-alerts.js").DKSeedBankAlerts;
+ const p=[{key:"mint",name:"Mint",count:5,used:0,archived:false}];
+ assert.equal(alerts.assess({today:"2026-11-12",plants:p,lowStock:0}).counts.low,0);
+ assert.equal(alerts.assess({today:"2026-11-12",plants:p,lowStock:10}).counts.low,1);
 });

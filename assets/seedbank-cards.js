@@ -951,7 +951,9 @@ async function createFullBackup(){
   if(!data)throw Error("Could not read an uploaded photo. No incomplete backup was downloaded.");
   serialized.push({key,data});
  }
- const snapshot={
+ // Normalize the export through JSON so the checksum covers exactly what will be saved.
+ // This also strips undefined values that cannot survive a round trip through a file.
+ const draft={
   format:"dk-seedbank-v1",backupSchema:2,exportedAt:new Date().toISOString(),
   journal,settings,photoUrls:remoteImageUrls,photoPreferences,
   workbench:window.DKSeedBankWorkbench?window.DKSeedBankWorkbench.exportData():null,
@@ -959,6 +961,10 @@ async function createFullBackup(){
   recipeGuide:window.DKSeedBankRecipes?window.DKSeedBankRecipes.exportData():null,
   photos:serialized
  };
+ const serializedBackup=JSON.stringify(draft);
+ if(new Blob([serializedBackup]).size>95000000)
+  throw Error("Backup would exceed the 100 MB restore limit. Reduce large uploaded photos before exporting.");
+ const snapshot=JSON.parse(serializedBackup);
  const helper=window.DKSeedBankBackup;
  if(!helper)throw Error("Backup protection tools are unavailable. Reload before exporting.");
  helper.validate(snapshot);

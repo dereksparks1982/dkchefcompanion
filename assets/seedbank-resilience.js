@@ -14,6 +14,8 @@ panel.innerHTML=
  '<div class="dk-resilience-actions">'+
  '<button type="button" id="dkRecoveryExport"></button>'+
  '<button type="button" id="dkRecoveryImport"></button>'+
+ '<button type="button" id="dkRecoveryVerify"></button>'+
+ '<input type="file" accept="application/json,.json" id="dkRecoveryVerifyInput" hidden>'+
  '<button type="button" id="dkRecoveryPersist"></button>'+
  '<button type="button" id="dkRecoveryPhotos"></button></div>'+
  '<p id="dkRecoveryProgress" role="status" aria-live="polite"></p>'+
@@ -41,6 +43,7 @@ function render(){
  $("dkRecoveryLast").textContent=lastExport();
  $("dkRecoveryExport").textContent=l("↓ Export full backup","↓ Скачать полную резервную копию");
  $("dkRecoveryImport").textContent=l("↑ Restore backup","↑ Восстановить из копии");
+ $("dkRecoveryVerify").textContent=l("✓ Verify backup file","✓ Проверить резервную копию");
  $("dkRecoveryPersist").textContent=l("Protect browser storage","Защитить хранилище браузера");
  $("dkRecoveryPhotos").textContent=saving?l("Stop photo saving","Остановить сохранение"):
   l("Save up to 80 photos offline","Сохранить до 80 фото для офлайна");
@@ -56,6 +59,33 @@ function render(){
 }
 $("dkRecoveryExport").addEventListener("click",()=>document.getElementById("exportJournal")?.click());
 $("dkRecoveryImport").addEventListener("click",()=>document.getElementById("importJournal")?.click());
+$("dkRecoveryVerify").addEventListener("click",()=>$("dkRecoveryVerifyInput").click());
+$("dkRecoveryVerifyInput").addEventListener("change",async event=>{
+ const file=event.target.files?.[0];
+ if(!file)return;
+ const button=$("dkRecoveryVerify");
+ button.disabled=true;
+ photoStatus=l("Checking backup file…","Проверка файла резервной копии…");
+ render();
+ try{
+  if(file.size>100000000)throw Error("File exceeds the 100 MB backup limit.");
+  const helper=window.DKSeedBankBackup;
+  if(!helper)throw Error("Backup verification is unavailable. Reload the application.");
+  const data=JSON.parse(await file.text());
+  const report=helper.validate(data);
+  const result=await helper.verify(data);
+  photoStatus=(result.verified?
+   l("✓ Backup integrity verified. ","✓ Целостность резервной копии проверена. "):
+   l("Older backup: structure valid, no checksum. ","Старая копия: структура верна, контрольной суммы нет. "))+
+   l("Plantings: ","Посадки: ")+report.plantings+
+   l(" · Custom varieties: "," · Добавленные сорта: ")+report.addedVarieties+
+   l(" · Seed lots: "," · Партии семян: ")+report.seedLots+
+   l(" · Photos: "," · Фотографии: ")+report.uploadedPhotos+
+   l(". No records were changed.",". Записи не изменены.");
+ }catch(error){
+  photoStatus=l("Backup verification failed: ","Ошибка проверки резервной копии: ")+error.message;
+ }finally{button.disabled=false;event.target.value="";render();}
+});
 $("dkRecoveryPersist").addEventListener("click",async()=>{
  if(!navigator.storage?.persist)return;
  try{
@@ -81,7 +111,7 @@ function photoCandidates(){
    seen.add(parsed.href);
   }catch(error){/* Ignore invalid URLs. */}
  }
- return Array.from(seen).slice(0,80);
+ return Array.from(seen);
 }
 $("dkRecoveryPhotos").addEventListener("click",async()=>{
  if(saving){stopped=true;return;}
@@ -97,8 +127,17 @@ $("dkRecoveryPhotos").addEventListener("click",async()=>{
  saving=true;stopped=false;let added=0,already=0,failed=0;
  try{
   const cache=await caches.open("dk-seedbank-images-v1");
+  const maxStored=180,batchLimit=80;
+  const stored=await cache.keys();
+  const available=Math.max(0,maxStored-stored.length);
+  const limit=Math.min(batchLimit,available);
+  if(!limit){
+   photoStatus=l("The offline photo cache already holds its 180-photo limit. Existing pictures remain available while stored.",
+    "Офлайн-кеш заполнен (180 фотографий). Уже сохранённые фото остаются доступными.");
+   return;
+  }
   for(const url of urls){
-   if(stopped)break;
+   if(stopped||added>=limit)break;
    try{
     const request=new Request(url,{mode:"no-cors",credentials:"omit"});
     if(await cache.match(request)){already++;continue;}
@@ -108,13 +147,16 @@ $("dkRecoveryPhotos").addEventListener("click",async()=>{
      added++;
     }else failed++;
    }catch(error){failed++;}
-   photoStatus=l("Saving photographs… ","Сохранение фотографий… ")+(added+already+failed)+"/"+urls.length;
+   photoStatus=l("Saving photographs… ","Сохранение фотографий… ")+added+"/"+limit+
+     l(" new · "," новых · ")+already+l(" already saved"," уже сохранено");
    render();
   }
-  photoStatus=l("Offline photos: ","Офлайн-фото: ")+(added+already)+"/"+urls.length+
-    l(" saved or already cached. "," сохранено или уже в кеше. ")+
+  photoStatus=l("Offline photos: ","Офлайн-фото: ")+added+
+    l(" new; "," новых; ")+already+
+    l(" previously saved. "," уже сохранено. ")+
     (failed?l(failed+" unavailable. ",failed+" недоступно. "):"")+
-    l("This is a best-effort cache; keep your JSON backups.","Кеш не гарантирует постоянное хранение. Сохраняйте копии JSON.");
+    l("Run again for the next batch if space remains. Photos may be cleared by the browser; keep your backups.",
+      "Повторите для следующей партии, если есть место. Браузер может очистить кеш; сохраняйте резервные копии.");
  }catch(error){
   photoStatus=l("Offline photo storage is unavailable or full.",
    "Офлайн-хранилище фотографий недоступно или заполнено.");

@@ -4,7 +4,8 @@
 const isObject=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
 const array=value=>Array.isArray(value)?value:[];
 const MAX_PHOTOS=3000;
-const MAX_PHOTO_BYTES=8000000;
+// Base64 uses roughly 4/3 the uploaded binary size, plus a data URL header.
+const MAX_PHOTO_BYTES=8300000;
 const MAX_TOTAL_PHOTO_CHARS=130000000;
 function validate(data){
  if(!isObject(data)||data.format!=="dk-seedbank-v1")throw Error("Not a DK Seed Bank backup.");

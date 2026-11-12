@@ -6,7 +6,7 @@ const validDate=s=>typeof s==="string"&&/^\d{4}-\d\d-\d\d$/.test(s)&&
  !Number.isNaN(new Date(s+"T12:00:00").valueOf());
 function assess(input){
  const today=validDate(input.today)?new Date(input.today+"T12:00:00"):new Date();
- const year=today.getFullYear(),lowStock=Math.max(0,Number(input.lowStock)||30);
+ const year=today.getFullYear(),lowStock=Number.isFinite(Number(input.lowStock))?Math.max(0,Number(input.lowStock)):30;
  const ru=input.locale==="ru",l=(en,russian)=>ru?russian:en;
  const plants=Array.isArray(input.plants)?input.plants:[];
  const lots=Array.isArray(input.lots)?input.lots:[];
