@@ -56,6 +56,10 @@ async function choose(token){
  const close=document.createElement("button");
  close.type="button";close.className="dk-drive-picker-close";
  close.textContent=lang("Close","Закрыть");
+ const retry=document.createElement("button");
+ retry.type="button";retry.className="dk-drive-picker-close";
+ retry.disabled=true;
+ retry.textContent=lang("Retry folders","Повторить загрузку");
  const message=document.createElement("div");
  message.className="dk-drive-picker-message";
  message.setAttribute("role","status");
@@ -65,7 +69,7 @@ async function choose(token){
  frame.title=lang("Google Drive folder selection","Выбор папки Google Диска");
  frame.referrerPolicy="strict-origin-when-cross-origin";
  frame.setAttribute("allow","clipboard-read; clipboard-write");
- bar.append(heading,close);
+ bar.append(heading,retry,close);
  dialog.append(bar,message,frame);
  overlay.appendChild(dialog);
  document.body.appendChild(overlay);
@@ -93,6 +97,14 @@ async function choose(token){
   function onKey(event){if(event.key==="Escape"){event.preventDefault();endPick(null);}}
   document.addEventListener("keydown",onKey);
   close.addEventListener("click",()=>endPick(null));
+  retry.addEventListener("click",()=>{
+   if(!frame.src)return;
+   frame.hidden=false;
+   message.textContent=lang("Retrying Google Drive folders after permission changes…",
+    "Повторная загрузка папок Google Диска после изменения разрешений…");
+   // The embedded Google account iframe may need reloading after cookies are allowed.
+   frame.src=frame.src;
+  });
   // PickerBuilder.toUri() is Google's documented iframe embedding API.
   // The embedded dialog does not depend on Google positioning a modal.
   loadPicker().then(()=>{
@@ -122,7 +134,10 @@ async function choose(token){
     const pickerUrl=builder.toUri().toString();
     if(!/^https:\/\//.test(pickerUrl))throw Error("Google returned an invalid folder picker address.");
     frame.src=pickerUrl;
-    message.textContent=lang("Select the folder you want DK Seed Bank to use.","Выберите папку для хранения файлов ДК Банка семян.");
+    retry.disabled=false;
+    message.textContent=lang(
+     "Select your folder. If Google denies access after you allow cookies, press Retry folders once.",
+     "Выберите папку. Если после разрешения файлов cookie Google отказывает в доступе, нажмите «Повторить загрузку».");
    }catch(error){fail(error);}
   }).catch(error=>{if(!done)fail(error);});
  });
