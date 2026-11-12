@@ -5,7 +5,7 @@
 const core=root.DKSeedBankCore,backup=root.DKSeedBankBackup,merge=root.DKSeedBankDriveMerge;
 if(!core||!backup||!merge)return;
 const appKey="dk-seedbank-google-sync-settings-v1";
-const scope="https://www.googleapis.com/auth/drive.appdata";
+const scope="https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file";
 const clientRx=/^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/;
 const filePrefix="dk-seedbank-sync-v1-";
 const desktop=!!root.DKSeedBankDesktop?.googleDrive;
@@ -42,6 +42,7 @@ box.innerHTML='<summary>☁ Google Drive sync</summary>'+
 '<button type="button" id="dkDriveConnect"></button>'+
 '<button type="button" id="dkDriveNow"></button>'+
 '<button type="button" id="dkDriveDisconnect"></button></div>'+
+(!desktop?'<div class="dk-visible-folder"><button type="button" id="dkDriveChooseFolder"></button><p id="dkDriveFolderState" role="status" aria-live="polite"></p></div>':'')+
 '<label class="dk-drive-auto"><input type="checkbox" id="dkDriveAuto"><span id="dkDriveAutoLabel"></span></label>'+
 '<p id="dkDriveState" role="status" aria-live="polite"></p>'+
 '<p id="dkDriveScope"></p>'+
@@ -82,6 +83,15 @@ function render(){
  $("dkDriveScope").textContent=t(
   "Google permits DK Seed Bank to access only its private app-data area in the Google account YOU authorize. Your other Drive files and folders are not accessible. Synchronization does not share your data publicly.",
   "Приложение получает доступ только к своему закрытому разделу данных в Google Диске ВАШЕГО аккаунта. Другие файлы и папки недоступны. Данные не становятся общедоступными.");
+ if(!desktop){
+  const visible=root.DKSeedBankDriveVisible;
+  $("dkDriveChooseFolder").textContent=t("Choose my Google Drive folder","Выбрать папку Google Диска");
+  $("dkDriveChooseFolder").disabled=busy||!ready();
+  const picked=visible?.folder();
+  $("dkDriveFolderState").textContent=picked?
+   t("Visible photo folder: ","Папка с фотографиями: ")+picked.name:
+   t("No visible Drive folder selected yet. Existing hidden backups are preserved.","Папка для видимых файлов ещё не выбрана. Скрытые копии сохранены.");
+ }
  $("dkDriveState").textContent=lastStatus||(
   connected?(ready()?t("Connected. Ready to synchronize.","Подключено. Можно синхронизировать."):
    t("Google session expired. Reconnect to continue syncing.","Срок действия сеанса истёк. Подключитесь снова.")):
@@ -196,11 +206,21 @@ async function syncNow(){
   }
   const mine=files.find(file=>file.name===filename);
   await upload(result,mine?.id);
+  let visibleMessage="";
+  const visible=root.DKSeedBankDriveVisible;
+  if(!desktop&&visible?.folder()){
+   try{
+    const published=await visible.mirror(token,result);
+    visibleMessage=t(" · Visible photos: "," · Видимые фото: ")+published.photos;
+   }catch(error){
+    visibleMessage=t(" · Visible-folder copy FAILED: "," · Не удалось сохранить в папку: ")+error.message;
+   }
+  }
   saved.lastSync=new Date().toISOString();persist();
   lastStatus=t("✓ Synchronized with your Google Drive: ","✓ Синхронизировано с вашим Google Диском: ")+
    new Date(saved.lastSync).toLocaleString()+" · "+
    t("Plantings","Посадки")+": "+result.journal.length+" · "+
-   t("Photos","Фото")+": "+result.photos.length;
+   t("Photos","Фото")+": "+result.photos.length+visibleMessage;
   render();
   if(reloadNeeded)setTimeout(()=>window.location.reload(),1200);
   return true;
@@ -253,6 +273,18 @@ async function disconnect(){
  }catch(error){lastStatus=t("Could not disconnect: ","Не удалось отключить: ")+error.message;}
  finally{busy=false;render();}
 }
+if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async()=>{
+ if(busy||!ready())return;
+ const visible=root.DKSeedBankDriveVisible;
+ if(!visible){lastStatus=t("Folder selection is unavailable in this version.","Выбор папки недоступен.");render();return;}
+ try{
+  const chosen=await visible.choose(token);
+  if(chosen){lastStatus=t("Folder selected: ","Выбрана папка: ")+chosen.name+
+   t(". Select Sync now to upload photos and the full backup.",". Нажмите «Синхронизировать сейчас», чтобы загрузить фотографии и копию.");
+  }
+ }catch(error){lastStatus=error.message;}
+ render();
+});
 $("dkDriveConnect").addEventListener("click",connect);
 $("dkDriveNow").addEventListener("click",syncNow);
 $("dkDriveDisconnect").addEventListener("click",disconnect);
