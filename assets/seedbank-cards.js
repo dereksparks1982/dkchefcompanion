@@ -461,8 +461,14 @@ document.getElementById("closePhoto").addEventListener("click",()=>photoDialog.c
 photoDialog.addEventListener("click",e=>{if(e.target===photoDialog)photoDialog.close();});
 
 function photoMatch(p){return Object.prototype.hasOwnProperty.call(checkedPhotoCatalog,p.key)?checkedPhotoCatalog[p.key]:null;}
-function commonsFilePage(meta){return "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(meta.file.replace(/ /g,"_"));}
-function commonsImageUrl(meta){return "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(meta.file.replace(/ /g,"_"))+"?width=560";}
+function commonsFilePage(meta){
+ if(meta.url)return meta.source||meta.url;
+ return "https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(meta.file.replace(/ /g,"_"));
+}
+function commonsImageUrl(meta){
+ if(meta.url)return meta.url;
+ return "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(meta.file.replace(/ /g,"_"))+"?width=560";
+}
 function availablePhotoUrls(p){
  const match=photoMatch(p);
  return {variety:match?commonsImageUrl(match):null,plant:savedImageLink(p,"plant")||userPhotos.get(p.key)||null,packet:savedImageLink(p,"packet")||packetPhotos.get(p.key)||null};
@@ -478,8 +484,8 @@ function showPhoto(p){
  credit.textContent="";
  if(mode==="variety"&&photoMatch(p)){
   const meta=photoMatch(p);
-  credit.appendChild(document.createTextNode("Photographer: "+meta.author+" · License: "+meta.license+" · "));
-  const a=document.createElement("a");a.href=commonsFilePage(meta);a.target="_blank";a.rel="noopener noreferrer";a.textContent="Original image, source and licensing details";credit.appendChild(a);
+  credit.appendChild(document.createTextNode((meta.url?"Source: ":"Photographer: ")+meta.author+" · "+(meta.url?"External image; reuse rights unverified":"License: "+meta.license)+" · "));
+  const a=document.createElement("a");a.href=commonsFilePage(meta);a.target="_blank";a.rel="noopener noreferrer";a.textContent=meta.url?"View original source page":"Original image, source and licensing details";credit.appendChild(a);
  }else if(savedImageLink(p,mode)){
   const link=document.createElement("a");link.href=savedImageLink(p,mode);link.target="_blank";link.rel="noopener noreferrer";link.textContent="Original image address";
   credit.appendChild(document.createTextNode("Web picture selected by you. Check the original website for usage rights. "));
@@ -499,7 +505,7 @@ function refreshPhoto(p){
   const icon=document.createElement("span");icon.className="seed-illustration";icon.textContent=pictureIcons[p.cat]||"🌱";thumb.appendChild(icon);
   thumb.title="No confirmed image yet. Choose Manage photos to add your own.";
  }else{
-  const image=document.createElement("img");image.src=images[mode];image.alt=(mode==="variety"?"Sourced "+(match.level==="cultivar"?"cultivar":"plant type")+" photo":mode==="plant"?"Your growing plant":"Your seed packet")+" of "+p.name;
+  const image=document.createElement("img");image.src=images[mode];image.alt=(mode==="variety"?(match.level==="packet"?"Source image of named seed packet":"Sourced "+(match.level==="cultivar"?"named cultivar":"plant type")+" photo"):mode==="plant"?"Your growing plant":"Your seed packet")+" of "+p.name;
   image.loading="lazy";image.decoding="async";
   image.addEventListener("error",()=>{
    if(image.parentNode!==thumb)return;
@@ -512,14 +518,16 @@ function refreshPhoto(p){
  let status="No exact variety photo verified";
  if(mode==="plant")status=savedImageLink(p,"plant")?"Showing your linked plant photograph":"Showing your plant photo";
  else if(mode==="packet")status=savedImageLink(p,"packet")?"Showing your linked seed packet photograph":"Showing your packet photo";
- else if(mode==="variety")status=match.level==="cultivar"?"Photo of named cultivar":match.level==="type"?"Matching plant type · strain unverified":match.level==="species"?"Correct species · exact seed strain unknown":"One example of this seed blend";
+ else if(mode==="variety")status=match.level==="packet"?"Named seed-packet photo (not growing carrots)":match.level==="cultivar"?(match.url?"Seller's photo of named cultivar":"Photo of named cultivar"):match.level==="type"?"Matching plant type · exact strain unverified":match.level==="species"?"Correct species · exact seed strain unknown":"One example of this seed blend";
  p.card.querySelector(".seed-photo-state").textContent=status;
  p.card.dataset.userPhoto=(images.plant||images.packet)?"yes":"no";
  const credit=p.card.querySelector(".photo-credit");credit.textContent="";
  if(match){
-  credit.appendChild(document.createTextNode("Sourced photo: "+match.author+" · "+match.license+" · "));
-  const link=document.createElement("a");link.href=commonsFilePage(match);link.target="_blank";link.rel="noopener noreferrer";link.textContent="View original, attribution and reuse license";credit.appendChild(link);
-  if(match.level!=="cultivar")credit.appendChild(document.createTextNode(". This is a type/species/example image, not a guaranteed exact seed-packet cultivar."));
+  credit.appendChild(document.createTextNode("Sourced photo: "+match.author+" · "+(match.url?"External image; reuse rights unverified":match.license)+" · "));
+  const link=document.createElement("a");link.href=commonsFilePage(match);link.target="_blank";link.rel="noopener noreferrer";link.textContent=match.url?"View original supplier source":"View original, attribution and reuse license";credit.appendChild(link);
+  if(match.level!=="cultivar")credit.appendChild(document.createTextNode(match.level==="packet"?". This shows a commercial seed packet, not harvested carrots.":". This is a type/species/example image, not a guaranteed exact seed-packet cultivar."));
+  if(match.note)credit.appendChild(document.createTextNode(" "+match.note));
+  if(match.url)credit.appendChild(document.createTextNode(" Image is linked from the seller's site, not copied to this repository."));
  }else credit.textContent="No reliable exact-variety photo was found and none has been substituted. Add your own plant or seed-packet picture.";
  for(const button of p.card.querySelectorAll("[data-photo-mode]")){
   const kind=button.dataset.photoMode;button.hidden=!images[kind];button.setAttribute("aria-pressed",String(kind===mode));

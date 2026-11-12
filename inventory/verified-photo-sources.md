@@ -36,3 +36,20 @@ These are **specific Wikimedia Commons files**, not generic Wikipedia article th
 | Grains and grasses: Glass Gem Corn | cultivar | [Glass gem corn with husk.jpg](https://commons.wikimedia.org/wiki/File:Glass_gem_corn_with_husk.jpg) | gozalewis | CC BY-SA 2.0 |
 | Grains and grasses: Golden Bantam Corn | cultivar | ['Golden Bantam' - Corn (35373809983).jpg](https://commons.wikimedia.org/wiki/File:'Golden_Bantam'_-_Corn_(35373809983).jpg) | Architect of the Capitol | see Commons |
 | Grains and grasses: Bloody Butcher Ornamental Corn | cultivar | [Corn - bloody butcher - 9724.jpg](https://commons.wikimedia.org/wiki/File:Corn_-_bloody_butcher_-_9724.jpg) | Amada44 | CC BY-SA 3.0 |
+
+
+## Carrots: cultivar-specific externally linked references (November 2026)
+
+These nine image links are verified as images displaying carrot varieties or their named packets. The image stays hosted by the source website; **no rights to copy or redistribute it have been established**. A seed card's own user-selected picture URL still takes precedence. If a retailer disables hotlinking, the image may fail to load. **Nantes** is only a Nantes-type reference; **Little Finger** is a customer image whose exact seed strain is unverified; **Starburst** shows a seed packet, not harvested carrots.
+
+| Seed entry | Image match | Image | Original source | Notes |
+|---|---|---|---|---|
+| Solar Yellow | cultivar | [External image](https://seedsofplenty.com.au/cdn/shop/products/V-CAR-05p1.jpg?v=1670217199) | [Seeds of Plenty](https://seedsofplenty.com.au/products/carrot-solar-yellow-daucus-carota) | Seller's Solar Yellow carrot photo |
+| Cosmic Purple | cultivar | [External image](https://www.edenbrothers.com/cdn/shop/files/carrot-cosmic-purple-shk-2.jpg?v=1723134515&width=1445) | [Eden Brothers](https://www.edenbrothers.com/products/cosmic-purple-carrot-seeds) | Seller's Cosmic Purple carrot photo |
+| Dragon | cultivar | [External image](https://tomorrowseeds.com/cdn/shop/files/CARRPD10.2_0908f9c3-8e2f-4b8a-afc1-e108f1453354_600x.png?v=1768495895) | [TomorrowSeeds](https://tomorrowseeds.com/products/purple-dragon-carrot) | Seller's Purple Dragon carrot photo |
+| Starburst | packet | [External image](https://cdn.shopify.com/s/files/1/0050/7255/1971/products/StarburstCarrotBlend.jpg?v=1671195867) | [High Mowing Organic Seeds (packet image)](https://seedtime.us/products/starburst-carrot-blend) | This is an image of the named Starburst carrot blend's commercial seed packet, NOT a photograph of harvested carrots |
+| Little Finger | type | [External image](https://photos-us.bazaarvoice.com/photo/2/cGhvdG86YnVycGVl/6a743bdf-f231-50a7-8afe-c42c1648f7ca) | [Burpee customer-uploaded growing photo](https://www.burpee.com/products/carrot-little-finger-prod000634) | Customer photo on the Little Finger product page. Exact seed strain cannot be independently confirmed |
+| Nantes | type | [External image](https://shop.hortinova.ca/cdn/shop/products/19.CRONA.jpg?v=1667411039&width=1080) | [Hortinova (CRONA Nantes-type)](https://shop.hortinova.ca/products/crona-gardening-and-farming-carrot-seeds) | Nantes-type reference, specifically CRONA, NOT a confirmed match for the user's unspecified Nantes packet |
+| Scarlet Nantes | cultivar | [External image](https://hawthornfarm.ca/cdn/shop/products/scarlet-nantes-3_6ff66fb1-401a-4207-89d3-4e256b98e845.jpg?v=1637339543) | [Hawthorn Farm](https://hawthornfarm.ca/products/scarlet-nantes-carrot) | Seller's Scarlet Nantes carrot photo |
+| Royal Chantenay | cultivar | [External image](https://dhseedharvestco.com/cdn/shop/products/royalcarrot1_5_1400x.jpg?v=1650002060) | [D&H Seed Harvest Co](https://dhseedharvestco.com/products/carrot-royal-chantenay) | Seller's Royal Chantenay carrot photo |
+| Imperator 58 | cultivar | [External image](https://www.reimerseeds.com/images/thumbs/0006204_imperator-58-carrot-seeds_510.jpeg) | [Reimer Seeds](https://www.reimerseeds.com/imperator-58-carrot-seeds) | Seller's Imperator 58 carrot photo |

@@ -1,4 +1,4 @@
-/* DK Seed Bank: manually reviewed variety photograph metadata. Wikimedia Commons source pages identify the photographer and reuse license. */
+/* DK Seed Bank: per-inventory-entry photo sources. Commons files provide credits and licensing; retailer images are external links, not owned by this project. */
 window.DKSeedBankVarietyImages = Object.freeze({
   "Sunflowers|Mammoth": {
     "file": "Bee and mammoth sunflower.jpg",
@@ -191,5 +191,77 @@ window.DKSeedBankVarietyImages = Object.freeze({
     "author": "Amada44",
     "license": "CC BY-SA 3.0",
     "level": "cultivar"
+  },
+  "Carrots|Solar Yellow": {
+    "url": "https://seedsofplenty.com.au/cdn/shop/products/V-CAR-05p1.jpg?v=1670217199",
+    "source": "https://seedsofplenty.com.au/products/carrot-solar-yellow-daucus-carota",
+    "author": "Seeds of Plenty",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Solar Yellow carrot photo"
+  },
+  "Carrots|Cosmic Purple": {
+    "url": "https://www.edenbrothers.com/cdn/shop/files/carrot-cosmic-purple-shk-2.jpg?v=1723134515&width=1445",
+    "source": "https://www.edenbrothers.com/products/cosmic-purple-carrot-seeds",
+    "author": "Eden Brothers",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Cosmic Purple carrot photo"
+  },
+  "Carrots|Dragon": {
+    "url": "https://tomorrowseeds.com/cdn/shop/files/CARRPD10.2_0908f9c3-8e2f-4b8a-afc1-e108f1453354_600x.png?v=1768495895",
+    "source": "https://tomorrowseeds.com/products/purple-dragon-carrot",
+    "author": "TomorrowSeeds",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Purple Dragon carrot photo"
+  },
+  "Carrots|Starburst": {
+    "url": "https://cdn.shopify.com/s/files/1/0050/7255/1971/products/StarburstCarrotBlend.jpg?v=1671195867",
+    "source": "https://seedtime.us/products/starburst-carrot-blend",
+    "author": "High Mowing Organic Seeds (packet image)",
+    "license": "External image; reuse rights not confirmed",
+    "level": "packet",
+    "note": "This is an image of the named Starburst carrot blend's commercial seed packet, NOT a photograph of harvested carrots"
+  },
+  "Carrots|Little Finger": {
+    "url": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86YnVycGVl/6a743bdf-f231-50a7-8afe-c42c1648f7ca",
+    "source": "https://www.burpee.com/products/carrot-little-finger-prod000634",
+    "author": "Burpee customer-uploaded growing photo",
+    "license": "External image; reuse rights not confirmed",
+    "level": "type",
+    "note": "Customer photo on the Little Finger product page. Exact seed strain cannot be independently confirmed"
+  },
+  "Carrots|Nantes": {
+    "url": "https://shop.hortinova.ca/cdn/shop/products/19.CRONA.jpg?v=1667411039&width=1080",
+    "source": "https://shop.hortinova.ca/products/crona-gardening-and-farming-carrot-seeds",
+    "author": "Hortinova (CRONA Nantes-type)",
+    "license": "External image; reuse rights not confirmed",
+    "level": "type",
+    "note": "Nantes-type reference, specifically CRONA, NOT a confirmed match for the user's unspecified Nantes packet"
+  },
+  "Carrots|Scarlet Nantes": {
+    "url": "https://hawthornfarm.ca/cdn/shop/products/scarlet-nantes-3_6ff66fb1-401a-4207-89d3-4e256b98e845.jpg?v=1637339543",
+    "source": "https://hawthornfarm.ca/products/scarlet-nantes-carrot",
+    "author": "Hawthorn Farm",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Scarlet Nantes carrot photo"
+  },
+  "Carrots|Royal Chantenay": {
+    "url": "https://dhseedharvestco.com/cdn/shop/products/royalcarrot1_5_1400x.jpg?v=1650002060",
+    "source": "https://dhseedharvestco.com/products/carrot-royal-chantenay",
+    "author": "D&H Seed Harvest Co",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Royal Chantenay carrot photo"
+  },
+  "Carrots|Imperator 58": {
+    "url": "https://www.reimerseeds.com/images/thumbs/0006204_imperator-58-carrot-seeds_510.jpeg",
+    "source": "https://www.reimerseeds.com/imperator-58-carrot-seeds",
+    "author": "Reimer Seeds",
+    "license": "External image; reuse rights not confirmed",
+    "level": "cultivar",
+    "note": "Seller's Imperator 58 carrot photo"
   }
 });
