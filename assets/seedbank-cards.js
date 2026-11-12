@@ -226,31 +226,9 @@ function tagContent(card){
 }
 cards.forEach(tagContent);
 
-// Opening a guide expands the visible seed cards sharing its actual CSS-grid row.
-// Closing a guide, via its summary or its Close button, affects only that card.
-// Measure when clicked so search filters, screen width and wrapping are respected.
-function seedCardsInSameVisualRow(selected){
- const grid=selected.closest(".entries");
- if(!grid)return [selected];
- const rowTop=selected.getBoundingClientRect().top;
- return Array.from(grid.querySelectorAll(".seed")).filter(card=>
-  !card.hidden && card.getClientRects().length>0 &&
-  Math.abs(card.getBoundingClientRect().top-rowTop)<2
- );
-}
+// Native details elements open and close independently for each seed card.
 cards.forEach(card=>{
  const guide=card.querySelector(".seed-details");
- const summary=guide.querySelector("summary");
- summary.addEventListener("click",()=>{
-  if(guide.open)return; // Native summary click will close ONLY this guide.
-  seedCardsInSameVisualRow(card).forEach(peer=>{
-   if(peer!==card){
-    const otherGuide=peer.querySelector(".seed-details");
-    if(otherGuide)otherGuide.open=true;
-   }
-  });
-  // The native summary action opens the selected card.
- });
  guide.querySelector(".close-planting-guide").addEventListener("click",()=>{
   guide.open=false;
  });
@@ -773,7 +751,6 @@ function patchInventoryCard(key,patch){
 }
 function initializeNewSeedCard(p){
  const c=p.card,g=c.querySelector(".seed-details");
- g.querySelector("summary").addEventListener("click",()=>{if(g.open)return;seedCardsInSameVisualRow(c).forEach(other=>{if(other!==c){const x=other.querySelector(".seed-details");if(x)x.open=true;}});});
  c.querySelector(".close-planting-guide").addEventListener("click",()=>{g.open=false;});
  c.querySelector(".log-planting").addEventListener("click",()=>openForm({seedKey:p.key,plant:p.name,variety:p.name,date:today(),status:"Sown"}));
  c.querySelector(".manage-photos").addEventListener("click",()=>openPhotoTools(p));
