@@ -28,6 +28,14 @@ const guides={
  celery:def("Surface sow; press into seed mix","8–12 in","Full sun / partial shade","14–28 days","65–75°F","Start indoors 10–12 weeks before last frost; transplant after hardening","Rich, moisture-retentive soil; long cool season","Needs reliably even moisture","Often 100–130 days from transplant","indoor","protected","100–130 days","Tall Utah celery is a long-season crop; do not bury tiny seeds deeply. Needs consistent moisture and nutrition."),
  cabbage:def("¼–½ in","12–18 in","Full sun","5–10 days","60–80°F","Start indoors 4–6 weeks before last frost for spring or start midsummer for fall","Cool-season fertile outdoor bed","Keep evenly moist and protect from cabbage pests","Early heads often 60–90 days from transplant","indoor","outdoor","60–90 days","Golden Acre and Copenhagen Market Early are early heading cabbages. Avoid sowing directly into hot weather."),
  chervil:def("¼ in","6–8 in","Partial shade / cool sun","10–21 days","50–70°F","Direct sow in cool spring and fall; repeat succession sowings","Moist, well-drained herb bed or container","Never let young plants dry out","Tender leaves about 6–8 weeks","direct-cool","outdoor","40–60 days","Curled chervil (Anthriscus cerefolium) bolts in heat and resents root disturbance."),
+ mulberry:def("¼ in","Tree: 15–25 ft at maturity","Full sun / light shade","Weeks to months","65–80°F after dormancy treatment","Follow Morus alba seed pretreatment and sowing guidance; germination varies","Nursery pot to outdoor planting site with room for a tree","Keep seed-starting mix moist, not saturated","Several years to fruit","unknown","outdoor","Years","White mulberry (Morus alba) is invasive in some regions; check local planting guidance."),
+ strawberry:def("Surface sow; press seeds down lightly","12–18 in for established plants","Full sun","2–6 weeks or more","60–75°F","Start indoors in a light, moist mix; many Fragaria seeds germinate better after cold treatment","Nursery trays then outdoor pots or beds","Keep germination media uniformly moist","Usually fruit from established plants after months or a season","indoor","outdoor","Varies","Species/cultivar unspecified; seed-grown plants may not match commercial varieties."),
+ serviceberry:def("⅛–¼ in","Shrub or small tree: allow several feet","Full sun / light shade","Slow; may require months","Seasonal; cold moist stratification often helps","Cold stratification may be required; sow according to verified serviceberry instructions","Deep nursery pots then a suitable outdoor location","Water evenly as seedlings establish","Several seasons to fruit","unknown","outdoor","Years","Amelanchier alnifolia; botanical identity should match the seed packet."),
+ elderberry:def("¼ in","6–10 ft for mature shrub","Full sun / partial shade","Often months; dormancy can be complex","Varies; may require warm/cold treatment","Follow Sambucus canadensis dormancy-specific instructions; germination can be slow","Moist but drained nursery mix, later outdoor shrub bed","Consistent moisture for young seedlings","Several seasons to fruit","unknown","outdoor","Years","Only suitably prepared fully ripe berries are used in food. Leaves, stems and unripe fruit can be poisonous."),
+ blueberry:def("Surface sow; needs light","2–3 ft for lowbush groundcover","Full sun / partial shade","Often 3–8 weeks","60–75°F","Start on a moist acidic substrate; seedlings grow slowly","Well-drained acidic bed or container (typically pH 4.5–5.5)","Consistently moist, not waterlogged","Several years to fruit","unknown","outdoor","Years","Lowbush blueberry is Vaccinium angustifolium; avoid lime and alkaline soils."),
+ huckleberry:def("Surface or very shallow; check packet","3–5 ft for established shrub","Partial shade / light sun","Several weeks to months","Varies; dormancy treatment may help","Sow Vaccinium ovatum in an acidic seed-starting mix; follow specific dormancy guidance","Moist, acidic, well-drained nursery pots","Even moisture; protect small seedlings from drying","Several years to fruit","unknown","outdoor","Years","Evergreen huckleberry is a true Vaccinium, not garden huckleberry."),
+ gardenHuckleberry:def("¼ in","18–24 in","Full sun","7–21 days","70–80°F","Start indoors 6–8 weeks before last frost; set out after soil warms","Warm garden soil or large container","Regular moisture without waterlogging","Fruit after about 70–100 days from transplant","indoor","protected","70–110 days","Garden huckleberry is a Solanum nightshade. Confirm exact packet species and safe food use. Unripe fruit can be toxic; ripe fruit is commonly cooked, not eaten raw."),
+ englishIvy:def("Follow packet; sow shallowly","Woody climbing vine; can spread widely","Shade / partial shade","Slow and irregular","Varies; dormancy treatment may help","Follow Hedera helix seed-specific guidance; cuttings are more commonly used","Contain in a pot; invasive outdoors in many locations","Keep the mix moist but well-drained","Evergreen ornamental vine","unknown","verify","Perennial","English ivy has saponins and is used traditionally for household leaf-cleaning experiments, but leaves are toxic if swallowed and can irritate skin. Never treat it as edible or as a tested skin-safe soap."),
  generic:def("Check packet","Check species","Check packet","Varies","Varies","Follow species and packet guidance","Unknown until species is confirmed","Keep evenly moist during germination, avoid saturation","Varies","unknown","verify","Varies","General botanical guidance only; this variety needs verification."),
  tomato:def("¼ in","24–36 in","Full sun","5–10 days","75–85°F","Start indoors about 5–8 weeks before last spring frost","Warm bed or greenhouse; harden off before transplanting","Water evenly, especially during fruiting","Typically 65–90 days from transplant","indoor","protected", "65–90 days","Support vining plants; long-season cultivars often benefit from protected growing."),
  pepper:def("¼ in","12–24 in","Full sun","7–21 days","75–90°F","Start indoors about 8–10 weeks before last spring frost","Warm greenhouse or sheltered bed; transplant after soil warms","Keep consistently moist; good drainage","Roughly 60–120 days from transplant","indoor","protected","60–120 days","Very hot varieties can mature slowly; provide extra warmth in short seasons."),
@@ -75,7 +83,8 @@ function resolveGuide(name,cat){
  if(cat==="Roots and brassicas")return n.includes("cabbage")?guides.cabbage:n.includes("parsnip")?guides.parsnip:n.includes("kohlrabi")?guides.kohlrabi:n.includes("turnip")?guides.turnip:n.includes("radish")?guides.radish:guides.beet;
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?guides.pumpkin:guides.melon;
  if(cat==="Gourds and squash")return n.includes("loofah")?guides.tropical:guides.squash;
- if(cat==="Trees and woody plants")return /date palm|moringa/.test(n)?guides.tropical:guides.tree;
+ if(cat==="Trees and woody plants")return n.includes("white mulberry")?guides.mulberry:n.includes("english ivy")?guides.englishIvy:/date palm|moringa/.test(n)?guides.tropical:guides.tree;
+  if(cat==="Berries and fruit")return n.includes("strawberry")?guides.strawberry:n.includes("saskatoon")?guides.serviceberry:n.includes("elderberry")?guides.elderberry:n.includes("lowbush blueberry")?guides.blueberry:n.includes("evergreen huckleberry")?guides.huckleberry:n.includes("garden huckleberry")?guides.gardenHuckleberry:guides.generic;
  if(cat==="Flowers and ornamentals")return /poppy/.test(n)?guides.poppy:guides.flower;
  if(cat==="Fiber and historical crops")return /tobacco/.test(n)?guides.tobacco:guides.cotton;
  if(cat==="Grains and grasses")return /corn/.test(n)?guides.corn:guides.grain;
@@ -94,7 +103,7 @@ const commonWiki={
  "Wildflower mixes":"Wildflower","Sunflowers":"Helianthus annuus","Carrots":"Carrot","Tomatoes":"Tomato",
  "Eggplant":"Eggplant","Peppers":"Capsicum annuum","Roots and brassicas":"Root vegetable","Leafy greens":"Leaf vegetable",
  "Pumpkins and melons":"Cucurbitaceae","Gourds and squash":"Squash (plant)",
- "Trees and woody plants":"Tree","Flowers and ornamentals":"Flower",
+ "Trees and woody plants":"Tree","Berries and fruit":"Berry","Flowers and ornamentals":"Flower",
  "Herbs and medicinal plants":"Herb","Alliums: chives, onions and leeks":"Allium","Grains and grasses":"Cereal",
  "Fiber and historical crops":"Fiber crop"
 };
@@ -120,7 +129,8 @@ function wikiFor(name,cat){
  if(cat==="Roots and brassicas")return n.includes("cabbage")?"Cabbage":n.includes("parsnip")?"Parsnip":n.includes("radish")?"Radish":n.includes("kohlrabi")?"Kohlrabi":n.includes("turnip")?"Turnip":"Beetroot";
  if(cat==="Pumpkins and melons")return n.includes("pumpkin")?"Pumpkin":n.includes("cucamelon")?"Melothria scabra":n.includes("watermelon")?"Watermelon":"Cantaloupe";
  if(cat==="Gourds and squash")return n.includes("loofah")?"Luffa aegyptiaca":n.includes("zucchini")?"Zucchini":n.includes("butternut")?"Butternut squash":n.includes("delicata")?"Delicata squash":"Summer squash";
- if(cat==="Trees and woody plants")return n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
+ if(cat==="Berries and fruit")return n.includes("strawberry")?"Strawberry":n.includes("serviceberry")?"Amelanchier alnifolia":n.includes("elderberry")?"Sambucus canadensis":n.includes("blueberry")?"Vaccinium angustifolium":n.includes("evergreen huckleberry")?"Vaccinium ovatum":n.includes("garden huckleberry")?"Solanum scabrum":"Berry";
+  if(cat==="Trees and woody plants")return n.includes("mulberry")?"Morus alba":n.includes("english ivy")?"Hedera helix":n.includes("date")?"Date palm":n.includes("hazelnut")?"Hazelnut":n.includes("pine")?"Pine":n.includes("moringa")?"Moringa oleifera":n.includes("sequoia")?"Sequoiadendron giganteum":n.includes("pecan")?"Pecan":n.includes("sugar maple")?"Acer saccharum":n.includes("boxwood")?"Buxus":commonWiki[cat];
  if(cat==="Flowers and ornamentals")return n.includes("rose")?"Rose":n.includes("poppy")?(n.includes("california")?"Eschscholzia californica":"Papaver somniferum"):n.includes("morning glory")?"Ipomoea tricolor":n.includes("sea holly")?"Eryngium planum":n.includes("edelweiss")?"Leontopodium alpinum":n.includes("zinnia")?"Zinnia elegans":n.includes("lily of the valley")?"Convallaria majalis":n.includes("pokeberry")?"Phytolacca americana":n.includes("larkspur")?"Consolida ajacis":n.includes("coleus")?"Coleus":n.includes("celosia")?"Celosia argentea":n.includes("haworthia")?"Haworthia":n.includes("dahlia")?"Dahlia":n.includes("phlox")?"Phlox subulata":n.includes("balsam")?"Impatiens balsamina":n.includes("forget")?"Myosotis":"Flower";
  if(cat==="Alliums: chives, onions and leeks")return n.includes("garlic chives")?"Allium tuberosum":n.includes("chives")?"Chives":n.includes("leek")?"Leek":/scallion|bunching/.test(n)?"Welsh onion":"Onion";
  if(cat==="Herbs and medicinal plants")return n.includes("dill")?"Dill":n.includes("basil")?(n.includes("tulsi")?"Ocimum tenuiflorum":"Basil"):n.includes("oregano")?"Oregano":n.includes("marjoram")?"Origanum majorana":n.includes("cilantro")||n.includes("coriander")?"Coriander":n.includes("fennel")?"Fennel":n.includes("parsley")?"Parsley":n.includes("ashwagandha")?"Withania somnifera":n.includes("hyssop")?"Hyssopus officinalis":n.includes("wormwood")?"Artemisia absinthium":n.includes("mugwort")?"Artemisia vulgaris":n.includes("rue")?"Ruta graveolens":n.includes("nightshade")?"Atropa belladonna":n.includes("henbane")?"Hyoscyamus":n.includes("foxglove")?"Digitalis":n.includes("caraway")?"Caraway":n.includes("anise")?"Anise":n.includes("cumin")?"Cumin":n.includes("savory")?"Satureja":n.includes("mimosa")?"Mimosa pudica":n.includes("herb of paris")?"Paris quadrifolia":commonWiki[cat];
@@ -145,7 +155,27 @@ const referenceGuides={
  parsley:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"],
  fennel:["University of Minnesota Extension · Growing herbs","https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/growing-herbs"]
 };
-const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Leafy greens":"🥬","Fiber and historical crops":"🌱"};
+const pictureIcons={"Sunflowers":"🌻","Tomatoes":"🍅","Carrots":"🥕","Peppers":"🌶️","Herbs and medicinal plants":"🌿","Alliums: chives, onions and leeks":"🧅","Wildflower mixes":"🌼","Trees and woody plants":"🌳","Berries and fruit":"🫐","Grains and grasses":"🌾","Pumpkins and melons":"🎃","Gourds and squash":"🥒","Flowers and ornamentals":"🌸","Eggplant":"🍆","Roots and brassicas":"🌱","Leafy greens":"🥬","Fiber and historical crops":"🌱"};
+
+const squashSVG='<svg class="seed-squash-svg" viewBox="0 0 100 86" role="img" aria-label="Generic yellow squash illustration" xmlns="http://www.w3.org/2000/svg"><path d="M50 23C42 20 39 15 44 7" stroke="#587536" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M53 25C44 20 37 24 38 35C26 39 14 47 15 60C16 76 30 81 49 81C70 81 84 73 84 59C84 46 75 39 61 35C61 28 58 25 53 25Z" fill="#F2C460" stroke="#AC7A28" stroke-width="2.5"/><path d="M32 51C26 63 35 72 45 74" stroke="#FFEDB2" stroke-width="6" fill="none" opacity=".85" stroke-linecap="round"/><path d="M61 24C74 13 80 22 75 31C69 33 65 31 61 24Z" fill="#64914D" stroke="#396232" stroke-width="2"/></svg>';
+const zucchiniSVG='<svg class="seed-squash-svg" viewBox="0 0 100 86" role="img" aria-label="Generic zucchini squash illustration" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(-28 50 44)"><path d="M48 9C57 9 62 21 62 35L66 68C67 76 57 82 47 82C36 82 29 76 31 68L36 35C37 21 40 9 48 9Z" fill="#4B783E" stroke="#254B2D" stroke-width="2.5"/><path d="M44 22C42 40 38 62 39 73" stroke="#89AC65" stroke-width="5" stroke-linecap="round" fill="none" opacity=".8"/><path d="M53 22C57 41 57 60 57 70" stroke="#34643A" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M41 9L40 1M47 9L47 1M53 9L55 1" stroke="#8C9561" stroke-width="4" stroke-linecap="round"/></g></svg>';
+function seedFallbackMarkup(name,cat){
+ const n=String(name||"").toLowerCase();
+ if(/\bwatermelon\b/.test(n))return '🍉';
+ if(/\bcantaloupe\b|\bhoneydew\b/.test(n))return '🍈';
+ if(/\bpumpkin\b/.test(n))return '🎃';
+ if(cat==="Gourds and squash")return /zucchini/.test(n)?zucchiniSVG:squashSVG;
+ if(/\bstrawberry\b/.test(n))return '🍓';
+ if(/\bblueberry\b|\bhuckleberry\b|\belderberry\b|\bserviceberry\b/.test(n))return '🫐';
+ if(/\bmulberry\b/.test(n))return '🌳';
+ if(/\benglish ivy\b/.test(n))return '🍃';
+ return pictureIcons[cat]||'🌱';
+}
+function placeSeedFallback(thumb,name,cat){
+ const icon=document.createElement('span');icon.className='seed-illustration';
+ icon.innerHTML=seedFallbackMarkup(name,cat);thumb.appendChild(icon);
+}
+
 const checkedPhotoCatalog=window.DKSeedBankVarietyImages||{};
 const photoPreferenceKey="dk-seedbank-photo-view-v2";
 const remoteImageStorageKey="dk-seedbank-remote-image-urls-v1";
@@ -236,7 +266,7 @@ function tagContent(card){
   '<p class="photo-credit">Exact variety image not yet confirmed. You can upload your own.</p>'+
   '<div class="plant-guide-close"><button type="button" class="close-planting-guide" aria-label="Close planting details for '+esc(name)+'">× Close planting details</button></div>'+
   '</details>';
- const thumb='<button type="button" class="seed-thumb" aria-label="View photo for '+esc(name)+'" title="Open plant photo"><span class="seed-illustration">'+(pictureIcons[cat]||"🌱")+'</span></button>';
+ const thumb='<button type="button" class="seed-thumb" aria-label="View photo for '+esc(name)+'" title="Open plant photo"><span class="seed-illustration">'+seedFallbackMarkup(name,cat)+'</span></button>';
  const top=card.querySelector(".seed-top");
  const stock=top.querySelector(".stock-badge");
  const existingTop=top.outerHTML;
@@ -510,14 +540,14 @@ function refreshPhoto(p){
  const thumb=p.card.querySelector(".seed-thumb");
  thumb.textContent="";
  if(mode==="none"){
-  const icon=document.createElement("span");icon.className="seed-illustration";icon.textContent=pictureIcons[p.cat]||"🌱";thumb.appendChild(icon);
-  thumb.title="No confirmed image yet. Choose Manage photos to add your own.";
+  placeSeedFallback(thumb,p.name,p.cat);
+  thumb.title="Generic plant illustration, not a photograph of this variety. Choose Manage photos to add your own.";
  }else{
   const image=document.createElement("img");image.src=images[mode];image.alt=(mode==="variety"?(match.level==="packet"?"Source image of named seed packet":"Sourced "+(match.level==="cultivar"?"named cultivar":"plant type")+" photo"):mode==="plant"?"Your growing plant":"Your seed packet")+" of "+p.name;
   image.loading="lazy";image.decoding="async";
   image.addEventListener("error",()=>{
    if(image.parentNode!==thumb)return;
-   thumb.textContent="";const fallback=document.createElement("span");fallback.className="seed-illustration";fallback.textContent=pictureIcons[p.cat]||"🌱";thumb.appendChild(fallback);
+   thumb.textContent="";placeSeedFallback(thumb,p.name,p.cat);
    p.card.querySelector(".seed-photo-state").textContent="Image unavailable. View source or add your photo.";
   });
   thumb.appendChild(image);
@@ -760,9 +790,10 @@ function patchInventoryCard(key,patch){
  if(Number.isInteger(patch.amount)&&patch.amount>=0&&patch.amount<=999999){
   card.dataset.amount=String(patch.amount);
   card.dataset.quantityKnown="yes";
-  card.querySelector(".stock-badge").textContent=patch.amount+" "+(patch.amount===1?"packet / lot":"packets / lots");
+  card.querySelector(".stock-badge").textContent=patch.amount+" "+(patch.amount===1?"packet":"packets");
  }
  if(["packet","harvested","unknown"].includes(patch.source))card.dataset.source=patch.source;
+  if(patch.source||Number.isInteger(patch.amount)){const num=Number(card.dataset.amount)||0;const unit=card.dataset.source==="packet"?"packet":"lot";card.querySelector(".stock-badge").textContent=num+" "+(num===1?unit:unit+"s");}
  if(typeof patch.archived==="boolean")card.dataset.archived=patch.archived?"yes":"no";
  p.guide=resolveGuide(p.name,p.cat);
  p.kind=Object.keys(guides).find(k=>guides[k]===p.guide)||"generic";

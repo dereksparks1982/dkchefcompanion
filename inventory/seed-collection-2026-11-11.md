@@ -80,10 +80,10 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 ## Leafy greens
 - Canton White Stem Pak Choi (Bok Choy) (*Brassica rapa* subsp. *chinensis*): 1 packet
 - Italian Dandelion / Catalogna Chicory (*Cichorium intybus*): **2 packets**
-- Winter Purslane (*Claytonia perfoliata*): packet count **unconfirmed**
-- Swiss Chard Ruby Red (*Beta vulgaris*): packet count **unconfirmed**
-- Swiss Chard Large White (*Beta vulgaris*): packet count **unconfirmed**
-- Mâche / Corn Salad (*Valerianella locusta*): packet count **unconfirmed**
+- Winter Purslane (*Claytonia perfoliata*): 1 packet
+- Swiss Chard Ruby Red (*Beta vulgaris*): 1 packet
+- Swiss Chard Large White (*Beta vulgaris*): 1 packet
+- Mâche / Corn Salad (*Valerianella locusta*): 1 packet
 - Kale Black Magic Dinosaur: 1 packet
 - Kale Dwarf Siberian: 1 packet
 - Kale Winter Red: 1 packet
@@ -152,13 +152,23 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 
 ## Trees and woody plants
 - Date palm, harvested from dates: 1 loose batch
-- Hazelnut: 2 seed lots
+- Hazelnut: 2 packets
 - Pine, from cones, species unknown: 1 loose batch
 - Drumstick Tree / Moringa oleifera: 1
 - Giant Sequoia: 1
 - Pecan: 1
 - Sugar Maple: 1
 - Boxwood: 1
+- White Mulberry: 1 packet
+- English Ivy: 1 packet
+
+## Berries and fruit
+- Strawberry: 1 packet
+- Saskatoon Serviceberry: 1 packet
+- American Elderberry: 1 packet
+- Lowbush Blueberry: 2 packets
+- Evergreen Huckleberry: 1 packet
+- Garden Huckleberry: 2 packets
 
 ## Flowers and ornamentals
 - Balsam Bush Double Mixed Colors: 1
@@ -251,8 +261,8 @@ Recorded from spoken inventory, 2026-11-11. Packet counts refer to commercial pa
 ## Grains and grasses
 - Common Cat Grass (species unspecified): 1 commercial packet
 - Black Ornamental Wheat / Black Night Wheat: 1 commercial packet
-- Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 seed lot
-- Unidentified Wheat (variety unknown): 1 seed lot
+- Unlabeled grain seeds (possibly barley; identification unconfirmed): 1 packet
+- Unidentified Wheat (variety unknown): 1 packet
 - Winter Rye: 2 commercial packets
 - Bio Bio Quinoa (spelled B-I-O B-I-O; also sounded like 'Bobo'): 1 packet
 - Mint Vanilla Quinoa: 1 packet

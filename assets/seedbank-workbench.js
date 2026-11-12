@@ -54,8 +54,14 @@ function familyOf(p){
  if(!p)return "Unknown";
  const name=(p.name+" "+p.cat).toLowerCase();
  if(p.cat==="Tomatoes"||p.cat==="Eggplant"||p.cat==="Peppers"||/belladonna|henbane|tobacco|pokeberry/.test(name))return "Nightshade (Solanaceae)";
- if(/pak choi|bok choy|radish|turnip|kohlrabi|brassica/.test(name))return "Brassica (Brassicaceae)";
- if(/fenugreek/.test(name))return "Legume (Fabaceae)";
+ if(/pak choi|bok choy|radish|turnip|kohlrabi|cabbage|kale|collard|brassica/.test(name))return "Brassica (Brassicaceae)";
+ if(/garden huckleberry/.test(name))return "Nightshade (Solanaceae)";
+  if(/elderberry/.test(name))return "Moschatel (Adoxaceae)";
+  if(/strawberry|serviceberry/.test(name))return "Rose (Rosaceae)";
+  if(/blueberry|evergreen huckleberry/.test(name))return "Heath (Ericaceae)";
+  if(/white mulberry/.test(name))return "Mulberry (Moraceae)";
+  if(/english ivy/.test(name))return "Ginseng (Araliaceae)";
+  if(/fenugreek/.test(name))return "Legume (Fabaceae)";
  if(/catalogna|chicory|italian dandelion/.test(name))return "Daisy (Asteraceae)";
  if(/winter purslane/.test(name))return "Miner's lettuce (Montiaceae)";
  if(/mâche|mache|corn salad/.test(name))return "Honeysuckle (Caprifoliaceae)";
@@ -73,7 +79,10 @@ function dangerFor(p){
  const name=p.name.toLowerCase();
  if(/belladonna|deadly nightshade|henbane|foxglove|lily of the valley/.test(name))return "Highly poisonous. Do not consume; protect children and pets.";
  if(/pokeberry|pokeweed|afghan poppy|papaver somniferum/.test(name))return "Potentially toxic or legally restricted plant. Verify handling and local requirements; keep away from pets and children.";
- if(/wormwood|rue|mugwort/.test(name))return "Contains potentially irritating or toxic compounds; avoid self-medicating and follow species-specific precautions.";
+ if(/english ivy/.test(name))return "Leaves are toxic if swallowed and can irritate skin; traditional leaf-cleaning use is not a guarantee of skin-safe soap. Plant can be invasive.";
+  if(/garden huckleberry/.test(name))return "Nightshade: unripe fruit may be poisonous. Confirm botanical species and proper preparation; keep away from pets and children.";
+  if(/elderberry/.test(name))return "Unripe berries, foliage and stems may be poisonous. Use only correctly prepared ripe berries.";
+  if(/wormwood|rue|mugwort/.test(name))return "Contains potentially irritating or toxic compounds; avoid self-medicating and follow species-specific precautions.";
  if(p.card.dataset.tags.split("|").includes("Caution"))return "Use caution: verify the plant's identity, toxicity and safe handling.";
  return "";
 }

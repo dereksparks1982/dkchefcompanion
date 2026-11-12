@@ -164,3 +164,6 @@ button.purpose-tag[aria-pressed="true"]{
 .legend button.purpose-tag{padding:5px 10px;font-size:.76rem}
 .legend button.purpose-tag[aria-pressed="true"]::before{content:"✓ ";font-weight:900}
 @media(prefers-reduced-motion:reduce){button.purpose-tag{transition:none}}
+
+/* Correct crop-specific squash artwork when no sourced photo is available. */
+.seed-illustration .seed-squash-svg{width:80px;height:80px;display:block;max-width:100%}
