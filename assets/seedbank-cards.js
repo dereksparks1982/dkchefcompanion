@@ -265,6 +265,48 @@ search.addEventListener("input",syncClear);syncClear();
 const filterArea=document.querySelector(".filter-grid");
 filterArea.insertAdjacentHTML("beforeend",'<div><label for="growFilter">Growing method</label><select id="growFilter"><option value="">All methods</option><option value="outdoor">Outdoor-friendly</option><option value="protected">Greenhouse recommended</option><option value="heated">Heated / indoor protection</option><option value="verify">Needs species verification</option></select></div><div><label for="photoFilter">My photos</label><select id="photoFilter"><option value="">All seeds</option><option value="yes">Has my photo</option><option value="no">No personal photo yet</option></select></div>');
 const growFilter=document.getElementById("growFilter"),photoFilter=document.getElementById("photoFilter");
+
+// The legend and every card purpose chip share the existing Purpose / role filter.
+// Toggle the same chip to return to the unfiltered, initially collapsed collection.
+const purposeSelect=document.getElementById("purposeFilter");
+const purposeChips=Array.from(document.querySelectorAll("button[data-purpose-tag]"));
+const knownPurposes=new Set(Array.from(purposeSelect.options).map(option=>option.value).filter(Boolean));
+function syncPurposeChips(){
+ const current=purposeSelect.value;
+ purposeChips.forEach(chip=>{
+  const active=chip.dataset.purposeTag===current;
+  chip.setAttribute("aria-pressed",String(active));
+  chip.classList.toggle("is-selected",active);
+  chip.title=active?"Clear "+current+" filter":"Show all "+chip.dataset.purposeTag+" seeds";
+ });
+}
+function selectPurposeByChip(value){
+ if(!knownPurposes.has(value))return;
+ const next=purposeSelect.value===value?"":value;
+ // Chips mean 'all matching seeds', so older unrelated filters must not hide results.
+ search.value="";
+ ["categoryFilter","sourceFilter","quantityFilter","heatFilter","growFilter","photoFilter"].forEach(id=>{
+  const input=document.getElementById(id);
+  if(input)input.value="";
+ });
+ purposeSelect.value=next;
+ search.dispatchEvent(new Event("input",{bubbles:true}));
+ purposeSelect.dispatchEvent(new Event("change",{bubbles:true}));
+ if(!next)cats.forEach(section=>{section.open=false;});
+ syncPurposeChips();
+ const collection=document.getElementById("collection");
+ if(collection)collection.scrollIntoView({behavior:"auto",block:"start"});
+}
+document.addEventListener("click",event=>{
+ const chip=event.target.closest&&event.target.closest("button[data-purpose-tag]");
+ if(!chip)return;
+ selectPurposeByChip(chip.dataset.purposeTag);
+});
+purposeSelect.addEventListener("change",syncPurposeChips);
+document.getElementById("reset").addEventListener("click",syncPurposeChips);
+document.querySelectorAll("[data-jump]").forEach(button=>button.addEventListener("click",syncPurposeChips));
+syncPurposeChips();
+
 function applyExtraFilters(){
  const grow=growFilter.value,photo=photoFilter.value;
  let count=0,units=0,sectionsCount=0;

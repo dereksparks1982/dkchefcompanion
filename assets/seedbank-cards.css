@@ -137,3 +137,30 @@
 .remote-photo-preview{width:100%;height:auto;max-height:250px;object-fit:contain;border:1px solid #d6e1d7;background:#fff;border-radius:8px;margin-top:11px}
 .remote-photo-feedback{font-size:.76rem;color:#516a57;margin:8px 0 0;line-height:1.45}
 @media(max-width:430px){#growPlanner>summary{padding:14px 15px}#growPlanner .planner-body{padding:12px}}
+
+
+/* Clickable purpose chips: visually consistent with the existing color legend */
+button.purpose-tag{
+ appearance:none;
+ -webkit-appearance:none;
+ font-family:inherit;
+ font-size:.7rem;
+ font-weight:750;
+ line-height:1.15;
+ border:1px solid transparent;
+ cursor:pointer;
+ text-decoration:none;
+ text-align:center;
+ transition:box-shadow .12s ease,border-color .12s ease,filter .12s ease;
+}
+button.purpose-tag:hover{filter:brightness(.95);border-color:currentColor}
+button.purpose-tag:focus-visible{outline:3px solid #b48221;outline-offset:3px}
+button.purpose-tag[aria-pressed="true"]{
+ border-color:currentColor;
+ outline:2px solid currentColor;
+ outline-offset:2px;
+ box-shadow:0 0 0 3px rgba(255,255,255,.95);
+}
+.legend button.purpose-tag{padding:5px 10px;font-size:.76rem}
+.legend button.purpose-tag[aria-pressed="true"]::before{content:"✓ ";font-weight:900}
+@media(prefers-reduced-motion:reduce){button.purpose-tag{transition:none}}
