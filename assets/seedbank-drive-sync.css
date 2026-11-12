@@ -19,3 +19,7 @@ html[lang="ru"] .dk-drive-sync>summary{color:#8e2941;background:#fff3f5}
 html[lang="ru"] .dk-drive-actions button:first-child{background:#9b304b;border-color:#9b304b}
 @media(max-width:550px){.dk-drive-body{padding:12px}.dk-drive-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.dk-drive-actions button{padding:8px 7px;font-size:.77rem}.dk-drive-actions button:first-child{grid-column:1/-1}}
 @media(max-width:340px){.dk-drive-actions{grid-template-columns:1fr}.dk-drive-actions button:first-child{grid-column:1}}
+.dk-visible-folder{border-top:1px solid #d7e3d8;margin-top:10px;padding-top:12px}
+.dk-visible-folder button{border:1px solid #b9caba;background:#eef7f0;color:#234b33;border-radius:9px;padding:10px 14px;min-height:43px;font:inherit;font-size:.83rem;font-weight:750;cursor:pointer}
+.dk-visible-folder button:disabled{opacity:.55;cursor:not-allowed}
+#dkDriveFolderState{font-size:.8rem;margin:9px 0;color:#4d6253;overflow-wrap:anywhere}
