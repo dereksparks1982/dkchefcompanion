@@ -5,12 +5,12 @@
 const core=root.DKSeedBankCore,backup=root.DKSeedBankBackup,merge=root.DKSeedBankDriveMerge;
 if(!core||!backup||!merge)return;
 const appKey="dk-seedbank-google-sync-settings-v1";
-// Keep existing hidden backups available even before the folder picker is configured.
+const desktop=!!root.DKSeedBankDesktop?.googleDrive;
+// Declare desktop before calculating the requested Google scopes.
 const scope="https://www.googleapis.com/auth/drive.appdata"+
  (!desktop&&root.DKSeedBankDriveVisible?.pickerReady()?" https://www.googleapis.com/auth/drive.file":"");
 const clientRx=/^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/;
 const filePrefix="dk-seedbank-sync-v1-";
-const desktop=!!root.DKSeedBankDesktop?.googleDrive;
 // Public application identifier, not a Google account, password or access token.
 const webClientId="990130733984-vc9lofrdpjc04flhkgc91buelgfo00ls.apps.googleusercontent.com";
 const t=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
