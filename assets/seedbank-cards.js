@@ -298,7 +298,18 @@ function openDB(){
  return dbPromise;
 }
 async function dbPut(key,blob){const db=await openDB();if(!db)return false;return new Promise(resolve=>{try{const tx=db.transaction("photos","readwrite");tx.objectStore("photos").put(blob,key);tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false);}catch(e){resolve(false);}});}
-async function dbDelete(key){const db=await openDB();if(!db)return;return new Promise(resolve=>{const t=db.transaction("photos","readwrite");t.objectStore("photos").delete(key);t.oncomplete=resolve;t.onerror=resolve;});}
+async function dbDelete(key){
+ const db=await openDB();if(!db)return false;
+ return new Promise(resolve=>{
+  try{
+   const tx=db.transaction("photos","readwrite");
+   tx.objectStore("photos").delete(key);
+   tx.oncomplete=()=>resolve(true);
+   tx.onerror=()=>resolve(false);
+   tx.onabort=()=>resolve(false);
+  }catch(error){resolve(false);}
+ });
+}
 async function dbAll(){const db=await openDB();if(!db)return [];return new Promise(resolve=>{try{const t=db.transaction("photos","readonly").objectStore("photos"), req=t.getAllKeys();req.onsuccess=()=>{const keys=req.result;Promise.all(keys.map(key=>new Promise(r=>{const request=t.get(key);request.onsuccess=()=>r([key,request.result]);request.onerror=()=>r(null);}))).then(x=>resolve(x.filter(Boolean)));};req.onerror=()=>resolve([]);}catch(e){resolve([]);}});}
 let journal=field(storageKey,null);
 let journalDeletes=field(journalDeletesKey,[]);
@@ -915,7 +926,7 @@ async function deleteUpload(p,kind){
  if(!target.has(p.key))return;
  const label=kind==="packet"?"packet":"plant";
  if(!window.confirm("Delete your uploaded "+label+" photo for "+p.name+" from this browser?"))return;
- try{await dbDelete(kind==="packet"?p.key+"|packet":p.key);}
+ try{if(!await dbDelete(kind==="packet"?p.key+"|packet":p.key))throw Error("Local image deletion failed.");}
  catch(e){alert("Unable to delete photo from local storage.");return;}
  const old=target.get(p.key);if(old)URL.revokeObjectURL(old);
  target.delete(p.key);
