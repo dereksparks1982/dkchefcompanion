@@ -319,7 +319,7 @@ if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async event=>{
  if(!visible){lastStatus=t("Folder selection is unavailable in this version.","Выбор папки недоступен.");render();return;}
  try{
   const chosen=await visible.choose(token);
-  if(!chosen&&Math.abs(window.scrollY-pageY)>20)window.scrollTo({top:pageY,behavior:"instant"});
+  if(!chosen&&Math.abs(window.scrollY-pageY)>20)window.scrollTo(0,pageY);
   if(chosen){lastStatus=t("Folder selected: ","Выбрана папка: ")+chosen.name+
    t(". Select Sync now to upload photos and the full backup.",". Нажмите «Синхронизировать сейчас», чтобы загрузить фотографии и копию.");
   }
