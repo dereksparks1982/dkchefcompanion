@@ -174,6 +174,7 @@ host.innerHTML=
  '<label>Yield<input type="number" name="amount" min="0.01" step="any" required></label>'+
  '<label>Unit<select name="unit"><option>lb</option><option>oz</option><option>kg</option><option>g</option><option>count</option><option>bunches</option></select></label>'+
  '<label>Garden space<input name="place" maxlength="100" placeholder="Bed / greenhouse"></label>'+
+ '<label class="wb-span">Linked planting (optional)<select name="plantingId" id="wbHarvestPlanting"><option value="">No linked planting</option></select></label>'+
  '<label class="wb-span">Quality and notes<input name="notes" maxlength="240" placeholder="Taste, pest damage, would grow again…"></label>'+
  '<button type="submit">Record harvest</button></form><div id="wbHarvestList"></div></div></details>'+
  '<details class="wb-panel" id="wb-saved"><summary>🌾 Seeds saved from your plants</summary><div class="wb-panel-body">'+
@@ -181,6 +182,11 @@ host.innerHTML=
  '<label>Seed harvest date<input type="date" name="date" required></label>'+
  '<label>Seeds collected<input type="number" min="0" name="count" placeholder="Approximate count"></label>'+
  '<label>Storage location<input name="place" maxlength="100" placeholder="Paper envelope in pantry"></label>'+
+ '<label class="wb-span">Linked planting (optional)<select name="plantingId" id="wbSavedPlanting"><option value="">No linked planting</option></select></label>'+
+ '<label>Seed batch label<input name="batch" maxlength="90" placeholder="e.g. 2026 North bed"></label>'+
+ '<label>Parent seed type<select name="parentType"><option value="unknown">Not verified</option><option value="open">Open-pollinated</option><option value="heirloom">Heirloom / open-pollinated</option><option value="hybrid">F1 hybrid</option></select></label>'+
+ '<label>Pollination / isolation<select name="isolation"><option value="unknown">Not verified</option><option value="isolated">Isolated from compatible varieties</option><option value="bagged">Flowers protected / hand-pollinated</option><option value="open">Open pollination (not isolated)</option><option value="possible">Possible cross-pollination</option></select></label>'+
+ '<label>Seed cleaning method<select name="method"><option value="unknown">Not recorded</option><option value="dry">Dry thresh / winnow</option><option value="wet">Wet seed wash</option><option value="ferment">Wet seed fermentation</option><option value="other">Other crop-specific method</option></select></label>'+
  '<label class="wb-span">Isolation, cross-pollination and observations<input name="notes" maxlength="300" placeholder="Isolated? Open pollinated?"></label>'+
  '<button type="submit">Save seed-harvest record</button></form><div id="wbSavedList"></div>'+
  '<p class="wb-note">Saved seed does not guarantee the parent traits, especially from hybrids or cross-pollinating plants.</p></div></details>'+
@@ -278,11 +284,13 @@ function countSeeds(key){
 }
 function renderLots(){
  const grouped=new Map();state.lots.forEach(l=>{const k=l.seedKey;if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(l);});
+ state.savedSeeds.forEach(l=>{if(!grouped.has(l.seedKey))grouped.set(l.seedKey,[]);});
  $("#wbLotList").innerHTML=grouped.size?[...grouped].map(([key,lots])=>{
   const p=item(key);if(!p)return "";
   const count=countSeeds(key),used=usedSeeds(key),remaining=Math.max(0,count-used);
   return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+count+' known seeds − '+used+' recorded sown = <strong>'+remaining+' estimated remaining</strong>'+
-   '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+'</ul></div>';
+   '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+
+   state.savedSeeds.filter(s=>s.seedKey===key).map(s=>'<li>Saved from garden · '+esc(s.batch||s.date||'year unknown')+' · '+number(s.count)+' seeds · '+esc(s.place||'storage unrecorded')+'</li>').join("")+'</ul></div>';
  }).join(""):'<p class="wb-empty">No seed lots recorded yet. Add one above to track actual seed counts.</p>';
 }
 function monthlyCandidates(year,month){
@@ -461,27 +469,50 @@ document.addEventListener("click",event=>{
 $("#wbHarvestForm").elements.date.value=today();
 $("#wbHarvestForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
- state.harvests.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),amount:number(v.get("amount")),unit:String(v.get("unit")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,240)});
+ state.harvests.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),amount:number(v.get("amount")),unit:String(v.get("unit")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,240),plantingId:linkedPlantingId(v)});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
+function refreshPlantingLinks(){
+ for(const [selector,formSelector] of [["#wbHarvestPlanting","#wbHarvestForm"],["#wbSavedPlanting","#wbSavedForm"]]){
+  const select=$(selector),form=$(formSelector);if(!select||!form)return;
+  const key=form.elements.seedKey.value,previous=select.value;
+  const matches=core.journal().filter(p=>p&&typeof p.id==="string"&&matchesName(p)===key)
+   .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  select.innerHTML='<option value="">No linked planting</option>'+matches.map(p=>
+   '<option value="'+esc(p.id)+'">'+esc((p.date||"date unknown")+" · "+(p.plant||"Plant")+(p.variety?" · "+p.variety:""))+'</option>').join("");
+  if(matches.some(p=>p.id===previous))select.value=previous;
+ }
+}
+function linkedPlantingId(form){
+ const key=String(form.get("seedKey")||""),selected=String(form.get("plantingId")||"");
+ return core.journal().some(p=>p&&p.id===selected&&matchesName(p)===key)?selected:"";
+}
+function linkedPlantingLabel(plantingId){
+ const planted=core.journal().find(p=>p&&p.id===plantingId);
+ return planted?'<p>Journal planting: '+esc(planted.date||"date unknown")+' · '+esc(planted.plant||"plant")+'</p>':"";
+}
+$("#wbHarvestForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
+$("#wbSavedForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
 function renderHarvests(){
  $("#wbHarvestList").innerHTML=state.harvests.length?state.harvests.slice().reverse().map(r=>{
   const p=item(r.seedKey);
   return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.amount)+' '+esc(r.unit)+
-  ' · '+esc(r.place||"location unspecified")+(r.notes?'<p>'+esc(r.notes)+'</p>':'')+
+  ' · '+esc(r.place||"location unspecified")+linkedPlantingLabel(r.plantingId)+(r.notes?'<p>'+esc(r.notes)+'</p>':'')+
   ' <button type="button" class="wb-small" data-wb-delete="harvests" data-id="'+esc(r.id)+'">Remove</button></div>';
  }).join(""):'<p class="wb-empty">No harvests recorded yet.</p>';
 }
 $("#wbSavedForm").elements.date.value=today();
 $("#wbSavedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
- state.savedSeeds.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,300)});
+ state.savedSeeds.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,300),plantingId:linkedPlantingId(v),batch:String(v.get("batch")||"").trim().slice(0,90),parentType:String(v.get("parentType")||"unknown"),isolation:String(v.get("isolation")||"unknown"),method:String(v.get("method")||"unknown")});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
 function renderSavedSeeds(){
  $("#wbSavedList").innerHTML=state.savedSeeds.length?state.savedSeeds.slice().reverse().map(r=>{
   const p=item(r.seedKey);
   return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.count)+' collected seeds · '+esc(r.place||"storage unrecorded")+
+  (r.batch?'<p>Batch: '+esc(r.batch)+'</p>':'')+linkedPlantingLabel(r.plantingId)+
+  '<p>Parent: '+esc(r.parentType||'unknown')+' · Isolation: '+esc(r.isolation||'unknown')+' · Cleaning: '+esc(r.method||'unknown')+'</p>'+ 
   (r.notes?'<p>'+esc(r.notes)+'</p>':'')+' <button type="button" class="wb-small" data-wb-delete="savedSeeds" data-id="'+esc(r.id)+'">Remove</button></div>';
  }).join(""):'<p class="wb-empty">No saved seed harvests recorded yet.</p>';
 }
@@ -689,7 +720,7 @@ document.addEventListener("change",event=>{
  if(key&&!item(key))return;
  core.setJournalSeedKey(id,key);
 });
-document.addEventListener("dkseedbank:journal-rendered",()=>{journalEnhance();renderSummary();renderLots();renderViability();});
+document.addEventListener("dkseedbank:journal-rendered",()=>{journalEnhance();renderSummary();renderLots();renderViability();refreshPlantingLinks();});
 document.addEventListener("dkseedbank:inventorychange",()=>{refreshSelects();renderAll();});
 document.addEventListener("click",event=>{
  const btn=event.target.closest("[data-wb-guide]");if(!btn)return;
@@ -718,7 +749,7 @@ function renderPlantWarnings(){
  });
 }
 function renderAll(){
- renderPlantWarnings();renderSummary();renderLots();renderSuccession();renderViability();renderBeds();renderHarvests();renderSavedSeeds();renderLabels();showMonth();journalEnhance();updateBackToTop();
+ renderPlantWarnings();renderSummary();renderLots();renderSuccession();renderViability();renderBeds();renderHarvests();renderSavedSeeds();renderLabels();showMonth();refreshPlantingLinks();journalEnhance();updateBackToTop();
 }
 function importData(data,options={}){
  if(!data||typeof data!=="object"||Array.isArray(data))return false;

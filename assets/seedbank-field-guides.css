@@ -1,0 +1,24 @@
+/* DK Seed Bank integrated reference guides: no additional top-level navigation. */
+.dk-field-guide{margin:12px 0 20px;border:1px solid #cfdcc9;border-radius:10px;background:#f8fbf6;overflow:hidden}
+.dk-field-guide>summary{cursor:pointer;padding:13px 15px;font-weight:750;color:#285b3a;background:#e9f3e6;list-style:none}
+.dk-field-guide>summary::-webkit-details-marker{display:none}
+.dk-field-guide>summary::after{content:"＋";float:right}
+.dk-field-guide[open]>summary::after{content:"−"}
+.dk-field-body{padding:15px 17px;font-size:.88rem;line-height:1.6}
+.dk-field-intro,.dk-field-note{color:#576c5a;line-height:1.5}
+.dk-field-select{display:block;margin:12px 0;font-weight:700;color:#375a42}
+.dk-field-select span{display:block;margin-bottom:6px}
+.dk-field-select select{max-width:100%;width:100%;border:1px solid #b5ceb7;border-radius:8px;padding:10px;background:white;color:#23402e;font:inherit}
+.dk-field-body h4{font-size:1rem;margin:14px 0 8px}
+.dk-field-body ol{padding-left:23px;margin:8px 0}
+.dk-field-body li{margin:7px 0}
+.dk-field-caution{padding:10px 12px;border-left:3px solid #bd852d;background:#fff7e7;border-radius:5px}
+.dk-field-links{margin-top:14px}
+.dk-field-links a{color:#196343;text-decoration:underline}
+.dk-season-checklist{margin:14px 0 18px;padding:12px 15px;border:1px solid #d4e4d0;border-radius:9px;background:#f7faf5;font-size:.85rem}
+.dk-season-checklist h3{margin:0 0 8px;color:#2c5f3e}
+.dk-season-checklist ul{margin:8px 0;padding-left:24px}
+.dk-season-checklist li{margin:7px 0}
+html[lang="ru"] .dk-field-guide>summary{background:#f5e8e9;color:#803a4e}
+html[lang="ru"] .dk-field-links a{color:#8e3b53}
+@media(max-width:580px){.dk-field-body{padding:12px}.dk-season-checklist{padding:10px}}
