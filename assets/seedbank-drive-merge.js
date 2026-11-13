@@ -124,6 +124,27 @@ function mergeSnapshots(inputs){
   return !marker||!marker.deleted||timestamp(photo.updatedAt)>timestamp(marker.at);
  });
  // Collect favorites from the user's own snapshots. No supplier data is publicized.
+ // Merge food inventory entries by record timestamps, preserving deletions across
+ // offline devices. Keep this inside recipeGuide so no Drive folder ID or permission changes.
+ const guideSnapshots=snapshots.map(s=>object(s.recipeGuide));
+ const recipeGuide={...object(local.recipeGuide)};
+ const stores=guideSnapshots.map(g=>object(g.provisions));
+ const provisionDeletes=unionTombstones(stores.flatMap(g=>array(g.deleted)),"deletedAt");
+ const byProvisionDeletion=new Map(provisionDeletes.map(x=>[x.id,timestamp(x.deletedAt)]));
+ const provisionItems=mergeRows(stores.flatMap(g=>array(g.items)),row=>row.id).filter(row=>
+  !byProvisionDeletion.has(row.id)||timestamp(row.updatedAt)>byProvisionDeletion.get(row.id));
+ if(provisionItems.length>3000)throw Error("Merged food inventory exceeds its safety limit.");
+ recipeGuide.provisions={
+  version:1,migrated:stores.some(g=>g.migrated===true),
+  items:provisionItems,deleted:provisionDeletes.slice(-3000)
+ };
+ // Preserve saved custom recipes and legacy recipe checkbox history from each device.
+ recipeGuide.ready=Object.assign({},...guideSnapshots.map(g=>object(g.ready)));
+ const customById=new Map();
+ for(const g of guideSnapshots)for(const recipe of array(g.custom)){
+  if(recipe&&typeof recipe.id==="string")customById.set(recipe.id,recipe);
+ }
+ recipeGuide.custom=[...customById.values()].slice(0,100);
  const supplierMap=new Map();
  for(const snapshot of snapshots)for(const item of array(snapshot.suppliers)){
   if(item&&typeof item.name==="string"&&typeof item.url==="string")
@@ -133,7 +154,7 @@ function mergeSnapshots(inputs){
  const output={
   format:"dk-seedbank-v1",backupSchema:3,exportedAt:new Date().toISOString(),
   journal,journalDeletes,settings:object(local.settings),
-  workbench,watering,recipeGuide:object(local.recipeGuide),suppliers,
+  workbench,watering,recipeGuide,suppliers,
   photoChanges,
   photoUrls:Object.assign({},...snapshots.map(s=>object(s.photoUrls))),
   photoPreferences:Object.assign({},...snapshots.map(s=>object(s.photoPreferences))),

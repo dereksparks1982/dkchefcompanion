@@ -1,4 +1,4 @@
-/* DK Seed Bank recipe guide: seed inventory is not an edible pantry. */
+/* DK Chef Companion: shared kitchen provisions and recipe checklists. */
 (function(){
 "use strict";
 const root=document.getElementById("recipeApp");
@@ -46,7 +46,7 @@ const templates=[
   item("water","Potable water","pantry",[])
  ],method:"Use a tested refrigerator-pickle recipe with food-safe vinegar strength, proper proportions and refrigeration. This guide tracks ingredients only."}
 ];
-const initial=()=>({version:1,ready:{},custom:[],selected:"absinthe"});
+const initial=()=>({version:2,ready:{},custom:[],selected:"absinthe",provisions:{version:1,migrated:false,items:[],deleted:[]}});
 let state=initial();
 try{const v=JSON.parse(localStorage.getItem(key)||"null");if(v&&typeof v==="object"&&!Array.isArray(v))state={...initial(),...v};}catch(e){}
 if(!state.ready||typeof state.ready!=="object")state.ready={};
@@ -55,9 +55,11 @@ function persist(){try{localStorage.setItem(key,JSON.stringify(state));return tr
 const all=()=>templates.concat(window.DKSeedBankRecipeLibrary?.recipes||[],state.custom);
 const category=recipe=>recipe.id.startsWith("custom-")?"personal":
  recipe.family==="Spice Blends"?"spices":
+ recipe.family==="Bread & Baking"?"bread":
  recipe.family==="Historical botanical checklist"?"historical":"kitchen";
 const tabs=[
  {id:"kitchen",en:"Meals & Kitchen",ru:"Блюда и кухня"},
+ {id:"bread",en:"Bread & Baking",ru:"Хлеб и выпечка"},
  {id:"spices",en:"Spice Blends",ru:"Смеси специй"},
  {id:"historical",en:"Historical",ru:"Исторические"},
  {id:"personal",en:"My Recipes",ru:"Мои рецепты"}
@@ -77,7 +79,107 @@ function matched(ingredient,plants){
  const aliases=(ingredient.aliases&&ingredient.aliases.length?ingredient.aliases:[ingredient.name]).map(clean).filter(Boolean);
  return plants.filter(p=>aliases.some(a=>(" "+p.normalized+" ").includes(" "+a+" "))).map(p=>p.name);
 }
-function isReady(recipe,ingredient){return !!state.ready[recipe.id+"/"+ingredient.id];}
+
+const ingredientAliases={
+ "fine salt":"salt","table salt":"salt","sea salt":"salt",
+ "extra virgin olive oil":"olive oil",
+ "fresh garlic":"garlic","garlic cloves":"garlic",
+ "yellow onion":"onion","onions":"onion","white onion":"onion",
+ "ripe tomatoes":"fresh tomatoes","fresh tomatoes":"fresh tomatoes",
+ "fresh basil":"fresh basil","basil leaves":"fresh basil",
+ "potable water":"water","warm water":"water",
+ "all purpose flour":"all purpose flour","plain flour":"all purpose flour",
+ "ground white pepper":"white pepper","white pepper":"white pepper",
+ "ground black pepper":"black pepper","black pepper":"black pepper",
+ "fresh lemon juice":"lemon juice","lemon juice":"lemon juice",
+ "egg":"eggs","eggs":"eggs","large eggs":"eggs",
+ "dried oregano":"dried oregano","ground oregano":"ground oregano"
+};
+function provisionKey(name){
+ const base=String(name||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
+  .replace(/\([^)]*\)/g," ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+ return ingredientAliases[base]||base;
+}
+function checkProvisions(){
+ const prov=state.provisions&&typeof state.provisions==="object"&&!Array.isArray(state.provisions)?state.provisions:{};
+ prov.items=Array.isArray(prov.items)?prov.items.filter(x=>x&&typeof x.id==="string"&&typeof x.key==="string").slice(0,3000):[];
+ prov.deleted=Array.isArray(prov.deleted)?prov.deleted.filter(x=>x&&typeof x.id==="string"&&typeof x.deletedAt==="string").slice(-3000):[];
+ if(!prov.migrated){
+  const recipes=all(),seen=new Set(prov.items.map(x=>x.key));
+  for(const recipe of recipes)for(const ing of recipe.ingredients||[]){
+   if(!state.ready[recipe.id+"/"+ing.id]||prov.items.length>=3000)continue;
+   const id=provisionKey(ing.name);if(!id||seen.has(id))continue;
+   prov.items.push({id:"legacy-"+recipe.id+"-"+ing.id,key:id,name:ing.name,location:"pantry",packages:1,
+    available:true,brand:"",barcode:"",size:"",amount:"",expiry:"",obtained:"",notes:"",
+    updatedAt:new Date().toISOString()});
+   seen.add(id);
+  }
+  prov.migrated=true;
+ }
+ state.provisions={version:1,...prov};
+}
+const provisions=()=>state.provisions.items;
+function isReady(recipe,ingredient){
+ const id=provisionKey(ingredient.name);
+ return !!id&&provisions().some(row=>row.key===id&&row.available!==false);
+}
+function provisionNotify(){
+ if(typeof Event==="function")document.dispatchEvent?.(new Event("dkchef:provisions-changed"));
+}
+function persistKitchen(){if(!persist())return false;provisionNotify();render();return true;}
+function setIngredientReady(recipe,ingredient,available){
+ const key=provisionKey(ingredient.name);if(!key)return false;
+ const existing=provisions().filter(row=>row.key===key);
+ const prev=JSON.stringify(state.provisions),now=new Date().toISOString();
+ if(existing.length)for(const row of existing){row.available=!!available;row.updatedAt=now;}
+ else if(available&&provisions().length<3000)provisions().push({
+  id:"ingredient-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9),
+  key,name:ingredient.name,location:"pantry",packages:1,available:true,
+  brand:"",barcode:"",size:"",amount:"",expiry:"",obtained:"",notes:"",updatedAt:now
+ });
+ else if(available)return false;
+ else return true;
+ if(!persistKitchen()){state.provisions=JSON.parse(prev);return false;}
+ return true;
+}
+function saveProvision(value){
+ if(!value||typeof value!=="object")return false;
+ const name=String(value.name||"").trim().slice(0,140),ingredient=String(value.ingredient||"").trim().slice(0,140),key=provisionKey(ingredient||name);
+ const location=value.location==="cellar"?"cellar":"pantry",barcode=String(value.barcode||"").replace(/\s+/g,"");
+ const packages=Number(value.packages||1);
+ if(!name||!key||key.length>140||barcode&&!/^\d{8,14}$/.test(barcode)||
+  !Number.isSafeInteger(packages)||packages<1||packages>999999)return false;
+ const old=JSON.stringify(state.provisions),now=new Date().toISOString();
+ const id=String(value.id||"");
+ let row=id?provisions().find(x=>x.id===id):null;
+ if(row)row.packages=packages;
+ if(!row){
+  // Repeat scans add packages to the same barcode+storage entry.
+  row=provisions().find(x=>x.location===location&&x.key===key&&x.barcode===barcode&&
+   (barcode||String(x.brand||"")===String(value.brand||"").trim()&&String(x.size||"")===String(value.size||"").trim()));
+  if(row)row.packages=Math.min(999999,Number(row.packages||1)+packages);
+ }
+ if(!row){
+  if(provisions().length>=3000)return false;
+  row={id:"provision-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)};
+  provisions().push(row);row.packages=packages;
+ }
+ Object.assign(row,{key,name,ingredient,location,barcode,brand:String(value.brand||"").trim().slice(0,100),
+  size:String(value.size||"").trim().slice(0,80),amount:String(value.amount||"").trim().slice(0,80),
+  expiry:String(value.expiry||"").slice(0,10),obtained:String(value.obtained||"").slice(0,10),
+  notes:String(value.notes||"").trim().slice(0,300),sourceHarvestId:String(value.sourceHarvestId||"").slice(0,150),
+  available:value.available!==false,updatedAt:now});
+ if(!persistKitchen()){state.provisions=JSON.parse(old);return false;}return true;
+}
+function removeProvision(id){
+ const old=JSON.stringify(state.provisions);
+ const row=provisions().find(x=>x.id===id);if(!row)return false;
+ state.provisions.items=provisions().filter(x=>x.id!==id);
+ state.provisions.deleted.push({id,deletedAt:new Date().toISOString()});
+ state.provisions.deleted=state.provisions.deleted.slice(-3000);
+ if(!persistKitchen()){state.provisions=JSON.parse(old);return false;}return true;
+}
+
 function recipeTabMarkup(){
  return '<div class="rg-section-tabs" role="group" aria-label="'+say("Recipe sections","Разделы рецептов")+'">'+
  tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
@@ -137,9 +239,9 @@ root.addEventListener("change",event=>{
  const target=event.target;
  if(target.id==="rg-recipe"){state.selected=target.value;persist();render();return;}
  if(target.hasAttribute("data-rg-ready")){
-  const k=state.selected+"/"+target.getAttribute("data-rg-ready");
-  if(target.checked)state.ready[k]=true;else delete state.ready[k];
-  persist();render();
+  const recipe=all().find(r=>r.id===state.selected);
+  const ing=recipe?.ingredients?.find(i=>i.id===target.getAttribute("data-rg-ready"));
+  if(ing&&!setIngredientReady(recipe,ing,target.checked))alert("Could not save your Pantry change.");
  }
 });
 root.addEventListener("click",event=>{
@@ -179,7 +281,7 @@ root.addEventListener("submit",event=>{
  const id="custom-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);
  state.custom.push({id,name,ingredients,family:"My recipe",intro:"Custom ingredient checklist."});
  state.selected=id;activeCategory="personal";
- if(!persist())alert("Local storage is unavailable. Export your Seed Bank backup when possible.");
+ if(!persist())alert("Local storage is unavailable. Export your DK Chef Companion backup when possible.");
  render();
 });
 document.getElementById("dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(render));
@@ -187,12 +289,17 @@ const recipePanel=document.getElementById("recipeGuide");
 recipePanel?.addEventListener("toggle",()=>{
  if(recipePanel.open){activeCategory=null;render();}
 });
+checkProvisions();persist();
 window.DKSeedBankRecipes=Object.freeze({
+ provisionKey,provisions:()=>JSON.parse(JSON.stringify(state.provisions)),isIngredientReady:ingredient=>isReady(null,ingredient),
+ saveProvision,removeProvision,setIngredientReady,
  exportData:()=>JSON.parse(JSON.stringify(state)),
  importData:data=>{
   if(!data||typeof data!=="object"||!Array.isArray(data.custom)||!data.ready||typeof data.ready!=="object")return false;
   state={...initial(),...data,custom:data.custom.filter(r=>r&&typeof r.id==="string"&&Array.isArray(r.ingredients)).slice(0,100)};
-  persist();render();return true;
+  checkProvisions();
+  if(!persist())return false;
+  provisionNotify();render();return true;
  },
  refresh:render
 });

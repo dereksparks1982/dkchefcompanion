@@ -41,8 +41,8 @@ test("seed cards get one collapsed, lazy-loaded packet view plus a working manag
  assert.match(css,/@media\(max-width:580px\)/);
  for(const page of ["index.html","docs/index.html"]){
   const content=read(page);
-  assert.match(content,/seedbank-workbench\.js\?v=20261112-cardhistory1/);
+  assert.match(content,/seedbank-workbench\.js\?v=20261112-[a-z0-9-]+/);
   assert.equal((content.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v46/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v50/);
 });

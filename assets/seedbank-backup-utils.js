@@ -106,6 +106,30 @@ function validate(data){
     throw Error("Invalid photo change marker.");
   }
  }
+ if(data.recipeGuide?.provisions!=null){
+  const provisions=data.recipeGuide.provisions;
+  if(!isObject(provisions)||!Array.isArray(provisions.items)||provisions.items.length>3000||
+   !Array.isArray(provisions.deleted)||provisions.deleted.length>3000)
+   throw Error("Invalid kitchen provisions.");
+  const ids=new Set();
+  for(const row of provisions.items){
+   if(!isObject(row)||typeof row.id!=="string"||!row.id||row.id.length>180||
+    ids.has(row.id)||typeof row.key!=="string"||!row.key||row.key.length>140||
+    typeof row.name!=="string"||!row.name||row.name.length>140||
+    !["pantry","cellar"].includes(row.location)||
+    row.available!=null&&typeof row.available!=="boolean"||
+    row.packages!=null&&(!Number.isSafeInteger(row.packages)||row.packages<1||row.packages>999999)||
+    row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||
+    typeof row.updatedAt!=="string"||Number.isNaN(Date.parse(row.updatedAt)))
+    throw Error("Invalid food inventory item.");
+   ids.add(row.id);
+  }
+  for(const row of provisions.deleted){
+   if(!isObject(row)||typeof row.id!=="string"||row.id.length>180||
+    typeof row.deletedAt!=="string"||Number.isNaN(Date.parse(row.deletedAt)))
+    throw Error("Invalid deleted food item.");
+  }
+ }
  for(const key of ["settings","workbench","watering","recipeGuide","photoUrls","photoPreferences"]){
   if(data[key]!=null&&!isObject(data[key]))throw Error("Invalid "+key+" section.");
  }

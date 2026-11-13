@@ -15,7 +15,7 @@ test("English/Russian web titles, tagline, footer, PWA install identity and sour
   assert.match(html,/From seed to table: plan your garden/);
   assert.match(html,/DK Chef Companion · From Seed to Table · DK Softworks/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
-  assert.match(html,/seedbank-i18n\.js\?v=20261112-chefbrand1/);
+  assert.match(html,/seedbank-i18n\.js\?v=20261112-kitchen1/);
  }
  const i18n=read("assets/seedbank-i18n.js");
  assert.match(i18n,/ДК Компаньон шеф-повара \| От семени до стола/);
@@ -48,5 +48,5 @@ test("All legacy local profile, Drive folder and backup schema names remain unch
  assert.match(workflow,/workflow_dispatch:/);
  assert.doesNotMatch(workflow,/  push:/);
  assert.match(workflow,/DK-Chef-Companion-0\.9\.9-Linux-x86_64\.tar\.gz/);
- assert.match(read("sw.js"),/dk-seedbank-app-v49/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v50/);
 });

@@ -71,7 +71,7 @@ test("Spice Blends tab switches recipes and preserves ingredient checks",()=>{
   id:"",hasAttribute:()=>true,getAttribute:()=>"star-anise",checked:true
  }});
  const saved=JSON.parse(env.values.get("dk-seedbank-recipes-v1"));
- assert.equal(saved.ready["five-spice/star-anise"],true);
+ assert.ok(saved.provisions.items.some(x=>x.key==="ground star anise"&&x.available===true));
 });
 test("Russian headings, directions, and amounts render without losing selected recipe",()=>{
  const env=environment();
@@ -158,8 +158,39 @@ test("sauce recipes appear in the kitchen picker in English and Russian",()=>{
  assert.match(en.host.innerHTML,/пастеризованные желтки/);
  for(const file of ["index.html","docs/index.html"]){
   const html=fs.readFileSync(path.join(root,file),"utf8");
-  assert.match(html,/seedbank-recipe-library\\.js\\?v=20261112-sauces1/);
+  assert.match(html,/seedbank-recipe-library\\.js\\?v=20261112-breads1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v47/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v50/);
+});
+
+test("Bread & Baking includes ten complete bilingual breads, with naan for tikka masala",()=>{
+ const env=environment();
+ const breads=env.win.DKSeedBankRecipeLibrary.recipes.filter(x=>x.family==="Bread & Baking");
+ assert.equal(breads.length,10);
+ assert.ok(breads.some(x=>x.id==="traditional-naan"));
+ assert.ok(breads.some(x=>x.id==="garlic-naan"));
+ assert.ok(breads.some(x=>x.id==="sourdough-boule"));
+ for(const bread of breads){
+  assert.ok(bread.ingredients.length>=4,bread.id);
+  assert.ok(bread.ingredients.every(i=>i.amount&&i.amountRu&&i.nameRu),bread.id);
+  assert.ok(bread.steps.length>=4,bread.id);
+  assert.equal(bread.steps.length,bread.stepsRu.length,bread.id);
+ }
+ env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"bread"})}});
+ assert.match(env.host.innerHTML,/Garlic and cilantro naan/);
+ env.document.documentElement.lang="ru";env.language.listeners.change();
+ assert.match(env.host.innerHTML,/Хлеб и выпечка/);
+ assert.match(env.host.innerHTML,/Наан/);
+});
+test("Old per-recipe ticks become shared Pantry ingredients across recipes",()=>{
+ const saved={version:1,selected:"pesto",custom:[],ready:{"pesto/oil":true,"pesto/salt":true}};
+ const env=environment({saved}),api=env.win.DKSeedBankRecipes;
+ assert.ok(api.provisions().items.some(x=>x.key==="olive oil"));
+ assert.equal(api.isIngredientReady({name:"Olive oil"}),true);
+ assert.equal(api.isIngredientReady({name:"Salt"}),true);
+ assert.equal(api.isIngredientReady({name:"Salt and black pepper"}),false);
+ assert.equal(api.setIngredientReady({id:"pesto"},{name:"Salt"},false),true);
+ assert.equal(api.isIngredientReady({name:"Salt"}),false);
+ assert.ok(api.provisions().items.some(x=>x.key==="salt"&&x.available===false));
 });

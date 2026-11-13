@@ -1370,6 +1370,838 @@ const recipes=[
     "Приправьте солью, белым перцем и, по желанию, щепоткой кайенского перца. Добавьте лимонный сок по вкусу. Соус должен быть гладким и текучим. Если он расслоился, взбейте 1 ч. л. тёплой воды в чистой миске и понемногу вмешайте расслоившийся соус.",
     "Подавайте сразу к яйцам бенедикт, спарже, рыбе или овощам. Поскольку яйца подвергаются лишь мягкому нагреву, особенно для людей с повышенным риском пищевых инфекций используйте пастеризованные желтки. Не оставляйте соус надолго тёплым; остатки быстро уберите в холодильник. Свежий голландский соус имеет лучшую текстуру."
   ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "traditional-naan",
+  "name": "Traditional skillet naan",
+  "nameRu": "Домашний наан на сковороде",
+  "intro": "Soft yeast-raised Indian-style flatbread with yogurt, ideal for chicken tikka masala.",
+  "introRu": "Мягкая индийская лепёшка на дрожжах и йогурте, идеальна к курице тикка масала.",
+  "serves": "Makes 8 naan",
+  "servesRu": "8 лепёшек",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "3 cups (375 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "375 г"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "2 ч. л."
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сахар",
+      "amountRu": "1 ч. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л."
+    },
+    {
+      "id": "yogurt",
+      "name": "Plain yogurt",
+      "amount": "½ cup (120 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Натуральный йогурт",
+      "amountRu": "120 г"
+    },
+    {
+      "id": "water",
+      "name": "Warm water",
+      "amount": "¾ cup (180 mL), as needed",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплая вода",
+      "amountRu": "180 мл, по необходимости"
+    },
+    {
+      "id": "oil",
+      "name": "Neutral cooking oil",
+      "amount": "2 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Растительное масло",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "butter",
+      "name": "Melted butter (optional)",
+      "amount": "2 tbsp for brushing",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Растопленное сливочное масло (по желанию)",
+      "amountRu": "2 ст. л. для смазывания"
+    }
+  ],
+  "steps": [
+    "Mix flour, yeast, sugar and salt. Stir in yogurt, oil and enough warm water to make a soft dough; knead 6–8 minutes until smooth.",
+    "Cover and rise in a warm spot 60–90 minutes, until noticeably puffy. Divide into eight balls and rest 10 minutes.",
+    "Roll each ball into a thin oval. Heat a heavy dry skillet over medium-high heat until hot; cook a naan about 1–2 minutes until blistered underneath, turn and cook 1–2 minutes more until golden and cooked through.",
+    "Brush with melted butter if desired. Stack under a clean towel to stay soft. Serve warm with chicken tikka masala."
+  ],
+  "stepsRu": [
+    "Смешайте муку, дрожжи, сахар и соль. Добавьте йогурт, масло и столько тёплой воды, чтобы получилось мягкое тесто. Вымешивайте 6–8 минут.",
+    "Накройте и оставьте в тепле на 60–90 минут до заметного подъёма. Разделите на восемь шариков и дайте отдохнуть 10 минут.",
+    "Раскатайте каждый шарик в тонкий овал. Хорошо разогрейте сухую тяжёлую сковороду на средне-сильном огне. Жарьте по 1–2 минуты с каждой стороны до румяных пузырей и полной готовности.",
+    "По желанию смажьте растопленным маслом. Складывайте под полотенце для мягкости. Подавайте тёплыми к тикка масала."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "garlic-naan",
+  "name": "Garlic and cilantro naan",
+  "nameRu": "Наан с чесноком и кинзой",
+  "intro": "Buttery garlic flatbread with fresh cilantro, cooked on a skillet.",
+  "introRu": "Лепёшки с чесночным маслом и свежей кинзой, приготовленные на сковороде.",
+  "serves": "Makes 8 naan",
+  "servesRu": "8 лепёшек",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "3 cups (375 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "375 г"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "2 ч. л."
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сахар",
+      "amountRu": "1 ч. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л."
+    },
+    {
+      "id": "yogurt",
+      "name": "Plain yogurt",
+      "amount": "½ cup (120 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Натуральный йогурт",
+      "amountRu": "120 г"
+    },
+    {
+      "id": "water",
+      "name": "Warm water",
+      "amount": "¾ cup (180 mL), as needed",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплая вода",
+      "amountRu": "180 мл, по необходимости"
+    },
+    {
+      "id": "oil",
+      "name": "Neutral cooking oil",
+      "amount": "2 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Растительное масло",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "butter",
+      "name": "Unsalted butter",
+      "amount": "3 tbsp (43 g), melted",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Несолёное сливочное масло",
+      "amountRu": "43 г, растопить"
+    },
+    {
+      "id": "garlic",
+      "name": "Garlic",
+      "amount": "3 cloves, minced",
+      "type": "garden",
+      "aliases": [
+        "garlic"
+      ],
+      "nameRu": "Чеснок",
+      "amountRu": "3 зубчика, измельчить"
+    },
+    {
+      "id": "cilantro",
+      "name": "Fresh cilantro",
+      "amount": "2 tbsp, chopped (optional)",
+      "type": "garden",
+      "aliases": [
+        "cilantro",
+        "coriander"
+      ],
+      "nameRu": "Свежая кинза",
+      "amountRu": "2 ст. л., нарезать, по желанию"
+    }
+  ],
+  "steps": [
+    "Make a soft dough from flour, yeast, sugar, salt, yogurt, oil and warm water. Knead 6–8 minutes and let rise covered for 60–90 minutes.",
+    "Divide into eight balls, rest 10 minutes, then roll into thin ovals.",
+    "Mix melted butter with minced garlic and cilantro. Cook naan one at a time on a hot dry heavy skillet over medium-high heat, about 1–2 minutes per side, until browned and cooked through.",
+    "Brush cooked naan immediately with garlic butter. If using raw garlic in the butter, serve promptly; refrigerate any leftovers rather than storing garlic-in-oil mixtures at room temperature."
+  ],
+  "stepsRu": [
+    "Замесите мягкое тесто из муки, дрожжей, сахара, соли, йогурта, масла и тёплой воды. Вымешивайте 6–8 минут, накройте и оставьте подниматься на 60–90 минут.",
+    "Разделите тесто на восемь шариков, выдержите 10 минут и раскатайте в тонкие овалы.",
+    "Смешайте растопленное сливочное масло с чесноком и кинзой. Обжаривайте лепёшки на горячей сухой тяжёлой сковороде по 1–2 минуты с каждой стороны до полной готовности и румяных пятен.",
+    "Сразу смажьте лепёшки чесночным маслом. Смесь сырого чеснока с маслом нельзя хранить при комнатной температуре; остатки сразу убирайте в холодильник."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "pita-bread",
+  "name": "Puffed pita bread",
+  "nameRu": "Пита с кармашком",
+  "intro": "A hot-oven Mediterranean flatbread that puffs into a pocket.",
+  "introRu": "Средиземноморская лепёшка, которая в горячей духовке раздувается и образует кармашек.",
+  "serves": "Makes 8 pitas",
+  "servesRu": "8 пит",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "3 cups (375 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "375 г"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "2 ч. л."
+    },
+    {
+      "id": "water",
+      "name": "Warm water",
+      "amount": "1 cup (240 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплая вода",
+      "amountRu": "240 мл"
+    },
+    {
+      "id": "oil",
+      "name": "Olive oil",
+      "amount": "2 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Оливковое масло",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л."
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сахар",
+      "amountRu": "1 ч. л."
+    }
+  ],
+  "steps": [
+    "Combine ingredients into a soft dough; knead 6–8 minutes. Cover and rise 60–90 minutes.",
+    "Preheat oven and an inverted baking sheet or baking stone to 475°F (245°C). Divide dough into eight balls; rest 10 minutes.",
+    "Roll each into a round approximately ¼ inch (6 mm) thick. Place on the hot baking surface and bake 3–5 minutes until ballooned and set; do not overbake or the pockets will dry out.",
+    "Transfer into a clean towel while cooling. Some rounds may not puff completely but remain good flatbread."
+  ],
+  "stepsRu": [
+    "Соедините ингредиенты в мягкое тесто и вымешивайте 6–8 минут. Накройте и оставьте на 60–90 минут.",
+    "Разогрейте духовку до 245°C вместе с перевёрнутым противнем или камнем. Разделите тесто на восемь шариков и оставьте на 10 минут.",
+    "Раскатайте круглые лепёшки толщиной около 6 мм. Переложите на горячую поверхность и пеките 3–5 минут, пока они не раздуются и не пропекутся. Не пересушивайте.",
+    "Сложите лепёшки под полотенце. Если некоторые не раздулись, их всё равно можно есть."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "chapati",
+  "name": "Whole-wheat chapati",
+  "nameRu": "Цельнозерновые чапати",
+  "intro": "Simple unleavened whole-wheat flatbread for curries, lentils and vegetables.",
+  "introRu": "Простые пресные лепёшки из цельнозерновой муки к карри, чечевице и овощам.",
+  "serves": "Makes 8 chapati",
+  "servesRu": "8 чапати",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "Whole-wheat flour (atta if available)",
+      "amount": "2 cups (260 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Цельнозерновая мука (лучше атта)",
+      "amountRu": "260 г"
+    },
+    {
+      "id": "water",
+      "name": "Warm water",
+      "amount": "¾ cup (180 mL), approximately",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплая вода",
+      "amountRu": "около 180 мл"
+    },
+    {
+      "id": "salt",
+      "name": "Salt (optional)",
+      "amount": "¼ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль (по желанию)",
+      "amountRu": "¼ ч. л."
+    },
+    {
+      "id": "oil",
+      "name": "Neutral cooking oil (optional)",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Растительное масло (по желанию)",
+      "amountRu": "1 ч. л."
+    }
+  ],
+  "steps": [
+    "Mix flour with warm water and optional salt/oil to form a soft, pliable dough. Knead 5 minutes; cover and rest 20–30 minutes.",
+    "Divide into eight balls. Dust lightly and roll each very thin.",
+    "Cook on a hot dry skillet over medium-high heat for 30–60 seconds per side, flipping until brown spots appear and bread is cooked through. Press gently with a clean cloth to encourage puffing.",
+    "Keep covered in a towel so the chapatis stay soft. Serve warm."
+  ],
+  "stepsRu": [
+    "Смешайте муку с тёплой водой и, по желанию, солью и маслом. Вымешивайте мягкое эластичное тесто 5 минут; накройте и оставьте на 20–30 минут.",
+    "Разделите тесто на восемь шариков. Присыпьте мукой и раскатайте очень тонко.",
+    "Обжаривайте на горячей сухой сковороде на средне-сильном огне по 30–60 секунд с каждой стороны до коричневых пятен и готовности. Можно слегка прижать чистой салфеткой, чтобы лепёшка вздулась.",
+    "Складывайте готовые чапати под полотенце. Подавайте тёплыми."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "sandwich-bread",
+  "name": "Classic white sandwich bread",
+  "nameRu": "Классический белый хлеб для бутербродов",
+  "intro": "A soft everyday loaf for toast, sandwiches and the breadbox.",
+  "introRu": "Мягкий повседневный белый хлеб для тостов и бутербродов.",
+  "serves": "Makes 1 loaf (9 × 5 in / 23 × 13 cm pan)",
+  "servesRu": "1 буханка (форма 23 × 13 см)",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour or bread flour",
+      "amount": "3½ cups (440 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука или хлебная мука",
+      "amountRu": "440 г"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2¼ tsp (7 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "7 г"
+    },
+    {
+      "id": "milk",
+      "name": "Warm milk",
+      "amount": "1 cup (240 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплое молоко",
+      "amountRu": "240 мл"
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": "2 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сахар",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1½ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1½ ч. л."
+    },
+    {
+      "id": "butter",
+      "name": "Unsalted butter",
+      "amount": "3 tbsp (43 g), softened",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Несолёное сливочное масло",
+      "amountRu": "43 г, мягкое"
+    }
+  ],
+  "steps": [
+    "Mix flour, yeast, sugar and salt. Add warm milk and butter; knead 8–10 minutes until smooth and stretchy, adding a splash of water if needed.",
+    "Cover and let rise 60–90 minutes until doubled. Gently flatten, roll tightly into a loaf and place seam down in a greased 9 × 5 inch loaf pan.",
+    "Cover and proof 35–60 minutes until domed about an inch above the rim. Bake at 350°F (175°C) for 30–38 minutes, tenting with foil if browning quickly; center should reach about 190°F (88°C).",
+    "Turn out and cool on a rack before slicing. Store covered at room temperature for short use or freeze slices."
+  ],
+  "stepsRu": [
+    "Смешайте муку, дрожжи, сахар и соль. Добавьте тёплое молоко и масло; вымешивайте 8–10 минут до гладкости и эластичности, при необходимости добавив немного воды.",
+    "Накройте и оставьте на 60–90 минут до удвоения объёма. Слегка расплющите тесто, сверните плотным рулетом и переложите швом вниз в смазанную форму 23 × 13 см.",
+    "Накройте и дайте подняться 35–60 минут, пока тесто не возвысится над краем примерно на 2,5 см. Выпекайте при 175°C около 30–38 минут; при сильном подрумянивании прикройте фольгой. Температура в центре около 88°C.",
+    "Выньте из формы и полностью остудите на решётке перед нарезкой. Для долгого хранения ломтики лучше заморозить."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "rosemary-focaccia",
+  "name": "Rosemary olive-oil focaccia",
+  "nameRu": "Фокачча с розмарином и оливковым маслом",
+  "intro": "An airy Italian sheet bread with crisp olive-oil edges and aromatic rosemary.",
+  "introRu": "Воздушный итальянский хлеб с хрустящими краями, оливковым маслом и розмарином.",
+  "serves": "Makes one 9 × 13 in (23 × 33 cm) pan",
+  "servesRu": "1 форма 23 × 33 см",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "Bread flour or all-purpose flour",
+      "amount": "3 cups (375 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Хлебная или обычная пшеничная мука",
+      "amountRu": "375 г"
+    },
+    {
+      "id": "water",
+      "name": "Warm water",
+      "amount": "1⅓ cups (320 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплая вода",
+      "amountRu": "320 мл"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "2 ч. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1 tsp, plus flaky salt for topping",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л. и немного крупной соли сверху"
+    },
+    {
+      "id": "oil",
+      "name": "Olive oil",
+      "amount": "¼ cup (60 mL), divided",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Оливковое масло",
+      "amountRu": "60 мл, разделить"
+    },
+    {
+      "id": "rosemary",
+      "name": "Fresh rosemary",
+      "amount": "2 tbsp leaves",
+      "type": "garden",
+      "aliases": [
+        "rosemary"
+      ],
+      "nameRu": "Свежий розмарин",
+      "amountRu": "2 ст. л. листьев"
+    }
+  ],
+  "steps": [
+    "Mix flour, water, yeast and salt into a very sticky dough. Add 1 tbsp oil and stir; cover and rise 1–2 hours until puffy, folding the dough over itself twice if desired.",
+    "Oil a 9 × 13 inch pan with about 2 tbsp oil. Tip dough in, gently stretch toward corners and rest 30–45 minutes until bubbly.",
+    "Preheat oven to 425°F (220°C). Oil fingertips, dimple the dough all over, drizzle with remaining oil and scatter rosemary and flaky salt on top.",
+    "Bake 20–25 minutes until deeply golden and the underside is crisp. Cool slightly before slicing."
+  ],
+  "stepsRu": [
+    "Смешайте муку, воду, дрожжи и соль в очень липкое тесто. Добавьте 1 ст. л. масла, накройте и оставьте на 1–2 часа до подъёма. По желанию дважды сложите тесто.",
+    "Смажьте форму 23 × 33 см примерно 2 ст. л. масла. Переложите тесто, мягко растяните к краям и оставьте на 30–45 минут до пузырьков.",
+    "Разогрейте духовку до 220°C. Смазанными маслом пальцами сделайте углубления по всей поверхности, полейте оставшимся маслом и посыпьте розмарином и крупной солью.",
+    "Пеките 20–25 минут до насыщенного золотистого цвета и хрустящей корочки снизу. Немного остудите перед нарезкой."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "dinner-rolls",
+  "name": "Soft butter dinner rolls",
+  "nameRu": "Мягкие сдобные булочки к обеду",
+  "intro": "Traditional pull-apart yeast rolls for stews, holiday dinners and sandwiches.",
+  "introRu": "Традиционные дрожжевые булочки к рагу, праздничному столу и бутербродам.",
+  "serves": "Makes 12 rolls",
+  "servesRu": "12 булочек",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "3½ cups (440 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "440 г"
+    },
+    {
+      "id": "milk",
+      "name": "Warm milk",
+      "amount": "1 cup (240 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Тёплое молоко",
+      "amountRu": "240 мл"
+    },
+    {
+      "id": "yeast",
+      "name": "Instant yeast",
+      "amount": "2¼ tsp (7 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Быстродействующие дрожжи",
+      "amountRu": "7 г"
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": "3 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сахар",
+      "amountRu": "3 ст. л."
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "amount": "1 large",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Яйцо",
+      "amountRu": "1 крупное"
+    },
+    {
+      "id": "butter",
+      "name": "Unsalted butter",
+      "amount": "4 tbsp (57 g), melted, divided",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Несолёное сливочное масло",
+      "amountRu": "57 г, растопить, разделить"
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "1 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л."
+    }
+  ],
+  "steps": [
+    "Combine flour, milk, yeast, sugar, egg, salt and 3 tbsp melted butter. Knead 7–9 minutes until elastic.",
+    "Cover and rise until doubled, about 60–90 minutes. Divide into 12 balls and arrange in a greased 9 × 13 inch pan.",
+    "Proof covered for 30–45 minutes until puffy. Bake at 375°F (190°C) for 18–22 minutes, until golden and the centers are cooked through.",
+    "Brush with the remaining melted butter. Cool a few minutes before serving."
+  ],
+  "stepsRu": [
+    "Смешайте муку, молоко, дрожжи, сахар, яйцо, соль и 3 ст. л. растопленного масла. Вымешивайте 7–9 минут до эластичности.",
+    "Накройте и дайте тесту удвоиться за 60–90 минут. Разделите на 12 шариков и выложите в смазанную форму 23 × 33 см.",
+    "Оставьте под крышкой или полотенцем на 30–45 минут до пышности. Выпекайте при 190°C около 18–22 минут до золотистой корочки и готовности внутри.",
+    "Смажьте оставшимся растопленным маслом. Немного остудите и подавайте."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "buttermilk-biscuits",
+  "name": "Flaky buttermilk biscuits",
+  "nameRu": "Слоёные булочки на пахте",
+  "intro": "Quick baking-powder biscuits, tender inside with crisp buttery tops. No yeast or rising time.",
+  "introRu": "Быстрые булочки на разрыхлителе: нежные внутри и с хрустящей масляной верхушкой. Без дрожжей.",
+  "serves": "Makes 8 biscuits",
+  "servesRu": "8 булочек",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "2 cups (250 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "250 г"
+    },
+    {
+      "id": "butter",
+      "name": "Cold unsalted butter",
+      "amount": "6 tbsp (85 g), cubed",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Холодное несолёное сливочное масло",
+      "amountRu": "85 г, кубиками"
+    },
+    {
+      "id": "buttermilk",
+      "name": "Cold buttermilk",
+      "amount": "¾ cup (180 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Холодная пахта",
+      "amountRu": "180 мл"
+    },
+    {
+      "id": "baking",
+      "name": "Baking powder",
+      "amount": "1 tbsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Разрыхлитель",
+      "amountRu": "1 ст. л."
+    },
+    {
+      "id": "soda",
+      "name": "Baking soda",
+      "amount": "¼ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пищевая сода",
+      "amountRu": "¼ ч. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "¾ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "¾ ч. л."
+    }
+  ],
+  "steps": [
+    "Preheat oven to 425°F (220°C). Whisk flour, baking powder, baking soda and salt. Cut cold butter into small pea-sized pieces in the dry mixture.",
+    "Add cold buttermilk and stir just until shaggy. Turn onto a floured board, pat flat, fold into thirds and repeat twice without overworking.",
+    "Pat to about ¾ inch (2 cm) thick. Cut eight rounds or squares; place close together on a parchment-lined sheet.",
+    "Bake 13–17 minutes until risen and golden. Eat warm; chill unused dough rather than leaving dairy dough at room temperature."
+  ],
+  "stepsRu": [
+    "Разогрейте духовку до 220°C. Смешайте муку, разрыхлитель, соду и соль. Разотрите холодное масло в муке до кусочков размером с горошину.",
+    "Добавьте холодную пахту и перемешайте до образования неровного теста. Выложите на присыпанный мукой стол, расплющите и сложите втрое; повторите дважды, не вымешивая слишком долго.",
+    "Раскатайте или расплющите до толщины около 2 см. Вырежьте восемь кружков или квадратов и выложите рядом на застеленный противень.",
+    "Выпекайте 13–17 минут до подъёма и золотистой корочки. Подавайте тёплыми; сырое тесто с молочными продуктами храните в холодильнике."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "skillet-cornbread",
+  "name": "Cast-iron skillet cornbread",
+  "nameRu": "Кукурузный хлеб в чугунной сковороде",
+  "intro": "A golden Southern-style cornbread with a crisp edge, excellent with beans and chili.",
+  "introRu": "Золотистый кукурузный хлеб в южноамериканском стиле с хрустящими краями, к фасоли и чили.",
+  "serves": "Makes 8 wedges",
+  "servesRu": "8 кусочков",
+  "ingredients": [
+    {
+      "id": "cornmeal",
+      "name": "Yellow cornmeal",
+      "amount": "1 cup (150 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Жёлтая кукурузная мука крупного помола",
+      "amountRu": "150 г"
+    },
+    {
+      "id": "flour",
+      "name": "All-purpose flour",
+      "amount": "1 cup (125 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пшеничная мука",
+      "amountRu": "125 г"
+    },
+    {
+      "id": "buttermilk",
+      "name": "Buttermilk",
+      "amount": "1 cup (240 mL)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пахта",
+      "amountRu": "240 мл"
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "amount": "1 large",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Яйцо",
+      "amountRu": "1 крупное"
+    },
+    {
+      "id": "baking",
+      "name": "Baking powder",
+      "amount": "2 tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Разрыхлитель",
+      "amountRu": "2 ч. л."
+    },
+    {
+      "id": "soda",
+      "name": "Baking soda",
+      "amount": "½ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Пищевая сода",
+      "amountRu": "½ ч. л."
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "¾ tsp",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "¾ ч. л."
+    },
+    {
+      "id": "oil",
+      "name": "Butter or neutral oil",
+      "amount": "3 tbsp, divided",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Сливочное или растительное масло",
+      "amountRu": "3 ст. л., разделить"
+    }
+  ],
+  "steps": [
+    "Heat oven to 425°F (220°C). Place 1 tbsp of the butter or oil in a 9-inch cast-iron skillet and heat the pan in the oven.",
+    "Whisk cornmeal, flour, baking powder, baking soda and salt. Separately whisk buttermilk, egg and remaining 2 tbsp melted butter or oil. Combine briefly without overmixing.",
+    "Carefully pour batter into the hot oiled skillet. Bake 18–23 minutes until golden, set in the center and a tester comes out clean.",
+    "Rest 5 minutes, cut into wedges and serve warm."
+  ],
+  "stepsRu": [
+    "Разогрейте духовку до 220°C. Положите 1 ст. л. масла в чугунную сковороду диаметром около 23 см и прогрейте её в духовке.",
+    "Смешайте кукурузную и пшеничную муку, разрыхлитель, соду и соль. Отдельно взбейте пахту, яйцо и оставшиеся 2 ст. л. растопленного масла. Быстро соедините, не вымешивая долго.",
+    "Осторожно вылейте тесто в горячую смазанную сковороду. Пеките 18–23 минуты до золотистой корочки и сухой деревянной шпажки в центре.",
+    "Дайте постоять 5 минут, нарежьте на кусочки и подавайте тёплым."
+  ]
+},
+{
+  "family": "Bread & Baking",
+  "id": "sourdough-boule",
+  "name": "Simple sourdough country loaf",
+  "nameRu": "Простой деревенский хлеб на закваске",
+  "intro": "An overnight naturally leavened loaf using an active, established sourdough starter.",
+  "introRu": "Хлеб длительного брожения на активной зрелой хлебной закваске.",
+  "serves": "Makes 1 round loaf",
+  "servesRu": "1 круглая буханка",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "Bread flour",
+      "amount": "3⅔ cups (450 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Хлебная пшеничная мука",
+      "amountRu": "450 г"
+    },
+    {
+      "id": "starter",
+      "name": "Active sourdough starter (100% hydration)",
+      "amount": "½ cup (100 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Активная хлебная закваска (100% влажности)",
+      "amountRu": "100 г"
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "amount": "1⅓ cups (320 g), room temperature",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Вода",
+      "amountRu": "320 г, комнатной температуры"
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "amount": "2 tsp (10 g)",
+      "type": "pantry",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "10 г"
+    }
+  ],
+  "steps": [
+    "Use an active starter that reliably doubles after feeding. Mix flour, water and starter, rest 30 minutes; then add salt and knead or fold until combined.",
+    "Cover at room temperature for about 4–7 hours, performing 3–4 sets of stretch-and-folds during the first two hours. Fermentation is ready when the dough is aerated and visibly risen; timing varies with starter and temperature.",
+    "Shape into a taut round, place seam-up in a floured towel-lined bowl, cover and refrigerate 8–16 hours.",
+    "Preheat a covered Dutch oven to 475°F (245°C). Turn the dough onto parchment, score, carefully lower into the pot and bake covered for 20 minutes, then uncovered at 450°F (230°C) for 20–25 minutes until deep brown and baked through. Cool completely before slicing."
+  ],
+  "stepsRu": [
+    "Используйте активную закваску, которая уверенно удваивается после подкормки. Смешайте муку, воду и закваску, оставьте на 30 минут, затем добавьте соль и перемешайте.",
+    "Оставьте при комнатной температуре примерно на 4–7 часов, выполняя 3–4 складывания в первые два часа. Тесто должно заметно подняться и наполниться пузырьками; время зависит от температуры и силы закваски.",
+    "Сформуйте упругий круглый хлеб, положите швом вверх в миску с присыпанным мукой полотенцем, накройте и уберите в холодильник на 8–16 часов.",
+    "Разогрейте жаропрочную кастрюлю с крышкой до 245°C. Переложите тесто на пергамент, сделайте надрез и осторожно поместите в кастрюлю. Пеките под крышкой 20 минут, затем без крышки при 230°C ещё 20–25 минут до тёмной корочки и полной готовности. Полностью остудите."
+  ]
 }
 ];
 root.DKSeedBankRecipeLibrary=Object.freeze({recipes});

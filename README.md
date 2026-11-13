@@ -23,8 +23,10 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 
 ### Food, recipes and traditional knowledge
 
-- **Recipe Guide:** measured, step-by-step recipes with ingredient checklists and English/Russian instructions, plus the ability to keep personal recipes.
-- **Home cooking:** includes Salisbury steak, chicken tikka masala, meatloaf, ratatouille, homemade spaghetti sauce and Hollandaise, alongside earlier recipes such as pesto, salsa and refrigerator dill pickles.
+- **Pantry & Root Cellar:** two distinct storage sections backed by one shared food inventory. Keep ordinary staples, packaged foods, harvested produce and suitable preserves with optional amounts, package counts, dates, brands, barcodes and storage notes. Duplicate scans increase an existing matching package count. Record a harvest into storage without automatically reducing the original harvest record.
+- **Barcode food identification:** optional camera scanning where the browser supports the Barcode Detection API, manual UPC/EAN entry everywhere, and internet-based product lookup through Open Food Facts (verify results and choose the generic ingredient for recipe matching).
+- **Recipe Guide:** measured, step-by-step bilingual recipes. The **On hand** checkbox is shared across recipes and linked to real Pantry/Root Cellar items, not seed ownership. Old per-recipe availability marks are migrated once into the shared kitchen inventory, retaining saved personal recipes.
+- **Home cooking and bread:** includes Salisbury steak, chicken tikka masala, meatloaf, ratatouille, spaghetti sauce and Hollandaise, plus **Bread & Baking** with naan, garlic naan, pita, chapati, sandwich bread, focaccia, dinner rolls, buttermilk biscuits, cornbread and sourdough. Existing pesto, salsa, refrigerator dill pickles and spice recipes remain.
 - **Spice Blends:** multi-ingredient mixes such as curry powder, Chinese five-spice, garam masala, Italian seasoning and other blends. Individual spices are ingredients, not one-ingredient blend recipes.
 - **Food Preservation:** a separate reference for drying, freezing, refrigeration, fermentation, pickling and safe canning practices. This is guidance, not a collection of invented or untested canning processing times.
 - **Monastic Garden:** historical growing and food-plant knowledge presented as a separate reference section.
@@ -38,20 +40,16 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 
 ## Where the project is going
 
-The next stage turns the existing seed, garden and recipe tools into a connected **household provisioning system**. These features are **planned, not yet shipped**:
+The **Pantry, Root Cellar, shared recipe ingredients, basic harvest-to-storage entry and bread recipes are now included**. The next iterations can improve inventory detail without turning it into mandatory bookkeeping.
 
-| Planned feature | What it will do |
+| Future improvement | Scope |
 | --- | --- |
-| **Shared Pantry** | Track ingredients and household staples such as flour, oil, salt, rice, pasta, beans, spices and canned goods. Mark olive oil or salt as available **once**, and have every recipe recognize it. |
-| **Root Cellar** | Keep a separate inventory of suitably stored produce and preserves, with optional quantities, locations, storage dates and condition notes. |
-| **Garden-to-storage flow** | Record where harvested food goes: used fresh, preserved, moved to the pantry or put into suitable long-term storage. |
-| **Connected recipe availability** | Compare what a dish needs against actual ingredients in the Pantry and Root Cellar. Seed ownership by itself never means edible ingredients are ready to use. |
-| **Bread and flatbread recipes** | Expand the kitchen collection with naan and garlic naan for chicken tikka masala, plus pita, chapati, sandwich bread, sourdough, focaccia, rolls, cornbread and other traditional breads. |
-| **Consistent Chef Companion identity** | Update remaining in-app titles, desktop packaging and older DK Seed Bank labels while protecting existing records and backup compatibility. |
+| **More storage detail** | Condition checks, storage environment and optional reminders for perishable foods. |
+| **Precise recipe stock math** | Calculate recipe portions from verified quantities and units before optionally deducting food consumed. Reading a recipe never deducts stock. |
+| **Better barcode coverage** | Add a locally bundled cross-browser camera scanner where native BarcodeDetector is unavailable, especially useful on iPhone and Firefox. Manual barcode entry already works. |
+| **More detailed harvest allocations** | Account for a harvest divided among fresh use, preservation, Pantry and Root Cellar, rather than just copying its details. |
 
-**Current recipe checkboxes are still saved per recipe.** Shared ingredient availability across all recipes belongs to the planned Pantry, so the README does not present it as already implemented.
-
-The overall goal is simple: **know what you have, what you are growing, where your food is stored, and what you can make with it.**
+The goal remains: **know what you have, what you are growing, where your food is stored, and what you can make with it.**
 
 ## Principles
 
@@ -74,7 +72,7 @@ Google Drive setup and technical details: [Google Drive Sync](docs/GOOGLE_DRIVE_
 
 ## Development
 
-The application uses a static web frontend with local browser storage and a portable Electron-based Linux desktop edition.
+The application uses a static web frontend with local browser storage and a portable Electron-based Linux desktop edition. Shared food stock is stored inside the already-backed-up `recipeGuide.provisions` section, with item timestamps and deletion markers merged across devices. This does not rename Google Drive folders, OAuth settings, hidden sync filenames or the backup format.
 
 Prepare the desktop bundle and run the local Node regression tests:
 
@@ -99,3 +97,7 @@ The existing **💧 Garden Watering Manager** is a single collapsible section **
 ### DK Chef Companion identity and existing records
 
 The application, browser title, install manifest and future Linux build names use **DK Chef Companion**. The English interface retains the green DK logo and the Russian interface retains the red DK logo. Existing browser storage keys, backup schema (`dk-seedbank-v1`), desktop user-data folder, Google Drive settings and permissions, and Google Drive folder/link identifiers deliberately remain unchanged so records, devices and authorized connections keep finding their old data. Some internal filenames and existing Drive folders may retain **DK Seed Bank** for compatibility. Do not delete or rename them merely for branding. New portable Linux releases use the **dkchefcompanion** repository; packaging and release publishing are manually triggered rather than running on every push.
+
+### Pantry, Root Cellar and barcode identification
+
+Food inventory is optional. Add items manually or enter an 8–14 digit UPC/EAN barcode; in browsers with a native `BarcodeDetector` and camera permission, use **Scan with camera**. Internet lookup uses the [Open Food Facts](https://world.openfoodfacts.org/) community database (ODbL); identification can be incomplete or inaccurate. Only the code is sent for lookup; the user's food inventory is not published. Products can be associated with a generic recipe ingredient, so a branded olive-oil bottle can count as **olive oil** without turning every product name into a false ingredient match. The same item checked on hand in one recipe is reflected in the other recipes. Seed packets never count as harvested food. Editing amounts and expiry dates is optional; packages are not automatically consumed when reading recipes. Legacy checkbox selections migrate into the shared inventory without wiping personal recipes. Food stock and deletion history are included in full JSON backups and the existing optional per-account Google Drive synchronization, with Drive authorization and folder names unchanged.
