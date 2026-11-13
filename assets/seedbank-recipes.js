@@ -267,11 +267,14 @@ function cookPlanner(recipes){
   '" data-rg-cook-filter="'+id+'" aria-pressed="'+(cookFilter===id)+'">'+esc(label)+'</button>').join("")+'</div>'+
   (selected.length?'<div class="rg-cook-results">'+selected.map(score=>{
    const recipe=score.recipe,missing=score.missing;
-   const status=score.complete?say("All listed ingredients on hand","Все ингредиенты в наличии"):
+   const status=score.complete?
+    (score.measuredShort?say("Ingredient names matched, but measured stock is short","Названия совпали, но измеренного запаса не хватает"):
+     score.quantityUnverified?say("Names matched; check quantities","Названия совпали; проверьте количества"):
+     say("Ingredients and measured amounts matched","Ингредиенты и измеренные количества совпадают")):
     score.near?say("Almost ready","Почти готово"):say("Missing ingredients","Не хватает ингредиентов");
    const swapIdeas=missing.filter(x=>x.suggestion).slice(0,2).map(x=>
     '<li>'+esc(localized(x.ingredient,"name"))+' → '+esc(x.suggestion.item)+'</li>');
-   return '<article class="rg-cook-card'+(score.complete?" is-complete":"")+'">'+
+   return '<article class="rg-cook-card'+(score.complete&&!score.measuredShort&&!score.quantityUnverified?" is-complete":"")+'">'+
     '<div class="rg-cook-card-top"><div><h4>'+esc(localized(recipe,"name"))+'</h4>'+
     '<small>'+esc(labels[category(recipe)]||labels.kitchen)+'</small></div>'+
     '<strong class="rg-cook-score">'+score.ready+' / '+score.total+'</strong></div>'+
