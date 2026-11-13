@@ -19,7 +19,7 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 - **Seed collection:** browse varieties and growing information, organize packets, add or edit seed entries, and keep seed-packet photographs.
 - **Packet records:** track individual packets or bulk lots, suppliers, storage locations, known seed counts, archived or empty packets, and their planting histories. Unknown counts stay unknown; variety-level packet totals are not mistaken for numbers of individual seeds.
 - **Garden Planner:** plan sowing dates using your own frost-date and growing-environment information; organize garden beds, crop rotation and succession sowing; record germination tests, harvested crops and saved seeds.
-- **Planting Journal:** optionally record planting dates, seed sources, observations, photographs, watering, growth measurements and charts. Individual plantings can be linked to the packet used and to their harvests.
+- **Planting Journal:** optionally record planting dates, seed sources, observations, photographs, growth measurements and charts. The **Garden Watering Manager lives inside the Planting Journal**, so soil checks, watering history and each planting's watering shortcut stay with the actual plants, not the Garden Planner. Individual plantings can be linked to the packet used and to their harvests.
 
 ### Food, recipes and traditional knowledge
 
@@ -91,3 +91,7 @@ The project should avoid unnecessary GitHub Actions use. App changes should pres
 
 **DK Chef Companion** · **DK Softworks**  
 *From Seed to Table.*
+
+### Watering belongs to Planting Journal
+
+The existing **💧 Garden Watering Manager** is a single collapsible section **inside Planting Journal**, immediately before the planting entry cards. Garden Planner no longer contains the manager or its quick-access button. Watering shortcuts on a planting or a seed card open the Planting Journal and Watering Manager, selecting a matching recorded planting where possible. Existing records, preferences, edit/delete controls, the original local storage key (`dk-seedbank-watering-v1`), and backup/restore/synchronization compatibility are preserved. No migration or data removal is needed. Recordkeeping remains optional.

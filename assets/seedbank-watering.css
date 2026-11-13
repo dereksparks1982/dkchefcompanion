@@ -1,5 +1,8 @@
 
-/* DK Seed Bank: practical watering dashboard, no garden-map/editor elements. */
+/* DK Chef Companion: watering dashboard nested inside Planting Journal. */
+#seedJournal .water-manager{margin:14px 0 18px;max-width:100%}
+#seedJournal .water-manager>summary{padding:13px 16px}
+
 .water-manager{margin:18px 0 24px;border:1px solid #c1d8cd;border-radius:14px;background:#fff;overflow:hidden;color:#294737}
 .water-manager>summary{cursor:pointer;padding:17px 20px;background:linear-gradient(115deg,#e2f1eb,#eef8ed);font-weight:800;color:#194d40;list-style:none;font-size:1.08rem}
 .water-manager>summary::-webkit-details-marker{display:none}.water-manager>summary small{display:block;color:#4a796e;font-weight:500;font-size:.78rem;margin-top:3px}

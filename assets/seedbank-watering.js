@@ -1,7 +1,7 @@
-/* DK Seed Bank Watering Manager: per-plant guidance and local-first records. */
+/* DK Chef Companion: Planting Journal watering guidance and local-first records. */
 (function(){
 "use strict";
-const core=window.DKSeedBankCore, wb=window.DKSeedBankWorkbench;
+const core=window.DKSeedBankCore;
 if(!core)return;
 const key="dk-seedbank-watering-v1";
 const $=(s,root=document)=>root.querySelector(s);
@@ -104,9 +104,11 @@ panel.innerHTML='<summary>💧 Garden Watering Manager <small>Plant-by-plant gui
  '</form></section><section><h3>Watering history</h3><div id="wmHistory" class="wm-history"></div></section></div>'+
  '<p class="wm-footnote">Guidance is a starting point, not a moisture sensor or live weather forecast. For in-ground vegetable beds, weekly totals include rainfall. For pots, water according to soil moisture and drainage rather than inches per week.</p>'+
  '<p class="wm-sources">Guidance: <a target="_blank" rel="noopener noreferrer" href="https://yardandgarden.extension.iastate.edu/how-to/watering-home-vegetable-garden">Iowa State Extension · Watering vegetables</a> · <a target="_blank" rel="noopener noreferrer" href="https://gardeningsolutions.ifas.ufl.edu/care/planting/starting-transplants-indoors/">UF/IFAS · Watering seedlings</a></p></div>';
-const workbench=document.getElementById("seedWorkbench");
-if(workbench)workbench.insertAdjacentElement("afterend",panel);
-else document.getElementById("collection").insertAdjacentElement("beforebegin",panel);
+// Nest the single existing Watering Manager inside the Planting Journal.
+const journalSection=document.getElementById("seedJournal");
+const journalEntries=document.getElementById("journalEntries");
+if(!journalSection||!journalEntries)return;
+journalEntries.insertAdjacentElement("beforebegin",panel);
 const form=$("#wmForm",panel),sel=$("#wmPlanting",panel),feed=$("#wmFeedback",panel);
 $("#wmDate",panel).value=today();$("#wmDate",panel).max=today();
 let editing="";
@@ -177,7 +179,7 @@ function history(){
  if(records.length>200)target.insertAdjacentHTML("beforeend",'<p class="wm-empty">Showing 200 newest records; '+(records.length-200)+' older records remain saved in the backup.</p>');
 }
 function renderAll(){refreshOptions();renderDue();history();}
-// Watering is nested inside Garden Planner. Open its parent accordions too.
+// Expand the Planting Journal parent when a watering shortcut opens the manager.
 function revealWateringPanel(){
  let current=panel;
  while(current){
@@ -266,10 +268,6 @@ function enhanceJournal(){
 }
 document.addEventListener("dkseedbank:journal-rendered",()=>{refreshOptions();renderDue();history();enhanceJournal();});
 document.addEventListener("dkseedbank:inventorychange",()=>{insertGuides();refreshOptions();renderDue();});
-if(workbench){
- const quick=workbench.querySelector(".wb-quick");
- if(quick){const button=document.createElement("button");button.type="button";button.textContent="💧 Watering manager";button.addEventListener("click",()=>openFor(""));quick.appendChild(button);}
-}
 function importData(value){
  if(!value||typeof value!=="object"||Array.isArray(value))return false;
  const records=Array.isArray(value.records)?value.records.filter(r=>r&&typeof r.id==="string"&&typeof r.plantingId==="string"&&iso(r.date)).slice(0,20000):[];
