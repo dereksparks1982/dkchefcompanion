@@ -168,6 +168,12 @@ button.purpose-tag[aria-pressed="true"]{
 /* Correct crop-specific squash artwork when no sourced photo is available. */
 .seed-illustration .seed-squash-svg{width:80px;height:80px;display:block;max-width:100%}
 
+/* Every caution-tagged card has a short warning while its guide is closed.
+   The guide contains the more complete warning. Never show both warnings
+   together, in English or Russian, even after inventory edits or imports.
+   General-sibling matching works for existing and newly added seed cards. */
+article.seed > .seed-details[open] ~ .seed-caution-summary{display:none}
+
 /* Caution flags must explain both the danger and how to handle it. */
 .seed-caution-summary{border:1px solid #e7c4a0;border-left:4px solid #ba7835;background:#fff8ef;color:#563a26;padding:10px 12px;border-radius:9px;font-size:.78rem;line-height:1.5}
 .seed-caution-summary p{margin:0 0 7px}.seed-caution-summary p:last-child{margin-bottom:0}

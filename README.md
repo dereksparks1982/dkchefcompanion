@@ -69,3 +69,9 @@ Local checks: `node desktop/prepare.cjs && node --test desktop/test/*.test.cjs`.
 ### Food Preservation and recipe navigation
 
 Food Preservation is a standalone main tab directly **under Recipe Guide**, before Monastic Garden and Seed Suppliers. Its safety references remain bilingual. Recipe Guide opens with all inner recipe sections closed. Clicking Meals & Kitchen, Spice Blends, Historical or My Recipes reveals the chosen section; clicking the same section closes it again. Reopening the main Recipe Guide resets visibility without deleting saved recipes, selections, custom recipes or ingredient checkboxes. The collapsed Recipe Guide heading no longer carries a descriptive subtitle. Both web entries and the offline shell are included.
+
+### One visible caution per plant card (November 2026)
+
+A seed card retains its short caution preview while **Planting guide & details** is closed. When that same card's guide is opened, the short preview is hidden and the complete species-specific caution, including who is at risk and source links, is displayed in its place. Closing the guide restores the preview. The rule applies independently to every caution-tagged plant, including newly added or edited entries, in English and Russian. The Caution purpose/filter chip remains visible as a category label. Other plant guidance, photos, watering, seed records and saved data are unchanged. The offline cache and both web entry points are updated.
+
+Other warning generation was checked: inventory re-rendering replaces existing caution blocks rather than stacking them; the workbench does not add its own safety block when the plant has a detailed caution; the Russian safety copy is language-specific rather than a separate additional warning. An automated regression test protects the one-visible-warning rule.
