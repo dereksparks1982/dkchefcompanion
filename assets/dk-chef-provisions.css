@@ -36,3 +36,12 @@
 .chef-photo-trigger{position:relative;display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;background:#eaf3e7;color:#24563b!important;border:1px solid #bdcfbd;border-radius:7px;padding:8px 11px;font:inherit;font-size:.8rem!important;font-weight:700!important;overflow:hidden}
 .chef-photo-trigger input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .chef-photo-trigger:focus-within{outline:2px solid #276347;outline-offset:2px}
+
+/* Quagga2 live camera selector and video preview. */
+.chef-camera .chef-scan-reader{position:relative;min-height:150px;overflow:hidden;background:#10241a;border-radius:10px}
+.chef-camera .chef-scan-reader video{display:block;width:100%;max-height:370px;object-fit:contain}
+.chef-camera .chef-scan-reader canvas{display:none}
+.chef-camera-picker{display:grid;gap:5px;font-weight:700;font-size:.81rem;color:#315a42}
+.chef-camera-picker[hidden]{display:none}
+.chef-camera-picker select{width:100%;max-width:480px;min-height:42px;border:1px solid #a9bdad;border-radius:8px;padding:7px;background:#fff;color:#21422e}
+.chef-camera-help{font-size:.8rem;color:#536d59;line-height:1.5;margin:0}

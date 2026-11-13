@@ -23,21 +23,21 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
   assert.match(html,/id="dkRootCellar"/);
   assert.ok(html.indexOf('id="dkPantry"')<html.indexOf('id="recipeGuide"'));
   assert.ok(html.indexOf('id="dkRootCellar"')<html.indexOf('id="recipeGuide"'));
-  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261112-camera2/);
-  assert.match(html,/dk-chef-provisions\.css\?v=20261112-camera2/);
+  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-quagga1/);
+  assert.match(html,/dk-chef-provisions\.css\?v=20261113-quagga1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
  assert.match(script,/getUserMedia/);
- assert.match(script,/new window\.Html5Qrcode/);
- assert.match(script,/useBarCodeDetectorIfSupported:false/);
- assert.match(script,/scanFile\(file,true\)/);
- assert.match(html,/html5-qrcode\.min\.js\?v=2\.3\.8/);
+ assert.match(script,/window\.DKChefBarcodeScanner/);
+ assert.match(script,/startScan/);
+ assert.match(script,/scanPhoto/);
+ assert.match(read("index.html"),/quagga2\.min\.js\?v=20261113/);
  assert.match(script,/world\.openfoodfacts\.org\/api\/v3\/product/);
  assert.match(script,/Open Food Facts/);
  assert.match(script,/sourceHarvestId/);
  assert.match(script,/harvestChoices/);
- assert.match(read("sw.js"),/dk-seedbank-app-v51/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v52/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
