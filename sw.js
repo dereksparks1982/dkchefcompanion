@@ -1,12 +1,12 @@
 /* DK Seed Bank offline app shell and previously viewed external photos.
    Personal records remain in their existing browser storage. */
 "use strict";
-const APP_CACHE="dk-seedbank-app-v35";
+const APP_CACHE="dk-seedbank-app-v36";
 const IMAGE_CACHE="dk-seedbank-images-v1";
 const CACHE_PREFIX="dk-seedbank-";
 const IMAGE_LIMIT=180;
 const SCOPE=new URL(self.registration.scope);
-const APP_FILES=["index.html","docs/index.html","assets/seedbank-cards.css","assets/seedbank-cards.js","assets/seedbank-i18n.css","assets/seedbank-i18n.js","assets/seedbank-monastery.js","assets/seedbank-recipes.css","assets/seedbank-recipes.js","assets/seedbank-variety-images.js","assets/seedbank-watering.css","assets/seedbank-watering.js","assets/seedbank-workbench.css","assets/seedbank-workbench.js","assets/seedbank-backup-utils.js","assets/seedbank-storage-transaction.js","assets/seedbank-alerts.js","assets/seedbank-resilience.css","assets/seedbank-resilience.js","assets/seedbank-chevrons.css","assets/seedbank-growth-photos.css","assets/seedbank-growth-photos.js","assets/seedbank-growth-measurements.css","assets/seedbank-growth-measurements.js","assets/seedbank-drive-sync.css","assets/seedbank-drive-merge.js","assets/seedbank-drive-visible.js","assets/seedbank-drive-sync.js","assets/seedbank-suppliers.css","assets/seedbank-suppliers.js","assets/dk-seedbank-green-96.webp","assets/dk-seedbank-red-96.webp","assets/seedbank-offline.js","manifest.webmanifest"];
+const APP_FILES=["index.html","docs/index.html","assets/seedbank-cards.css","assets/seedbank-cards.js","assets/seedbank-i18n.css","assets/seedbank-i18n.js","assets/seedbank-monastery.js","assets/seedbank-recipes.css","assets/seedbank-recipe-library.js","assets/seedbank-recipes.js","assets/seedbank-variety-images.js","assets/seedbank-watering.css","assets/seedbank-watering.js","assets/seedbank-workbench.css","assets/seedbank-workbench.js","assets/seedbank-backup-utils.js","assets/seedbank-storage-transaction.js","assets/seedbank-alerts.js","assets/seedbank-resilience.css","assets/seedbank-resilience.js","assets/seedbank-chevrons.css","assets/seedbank-growth-photos.css","assets/seedbank-growth-photos.js","assets/seedbank-growth-measurements.css","assets/seedbank-growth-measurements.js","assets/seedbank-drive-sync.css","assets/seedbank-drive-merge.js","assets/seedbank-drive-visible.js","assets/seedbank-drive-sync.js","assets/seedbank-suppliers.css","assets/seedbank-suppliers.js","assets/dk-seedbank-green-96.webp","assets/dk-seedbank-red-96.webp","assets/seedbank-offline.js","manifest.webmanifest"];
 const APP_URLS=APP_FILES.map(path=>new URL(path,SCOPE).href);
 const APP_PATHS=new Set(APP_URLS.map(url=>new URL(url).pathname));
 self.addEventListener("install",event=>{

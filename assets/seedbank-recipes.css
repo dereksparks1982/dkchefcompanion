@@ -24,3 +24,16 @@
 .rg-form textarea{min-height:126px;resize:vertical}.rg-form .rg-button{justify-self:start}
 .rg-feedback{font-size:.84rem;color:#476c4f;margin:8px 0}
 @media(max-width:550px){.rg-inner{padding:13px}.rg-list{grid-template-columns:1fr}.recipe-guide>summary{padding:14px}}
+
+/* Separate meal and multi-ingredient spice blend controls. */
+.rg-section-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 15px}
+.rg-section-button{border:1px solid #bfd0bc;background:#f5f9f3;color:#2d573b;border-radius:18px;padding:9px 13px;font:inherit;font-size:.84rem;font-weight:750;cursor:pointer;min-height:39px}
+.rg-section-button.is-selected{background:#2e6644;color:#fff;border-color:#2e6644}
+.rg-section-button:focus-visible{outline:3px solid #a5bc79;outline-offset:2px}
+.rg-yield{margin:0 0 11px;color:#315943;font-size:.86rem}
+.rg-amount{display:block;margin-top:5px;font-size:.8rem;font-weight:550;color:#52745b}
+.rg-method{padding:14px 16px;background:#f8faf5;border:1px solid #dce8d6;border-radius:11px;margin:13px 0}
+.rg-method h4{font-size:.98rem;margin:0 0 9px;color:#29553b}
+.rg-method ol{margin:0;padding-left:22px;line-height:1.7;font-size:.87rem}
+.rg-method li+li{margin-top:9px}
+@media(max-width:550px){.rg-section-button{flex:1 1 auto;min-height:44px}.rg-method{padding:12px}}

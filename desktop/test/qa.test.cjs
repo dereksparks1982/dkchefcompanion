@@ -445,3 +445,18 @@ test("Seed Suppliers sits directly below Monastic Garden, not below the collecti
   assert.ok(source.indexOf("seedbank-monastery.js")<source.indexOf("seedbank-suppliers.js"));
  }
 });
+
+test("New meals and spice mixes extend Recipe Guide without replacing built-ins",()=>{
+ const original=read("assets/seedbank-recipes.js");
+ const extension=read("assets/seedbank-recipe-library.js");
+ for(const id of ["absinthe","pesto","salsa","pickles"])
+  assert.ok(original.includes('id:"'+id+'"'),id+" built-in missing");
+ assert.match(original,/templates\.concat\(window\.DKSeedBankRecipeLibrary\?\.recipes\|\|\[\],state\.custom\)/);
+ assert.match(original,/rg-section-tabs/);
+ assert.match(original,/data-rg-section/);
+ assert.match(original,/rg-method/);
+ for(const id of ["salisbury-steak","chicken-tikka-masala","classic-meatloaf","ratatouille","curry-powder","five-spice","garam-masala","allspice-substitute"])
+  assert.ok(extension.includes('"id": "'+id+'"'),id+" missing");
+ for(const page of [read("index.html"),read("docs/index.html")])
+  assert.ok(page.indexOf("seedbank-recipe-library.js")<page.indexOf("seedbank-recipes.js"));
+});

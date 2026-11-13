@@ -52,7 +52,19 @@ try{const v=JSON.parse(localStorage.getItem(key)||"null");if(v&&typeof v==="obje
 if(!state.ready||typeof state.ready!=="object")state.ready={};
 if(!Array.isArray(state.custom))state.custom=[];
 function persist(){try{localStorage.setItem(key,JSON.stringify(state));return true;}catch(e){return false;}}
-const all=()=>templates.concat(state.custom);
+const all=()=>templates.concat(window.DKSeedBankRecipeLibrary?.recipes||[],state.custom);
+const category=recipe=>recipe.id.startsWith("custom-")?"personal":
+ recipe.family==="Spice Blends"?"spices":
+ recipe.family==="Historical botanical checklist"?"historical":"kitchen";
+const tabs=[
+ {id:"kitchen",en:"Meals & Kitchen",ru:"Блюда и кухня"},
+ {id:"spices",en:"Spice Blends",ru:"Смеси специй"},
+ {id:"historical",en:"Historical",ru:"Исторические"},
+ {id:"personal",en:"My Recipes",ru:"Мои рецепты"}
+];
+const ru=()=>document.documentElement.lang==="ru";
+const say=(en,rus)=>ru()?rus:en;
+const localized=(entity,field)=>ru()&&entity[field+"Ru"]?entity[field+"Ru"]:entity[field];
 function inventory(){
  const core=window.DKSeedBankCore;
  if(!core||typeof core.plants!=="function")return [];
@@ -69,6 +81,8 @@ function render(){
  const recipes=all();
  if(!recipes.some(r=>r.id===state.selected))state.selected="absinthe";
  const recipe=recipes.find(r=>r.id===state.selected);
+ const selectedCategory=category(recipe);
+ const categoryRecipes=recipes.filter(r=>category(r)===selectedCategory);
  const plants=inventory();
  const rows=recipe.ingredients.map(ing=>({ing,found:matched(ing,plants),ready:isReady(recipe,ing)}));
  const botanical=rows.filter(r=>r.ing.type==="garden");
@@ -79,15 +93,19 @@ function render(){
  const extras=rows.filter(r=>r.ing.type==="pantry"&&!r.ready);
  const readySummary=ready.length===rows.length?"All ingredients marked on hand. Confirm freshness, identity and safety before use.":"You still need to obtain or prepare "+missing.length+" ingredient"+(missing.length===1?"":"s")+".";
  root.innerHTML=
-  '<div class="rg-controls"><label for="rg-recipe">Choose a recipe<select id="rg-recipe">'+recipes.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===recipe.id?" selected":"")+'>'+esc(r.name)+'</option>').join("")+'</select></label>'+
+  '<div class="rg-section-tabs" role="group" aria-label="'+say("Recipe sections","Разделы рецептов")+'">'+
+    tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
+     '<button type="button" class="rg-section-button'+(selectedCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(selectedCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>'+
+  '<div class="rg-controls"><label for="rg-recipe">'+say("Choose a recipe","Выберите рецепт")+'<select id="rg-recipe">'+categoryRecipes.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===recipe.id?" selected":"")+'>'+esc(localized(r,"name"))+'</option>').join("")+'</select></label>'+
   (recipe.id.startsWith("custom-")?'<button class="rg-button rg-danger" type="button" id="rg-remove">Delete this recipe</button>':"")+'</div>'+
   '<p class="rg-note">'+esc(recipe.family||"Personal recipe")+'</p>'+
-  '<h3 class="rg-title">'+esc(recipe.name)+'</h3><p class="rg-subtitle">'+esc(recipe.intro||"Compare each ingredient with your seed inventory and pantry.")+'</p>'+
+  '<h3 class="rg-title">'+esc(localized(recipe,"name"))+'</h3><p class="rg-subtitle">'+esc(localized(recipe,"intro")||"Compare each ingredient with your seed inventory and pantry.")+'</p>'+
+  (recipe.serves?'<p class="rg-yield"><strong>'+say("Yield: ","Выход: ")+'</strong>'+esc(localized(recipe,"serves"))+'</p>':"")+
   '<div class="rg-metrics"><div class="rg-metric"><strong>'+available.length+" / "+botanical.length+'</strong>Growable ingredients with seeds</div>'+
   '<div class="rg-metric"><strong>'+ready.length+" / "+rows.length+'</strong>Ingredients marked on hand</div>'+
   '<div class="rg-metric"><strong>'+missing.length+'</strong>Still not ready</div></div>'+
   '<div class="rg-list">'+rows.map(({ing,found,ready})=>
-   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(ing.name)+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> On hand</label></div>'+
+   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(localized(ing,"name"))+(ing.amount?'<small class="rg-amount">'+esc(localized(ing,"amount"))+'</small>':"")+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> On hand</label></div>'+
    '<div class="rg-state '+(ready||found.length?"found":"missing")+'">'+(ready?"✓ Ingredient on hand":ing.type==="pantry"?"Not tracked as a seed":found.length?"✓ Seeds recorded; ingredient not confirmed ready":"✕ No matching seed recorded")+'</div>'+
    (found.length?'<p class="rg-matches">Your seed records: '+esc(found.join(", "))+'</p>':"")+
    (ing.note?'<p class="rg-detail">'+esc(ing.note)+'</p>':"")+'</div>'
@@ -96,7 +114,9 @@ function render(){
   (newSeed.length?'<p class="rg-note">Not found in the seed bank: '+newSeed.map(r=>esc(r.ing.name)).join(", ")+'.</p>':"")+
   (extras.length?'<p class="rg-note">Other supplies not marked on hand: '+extras.map(r=>esc(r.ing.name)).join(", ")+'.</p>':"")+
   (missing.length?'<ul>'+missing.map(r=>'<li>'+esc(r.ing.name)+': '+(r.ing.type==="pantry"?"obtain/confirm supply":r.found.length?"grow, harvest or otherwise obtain usable ingredient":"obtain the seed or prepared ingredient")+'</li>').join("")+'</ul>':'<p class="rg-note">Every ingredient has been checked on hand.</p>')+'</div>'+
-  (recipe.method?'<p class="rg-note"><strong>Preparation:</strong> '+esc(recipe.method)+'</p>':"")+
+  (recipe.steps?.length?'<section class="rg-method"><h4>'+say("Preparation","Приготовление")+'</h4><ol>'+
+     recipe.steps.map((step,index)=>'<li>'+esc(ru()&&recipe.stepsRu?.[index]?recipe.stepsRu[index]:step)+'</li>').join("")+
+    '</ol></section>':recipe.method?'<p class="rg-note"><strong>Preparation:</strong> '+esc(recipe.method)+'</p>':"")+
   (recipe.caution?'<p class="rg-note"><strong>Important:</strong> '+esc(recipe.caution)+'</p>':"")+
   (recipe.sources&&recipe.sources.length?'<p class="rg-source">References: '+recipe.sources.map(s=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(s[1])+'">'+esc(s[0])+'</a>').join(" · ")+'</p>':"")+
   '<details class="rg-new" id="rg-new"><summary>Add your own recipe</summary><form class="rg-form" id="rg-form">'+
@@ -116,6 +136,12 @@ root.addEventListener("change",event=>{
  }
 });
 root.addEventListener("click",event=>{
+ const section=event.target.closest?.("[data-rg-section]");
+ if(section){
+  const next=all().find(r=>category(r)===section.getAttribute("data-rg-section"));
+  if(next){state.selected=next.id;persist();render();}
+  return;
+ }
  if(event.target.id!=="rg-remove")return;
  const r=all().find(x=>x.id===state.selected);
  if(!r||!r.id.startsWith("custom-")||!confirm('Delete "'+r.name+'" and its on-hand marks?'))return;
@@ -143,6 +169,7 @@ root.addEventListener("submit",event=>{
  if(!persist())alert("Local storage is unavailable. Export your Seed Bank backup when possible.");
  render();
 });
+document.getElementById("dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(render));
 window.DKSeedBankRecipes=Object.freeze({
  exportData:()=>JSON.parse(JSON.stringify(state)),
  importData:data=>{

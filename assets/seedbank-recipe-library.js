@@ -15,7 +15,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 lb (450 g)",
     "aliases": [],
-    "nameRu": "Говяжий фарш"
+    "nameRu": "Говяжий фарш",
+    "amountRu": "450 г"
    },
    {
     "id": "crumbs",
@@ -23,7 +24,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1/3 cup",
     "aliases": [],
-    "nameRu": "Панировочные сухари"
+    "nameRu": "Панировочные сухари",
+    "amountRu": "⅓ стакана"
    },
    {
     "id": "egg",
@@ -31,7 +33,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 large",
     "aliases": [],
-    "nameRu": "Яйцо"
+    "nameRu": "Яйцо",
+    "amountRu": "1 крупная"
    },
    {
     "id": "onion",
@@ -41,7 +44,8 @@ const recipes=[
     "aliases": [
      "onion"
     ],
-    "nameRu": "Лук"
+    "nameRu": "Лук",
+    "amountRu": "1 средняя, разделить"
    },
    {
     "id": "garlic",
@@ -51,7 +55,8 @@ const recipes=[
     "aliases": [
      "garlic"
     ],
-    "nameRu": "Чеснок"
+    "nameRu": "Чеснок",
+    "amountRu": "2 зубчика"
    },
    {
     "id": "worcestershire",
@@ -59,7 +64,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp, divided",
     "aliases": [],
-    "nameRu": "Вустерский соус"
+    "nameRu": "Вустерский соус",
+    "amountRu": "2 ч. л., разделить"
    },
    {
     "id": "mustard",
@@ -67,7 +73,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Дижонская горчица"
+    "nameRu": "Дижонская горчица",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "mushrooms",
@@ -75,7 +82,8 @@ const recipes=[
     "type": "pantry",
     "amount": "8 oz (225 g), sliced; optional",
     "aliases": [],
-    "nameRu": "Шампиньоны"
+    "nameRu": "Шампиньоны",
+    "amountRu": "225 г, ломтиками, по желанию"
    },
    {
     "id": "butter",
@@ -83,7 +91,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Сливочное масло"
+    "nameRu": "Сливочное масло",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "flour",
@@ -91,7 +100,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tbsp",
     "aliases": [],
-    "nameRu": "Пшеничная мука"
+    "nameRu": "Пшеничная мука",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "broth",
@@ -99,7 +109,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 cups (475 mL)",
     "aliases": [],
-    "nameRu": "Говяжий бульон"
+    "nameRu": "Говяжий бульон",
+    "amountRu": "475 мл"
    },
    {
     "id": "salt",
@@ -107,7 +118,8 @@ const recipes=[
     "type": "pantry",
     "amount": "to taste",
     "aliases": [],
-    "nameRu": "Соль и чёрный перец"
+    "nameRu": "Соль и чёрный перец",
+    "amountRu": "по вкусу"
    }
   ],
   "steps": [
@@ -139,7 +151,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1½ lb (680 g)",
     "aliases": [],
-    "nameRu": "Куриные бёдра без кости"
+    "nameRu": "Куриные бёдра без кости",
+    "amountRu": "680 г"
    },
    {
     "id": "yogurt",
@@ -147,7 +160,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ cup",
     "aliases": [],
-    "nameRu": "Натуральный йогурт"
+    "nameRu": "Натуральный йогурт",
+    "amountRu": "½ стакана"
    },
    {
     "id": "lemon",
@@ -155,7 +169,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Лимонный сок"
+    "nameRu": "Лимонный сок",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "garam",
@@ -163,7 +178,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp, divided",
     "aliases": [],
-    "nameRu": "Гарам масала"
+    "nameRu": "Гарам масала",
+    "amountRu": "2 ч. л., разделить"
    },
    {
     "id": "paprika",
@@ -171,7 +187,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Паприка"
+    "nameRu": "Паприка",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "salt",
@@ -179,7 +196,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp, divided",
     "aliases": [],
-    "nameRu": "Соль"
+    "nameRu": "Соль",
+    "amountRu": "1 ч. л., разделить"
    },
    {
     "id": "onion",
@@ -189,7 +207,8 @@ const recipes=[
     "aliases": [
      "onion"
     ],
-    "nameRu": "Лук"
+    "nameRu": "Лук",
+    "amountRu": "1 крупная, кубиками"
    },
    {
     "id": "garlic",
@@ -199,7 +218,8 @@ const recipes=[
     "aliases": [
      "garlic"
     ],
-    "nameRu": "Чеснок"
+    "nameRu": "Чеснок",
+    "amountRu": "4 зубчика, измельчить"
    },
    {
     "id": "ginger",
@@ -209,7 +229,8 @@ const recipes=[
     "aliases": [
      "ginger"
     ],
-    "nameRu": "Свежий имбирь"
+    "nameRu": "Свежий имбирь",
+    "amountRu": "1 ст. л. тёртого"
    },
    {
     "id": "tomato",
@@ -219,7 +240,8 @@ const recipes=[
     "aliases": [
      "tomato"
     ],
-    "nameRu": "Протёртые томаты"
+    "nameRu": "Протёртые томаты",
+    "amountRu": "1 банка (400 г)"
    },
    {
     "id": "paste",
@@ -227,7 +249,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Томатная паста"
+    "nameRu": "Томатная паста",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "cumin",
@@ -235,7 +258,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотый кумин"
+    "nameRu": "Молотый кумин",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "turmeric",
@@ -243,7 +267,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотая куркума"
+    "nameRu": "Молотая куркума",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "cream",
@@ -251,7 +276,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ cup (120 mL)",
     "aliases": [],
-    "nameRu": "Жирные сливки"
+    "nameRu": "Жирные сливки",
+    "amountRu": "120 мл"
    },
    {
     "id": "oil",
@@ -259,7 +285,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tbsp",
     "aliases": [],
-    "nameRu": "Растительное масло"
+    "nameRu": "Растительное масло",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "cilantro",
@@ -270,7 +297,8 @@ const recipes=[
      "cilantro",
      "coriander"
     ],
-    "nameRu": "Свежая кинза"
+    "nameRu": "Свежая кинза",
+    "amountRu": "для украшения, по желанию"
    }
   ],
   "steps": [
@@ -302,7 +330,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1½ lb (680 g)",
     "aliases": [],
-    "nameRu": "Говяжий фарш"
+    "nameRu": "Говяжий фарш",
+    "amountRu": "680 г"
    },
    {
     "id": "crumbs",
@@ -310,7 +339,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 cup",
     "aliases": [],
-    "nameRu": "Панировочные сухари"
+    "nameRu": "Панировочные сухари",
+    "amountRu": "1 стакан"
    },
    {
     "id": "milk",
@@ -318,7 +348,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ cup (120 mL)",
     "aliases": [],
-    "nameRu": "Молоко"
+    "nameRu": "Молоко",
+    "amountRu": "120 мл"
    },
    {
     "id": "egg",
@@ -326,7 +357,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 large",
     "aliases": [],
-    "nameRu": "Яйцо"
+    "nameRu": "Яйцо",
+    "amountRu": "1 крупная"
    },
    {
     "id": "onion",
@@ -336,7 +368,8 @@ const recipes=[
     "aliases": [
      "onion"
     ],
-    "nameRu": "Лук"
+    "nameRu": "Лук",
+    "amountRu": "1 маленькая, мелко нарезать"
    },
    {
     "id": "garlic",
@@ -346,7 +379,8 @@ const recipes=[
     "aliases": [
      "garlic"
     ],
-    "nameRu": "Чеснок"
+    "nameRu": "Чеснок",
+    "amountRu": "2 зубчика, измельчить"
    },
    {
     "id": "worcestershire",
@@ -354,7 +388,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Вустерский соус"
+    "nameRu": "Вустерский соус",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "salt",
@@ -362,7 +397,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Соль"
+    "nameRu": "Соль",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "pepper",
@@ -370,7 +406,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Чёрный перец"
+    "nameRu": "Чёрный перец",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "ketchup",
@@ -378,7 +415,8 @@ const recipes=[
     "type": "pantry",
     "amount": "⅓ cup",
     "aliases": [],
-    "nameRu": "Кетчуп"
+    "nameRu": "Кетчуп",
+    "amountRu": "⅓ стакана"
    },
    {
     "id": "sugar",
@@ -386,7 +424,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Коричневый сахар"
+    "nameRu": "Коричневый сахар",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "mustard",
@@ -394,7 +433,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Готовая горчица"
+    "nameRu": "Готовая горчица",
+    "amountRu": "1 ч. л."
    }
   ],
   "steps": [
@@ -428,7 +468,8 @@ const recipes=[
     "aliases": [
      "eggplant"
     ],
-    "nameRu": "Баклажан"
+    "nameRu": "Баклажан",
+    "amountRu": "1 средняя, кубиками"
    },
    {
     "id": "zucchini",
@@ -439,7 +480,8 @@ const recipes=[
      "zucchini",
      "courgette"
     ],
-    "nameRu": "Кабачки цукини"
+    "nameRu": "Кабачки цукини",
+    "amountRu": "2 средних, ломтиками"
    },
    {
     "id": "peppers",
@@ -450,7 +492,8 @@ const recipes=[
      "bell pepper",
      "sweet pepper"
     ],
-    "nameRu": "Сладкий перец"
+    "nameRu": "Сладкий перец",
+    "amountRu": "2 шт., ломтиками"
    },
    {
     "id": "tomatoes",
@@ -460,7 +503,8 @@ const recipes=[
     "aliases": [
      "tomato"
     ],
-    "nameRu": "Спелые помидоры"
+    "nameRu": "Спелые помидоры",
+    "amountRu": "4 больших, нарезать"
    },
    {
     "id": "onion",
@@ -470,7 +514,8 @@ const recipes=[
     "aliases": [
      "onion"
     ],
-    "nameRu": "Лук"
+    "nameRu": "Лук",
+    "amountRu": "1 крупная, кубиками"
    },
    {
     "id": "garlic",
@@ -480,7 +525,8 @@ const recipes=[
     "aliases": [
      "garlic"
     ],
-    "nameRu": "Чеснок"
+    "nameRu": "Чеснок",
+    "amountRu": "4 зубчика, измельчить"
    },
    {
     "id": "olive-oil",
@@ -488,7 +534,8 @@ const recipes=[
     "type": "pantry",
     "amount": "¼ cup, divided",
     "aliases": [],
-    "nameRu": "Оливковое масло"
+    "nameRu": "Оливковое масло",
+    "amountRu": "¼ стакана, разделить"
    },
    {
     "id": "thyme",
@@ -498,7 +545,8 @@ const recipes=[
     "aliases": [
      "thyme"
     ],
-    "nameRu": "Тимьян"
+    "nameRu": "Тимьян",
+    "amountRu": "1 ч. л. сушёного или 1 ст. л. свежего"
    },
    {
     "id": "rosemary",
@@ -508,7 +556,8 @@ const recipes=[
     "aliases": [
      "rosemary"
     ],
-    "nameRu": "Розмарин"
+    "nameRu": "Розмарин",
+    "amountRu": "½ ч. л. сушёного или 1 ч. л. свежего"
    },
    {
     "id": "basil",
@@ -518,7 +567,8 @@ const recipes=[
     "aliases": [
      "basil"
     ],
-    "nameRu": "Листья базилика"
+    "nameRu": "Листья базилика",
+    "amountRu": "горсть для подачи"
    },
    {
     "id": "salt",
@@ -526,7 +576,8 @@ const recipes=[
     "type": "pantry",
     "amount": "to taste",
     "aliases": [],
-    "nameRu": "Соль и чёрный перец"
+    "nameRu": "Соль и чёрный перец",
+    "amountRu": "по вкусу"
    }
   ],
   "steps": [
@@ -558,7 +609,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tbsp",
     "aliases": [],
-    "nameRu": "Молотый кориандр"
+    "nameRu": "Молотый кориандр",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "cumin",
@@ -566,7 +618,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Молотый кумин"
+    "nameRu": "Молотый кумин",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "turmeric",
@@ -574,7 +627,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Молотая куркума"
+    "nameRu": "Молотая куркума",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "ginger",
@@ -582,7 +636,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp",
     "aliases": [],
-    "nameRu": "Молотый имбирь"
+    "nameRu": "Молотый имбирь",
+    "amountRu": "2 ч. л."
    },
    {
     "id": "paprika",
@@ -590,7 +645,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Паприка"
+    "nameRu": "Паприка",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "mustard",
@@ -598,7 +654,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Горчичный порошок"
+    "nameRu": "Горчичный порошок",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "pepper",
@@ -606,7 +663,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Чёрный перец"
+    "nameRu": "Чёрный перец",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "cayenne",
@@ -614,7 +672,8 @@ const recipes=[
     "type": "pantry",
     "amount": "¼–½ tsp",
     "aliases": [],
-    "nameRu": "Кайенский перец"
+    "nameRu": "Кайенский перец",
+    "amountRu": "¼–½ ч. л."
    }
   ],
   "steps": [
@@ -644,7 +703,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp",
     "aliases": [],
-    "nameRu": "Молотый бадьян"
+    "nameRu": "Молотый бадьян",
+    "amountRu": "2 ч. л."
    },
    {
     "id": "fennel",
@@ -652,7 +712,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp",
     "aliases": [],
-    "nameRu": "Молотые семена фенхеля"
+    "nameRu": "Молотые семена фенхеля",
+    "amountRu": "2 ч. л."
    },
    {
     "id": "cinnamon",
@@ -660,7 +721,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотая корица (кассия)"
+    "nameRu": "Молотая корица (кассия)",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "sichuan",
@@ -668,7 +730,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотый сычуаньский перец"
+    "nameRu": "Молотый сычуаньский перец",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "cloves",
@@ -676,7 +739,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотая гвоздика"
+    "nameRu": "Молотая гвоздика",
+    "amountRu": "½ ч. л."
    }
   ],
   "steps": [
@@ -706,7 +770,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Молотый кумин"
+    "nameRu": "Молотый кумин",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "coriander",
@@ -714,7 +779,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Молотый кориандр"
+    "nameRu": "Молотый кориандр",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "cardamom",
@@ -722,7 +788,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотый кардамон"
+    "nameRu": "Молотый кардамон",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "cinnamon",
@@ -730,7 +797,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотая корица"
+    "nameRu": "Молотая корица",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "pepper",
@@ -738,7 +806,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Чёрный перец"
+    "nameRu": "Чёрный перец",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "cloves",
@@ -746,7 +815,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотая гвоздика"
+    "nameRu": "Молотая гвоздика",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "nutmeg",
@@ -754,7 +824,8 @@ const recipes=[
     "type": "pantry",
     "amount": "¼ tsp",
     "aliases": [],
-    "nameRu": "Молотый мускатный орех"
+    "nameRu": "Молотый мускатный орех",
+    "amountRu": "¼ ч. л."
    }
   ],
   "steps": [
@@ -784,7 +855,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотая корица"
+    "nameRu": "Молотая корица",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "cloves",
@@ -792,7 +864,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотая гвоздика"
+    "nameRu": "Молотая гвоздика",
+    "amountRu": "½ ч. л."
    },
    {
     "id": "nutmeg",
@@ -800,7 +873,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотый мускатный орех"
+    "nameRu": "Молотый мускатный орех",
+    "amountRu": "½ ч. л."
    }
   ],
   "steps": [
@@ -830,7 +904,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tbsp",
     "aliases": [],
-    "nameRu": "Порошок чили (мягкая смесь)"
+    "nameRu": "Порошок чили (мягкая смесь)",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "cumin",
@@ -838,7 +913,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tbsp",
     "aliases": [],
-    "nameRu": "Молотый кумин"
+    "nameRu": "Молотый кумин",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "paprika",
@@ -846,7 +922,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Паприка"
+    "nameRu": "Паприка",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "oregano",
@@ -856,7 +933,8 @@ const recipes=[
     "aliases": [
      "oregano"
     ],
-    "nameRu": "Сушёный орегано"
+    "nameRu": "Сушёный орегано",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "onion",
@@ -864,7 +942,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Луковый порошок"
+    "nameRu": "Луковый порошок",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "garlic",
@@ -872,7 +951,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Чесночный порошок"
+    "nameRu": "Чесночный порошок",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "cayenne",
@@ -880,7 +960,8 @@ const recipes=[
     "type": "pantry",
     "amount": "¼ tsp, optional",
     "aliases": [],
-    "nameRu": "Кайенский перец"
+    "nameRu": "Кайенский перец",
+    "amountRu": "¼ ч. л., по желанию"
    },
    {
     "id": "salt",
@@ -888,7 +969,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Соль"
+    "nameRu": "Соль",
+    "amountRu": "½ ч. л."
    }
   ],
   "steps": [
@@ -918,7 +1000,8 @@ const recipes=[
     "aliases": [
      "basil"
     ],
-    "nameRu": "Сушёный базилик"
+    "nameRu": "Сушёный базилик",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "oregano",
@@ -928,7 +1011,8 @@ const recipes=[
     "aliases": [
      "oregano"
     ],
-    "nameRu": "Сушёный орегано"
+    "nameRu": "Сушёный орегано",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "thyme",
@@ -938,7 +1022,8 @@ const recipes=[
     "aliases": [
      "thyme"
     ],
-    "nameRu": "Сушёный тимьян"
+    "nameRu": "Сушёный тимьян",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "rosemary",
@@ -948,7 +1033,8 @@ const recipes=[
     "aliases": [
      "rosemary"
     ],
-    "nameRu": "Сушёный розмарин"
+    "nameRu": "Сушёный розмарин",
+    "amountRu": "1 ст. л."
    },
    {
     "id": "marjoram",
@@ -958,7 +1044,8 @@ const recipes=[
     "aliases": [
      "marjoram"
     ],
-    "nameRu": "Сушёный майоран"
+    "nameRu": "Сушёный майоран",
+    "amountRu": "1 ст. л."
    }
   ],
   "steps": [
@@ -988,7 +1075,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tbsp",
     "aliases": [],
-    "nameRu": "Молотая корица"
+    "nameRu": "Молотая корица",
+    "amountRu": "2 ст. л."
    },
    {
     "id": "ginger",
@@ -996,7 +1084,8 @@ const recipes=[
     "type": "pantry",
     "amount": "2 tsp",
     "aliases": [],
-    "nameRu": "Молотый имбирь"
+    "nameRu": "Молотый имбирь",
+    "amountRu": "2 ч. л."
    },
    {
     "id": "nutmeg",
@@ -1004,7 +1093,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотый мускатный орех"
+    "nameRu": "Молотый мускатный орех",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "allspice",
@@ -1012,7 +1102,8 @@ const recipes=[
     "type": "pantry",
     "amount": "1 tsp",
     "aliases": [],
-    "nameRu": "Молотый душистый перец"
+    "nameRu": "Молотый душистый перец",
+    "amountRu": "1 ч. л."
    },
    {
     "id": "cloves",
@@ -1020,7 +1111,8 @@ const recipes=[
     "type": "pantry",
     "amount": "½ tsp",
     "aliases": [],
-    "nameRu": "Молотая гвоздика"
+    "nameRu": "Молотая гвоздика",
+    "amountRu": "½ ч. л."
    }
   ],
   "steps": [
