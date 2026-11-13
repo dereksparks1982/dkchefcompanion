@@ -38,7 +38,7 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
  assert.match(read("assets/dk-chef-universal-scanner.js"),/DKChefProductLookup/);
  assert.match(script,/sourceHarvestId/);
  assert.match(script,/harvestChoices/);
- assert.match(read("sw.js"),/dk-seedbank-app-v56/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v57/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
@@ -141,4 +141,19 @@ test("Bread & Baking adds ten bilingual recipes without modifying existing spice
  }
  assert.ok(breads.find(x=>x.id==="traditional-naan"));
  assert.ok(breads.find(x=>x.id==="garlic-naan"));
+});
+
+test("Seed Suppliers is the final main-page section without changing favorites or library",()=>{
+ const source=read("assets/seedbank-suppliers.js");
+ assert.match(source,/main\.appendChild\(panel\)/);
+ assert.doesNotMatch(source,/monastic\.insertAdjacentElement\("afterend",panel\)/);
+ assert.match(source,/dk-seedbank-suppliers-v1/);
+ assert.match(source,/Burpee/);
+ assert.match(source,/Seed Savers Exchange/);
+ for(const route of ["index.html","docs/index.html"]){
+  const html=read(route);
+  assert.match(html,/seedbank-suppliers\.js\?v=20261113-bottom1/);
+  assert.ok(html.indexOf('id="dkSeedCollection"')<html.indexOf("</main>"));
+  assert.ok(html.indexOf("</main>")<html.indexOf("<footer>"));
+ }
 });

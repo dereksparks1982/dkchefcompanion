@@ -17,10 +17,9 @@ panel.innerHTML='<summary>🌱 <span id="dkSupplierTitle"></span></summary><div 
  '<label><span id="dkSupplierNameLabel"></span><input name="name" required maxlength="100"></label>'+
  '<label><span id="dkSupplierUrlLabel"></span><input name="url" type="url" required maxlength="500" placeholder="https://"></label>'+
  '<button type="submit" id="dkSupplierAdd"></button></form><p id="dkSupplierMessage" role="status"></p></div>';
-// Keep Seed Suppliers as a standalone sibling directly after Monastic Garden.
-const monastic=document.getElementById("monasteryGuide");
-if(monastic)monastic.insertAdjacentElement("afterend",panel);
-else main.appendChild(panel);
+// Seed Suppliers belongs at the very bottom, after every other main-page section.
+ // Append after page features have initialized; immediately above the footer.
+main.appendChild(panel);
 const $=id=>document.getElementById(id),l=(en,ru)=>document.documentElement.lang==="ru"?ru:en;
 function safeUrl(value){try{const url=new URL(value);return url.protocol==="https:"&&!url.username&&!url.password?url.href:"";}catch(e){return "";}}
 function clean(items){

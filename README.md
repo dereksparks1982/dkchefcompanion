@@ -30,7 +30,7 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 - **Spice Blends:** multi-ingredient mixes such as curry powder, Chinese five-spice, garam masala, Italian seasoning and other blends. Individual spices are ingredients, not one-ingredient blend recipes.
 - **Food Preservation:** a separate reference for drying, freezing, refrigeration, fermentation, pickling and safe canning practices. This is guidance, not a collection of invented or untested canning processing times.
 - **Monastic Garden:** historical growing and food-plant knowledge presented as a separate reference section.
-- **Seed Suppliers:** website links to established suppliers and user-added favorites. This is a directory, not a shopping or checkout system.
+- **Seed Suppliers:** collapsible links section at the very bottom of the main page, immediately above the footer and after all other sections. Includes established supplier websites and user-added favorites. This is a directory, not a shopping or checkout system. Favorite supplier data remains under the existing storage key and Google Drive backup/sync schema.
 
 ### Keeping records yours
 

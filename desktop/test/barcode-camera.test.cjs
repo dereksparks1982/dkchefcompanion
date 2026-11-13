@@ -124,7 +124,7 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
   const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-station1");
   assert.ok(quagga>0&&bridge>quagga&&product>bridge&&app>product&&station>app,page);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v56/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v57/);
  assert.match(read("README.md"),/Quagga2 direct live-camera integration/);
  assert.match(read("sw.js"),/"assets\/dk-chef-product-lookup.js"/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
