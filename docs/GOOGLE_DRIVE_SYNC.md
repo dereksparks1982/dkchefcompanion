@@ -1,6 +1,6 @@
 # Optional Google Drive synchronization
 
-DK Seed Bank keeps its data on your device unless you explicitly connect Google and
+DK Chef Companion keeps its data on your device unless you explicitly connect Google and
 choose **Sync now** or opt into automatic synchronization while the app is open.
 
 ## Privacy and account isolation
@@ -35,7 +35,7 @@ button and can be dismissed by pressing Escape. A failed picker load is displaye
 in the dialog instead of silently moving the page.
 
 
-1. Open [DK Seed Bank](https://dereksparks1982.github.io/seedrepo/) on your device.
+1. Open [DK Chef Companion](https://dereksparks1982.github.io/dkchefcompanion/) on your device.
 2. Open **Sync & Backup → Google Drive synchronization** and select **Connect my Google Drive**.
 3. Pick your own Google account in Google's sign-in window and approve the requested access.
 4. Select **Sync now** to merge the device's records with that account's hidden DK Seed Bank app data. Or enable optional automatic sync while the app is open.

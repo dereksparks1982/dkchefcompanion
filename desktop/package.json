@@ -1,9 +1,9 @@
 {
-  "name": "dk-seed-bank-desktop",
-  "productName": "DK Seed Bank",
+  "name": "dk-chef-companion-desktop",
+  "productName": "DK Chef Companion",
   "version": "0.9.9",
   "private": true,
-  "description": "Portable offline seed inventory and planting journal for Linux",
+  "description": "Portable Linux companion for seeds, gardening, food storage, preservation and cooking",
   "main": "main.cjs",
   "author": "DK Softworks",
   "license": "UNLICENSED",
@@ -18,7 +18,7 @@
   },
   "build": {
     "appId": "com.dksoftworks.seedbank",
-    "productName": "DK Seed Bank",
+    "productName": "DK Chef Companion",
     "asar": true,
     "compression": "normal",
     "directories": {
@@ -48,7 +48,7 @@
     "linux": {
       "category": "Office",
       "icon": "build/icons",
-      "executableName": "dk-seed-bank"
+      "executableName": "dk-chef-companion"
     }
   }
 }

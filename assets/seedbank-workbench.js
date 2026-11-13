@@ -1,5 +1,5 @@
 
-/* DK Seed Bank Garden Planner: local-first garden management and recordkeeping. */
+/* DK Chef Companion Garden Planner: local-first garden management and recordkeeping. */
 (function(){
 "use strict";
 const core=window.DKSeedBankCore;
@@ -30,7 +30,7 @@ const dateOffset=(date,offset)=>{const d=new Date(date);d.setDate(d.getDate()+of
 const dateText=(date)=>date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
 const monthName=(date)=>date.toLocaleDateString(undefined,{month:"long",year:"numeric"});
 const number=(n)=>Number.isFinite(Number(n))?Math.max(0,Number(n)):0;
-function persist(){try{localStorage.setItem(storageKey,JSON.stringify(state));return true;}catch(e){alert("This browser could not save your Seed Bank changes. Export a backup and check browser storage.");return false;}}
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify(state));return true;}catch(e){alert("This browser could not save your seed collection changes. Export a backup and check browser storage.");return false;}}
 function item(key){return core.plants().get(key);}
 function matchesName(entry){
  if(entry.seedKey&&item(entry.seedKey))return entry.seedKey;
@@ -138,7 +138,7 @@ host.innerHTML=
  '<label>Packets / lots owned<input name="amount" type="number" min="0" max="999999" value="1" required></label>'+
  '<label>Seed source<select name="source"><option value="packet">Commercial packet</option><option value="bag">Bag of beans / lentils</option><option value="harvested">Saved from my garden</option><option value="unknown">Unknown</option></select></label>'+
  '<fieldset class="wb-span"><legend>Color-coded roles</legend><div class="wb-roles">'+rolesHTML(["Food crop"])+'</div></fieldset>'+
- '<button type="submit" class="wb-primary">Add to Seed Bank</button></form>'+
+ '<button type="submit" class="wb-primary">Add to collection</button></form>'+
  '<h3>Edit a seed already in your collection</h3><form id="wbEditSeed" class="wb-form">'+
  '<label class="wb-span">Seed entry'+formSelect("seedKey",true,"wb-edit-seed")+'</label>'+
  '<label>Seed name<input name="name" maxlength="140" required></label>'+
@@ -159,7 +159,7 @@ host.innerHTML=
  '<label>Date obtained (optional)<input name="obtained" type="date"></label>'+
  '<label>Record type<select name="kind"><option value="packet">Individual seed packet</option><option value="bulk">Loose seeds / bulk lot</option></select></label>'+
  '<label class="wb-check wb-span"><input type="checkbox" name="alreadyCounted" value="yes"> This packet is already included in the variety card count</label>'+
- '<p class="wb-note wb-span">Check this for a packet you already own and counted in DK Seed Bank. Registration adds a history without increasing the card total. Leave unchecked for a separately recorded lot. Record each physical packet only once.</p>'+
+ '<p class="wb-note wb-span">Check this for a packet you already own and counted in DK Chef Companion. Registration adds a history without increasing the card total. Leave unchecked for a separately recorded lot. Record each physical packet only once.</p>'+
  '<button type="submit">Add seed lot</button></form><div id="wbLotList"></div>'+
  '<form class="wb-form wb-packet-edit" id="wbLotEditForm" hidden>'+
  '<h3 class="wb-span">Edit packet or seed lot</h3>'+
@@ -237,7 +237,7 @@ host.innerHTML=
  '<p class="wb-note">Saved seed does not guarantee the parent traits, especially from hybrids or cross-pollinating plants.</p></div></details>'+
  '<details class="wb-panel" id="wb-labels"><summary>🏷️ Printable seed packet labels</summary><div class="wb-panel-body">'+
  '<div class="wb-inline"><label>Variety'+formSelect("seedKey")+'</label><button type="button" id="wbAddLabel">Add label</button><button type="button" id="wbPrintLabels">Print selected labels</button><button type="button" id="wbClearLabels">Clear sheet</button></div>'+
- '<div id="wbLabelSheet" class="wb-label-sheet"></div><p class="wb-note">Print dialog opens in your browser; no print job is sent by DK Seed Bank.</p></div></details>'+
+ '<div id="wbLabelSheet" class="wb-label-sheet"></div><p class="wb-note">Print dialog opens in your browser; no print job is sent by DK Chef Companion.</p></div></details>'+
  '</div>';
 // Keep one Garden Planner accordion and preserve all original subpanel IDs.
 planner.appendChild(host);
@@ -848,7 +848,7 @@ function renderLabels(){
   const guide=p.guide,danger=dangerFor(p);
   return '<article class="wb-print-label"><h3>'+esc(p.name)+'</h3><p>'+esc(p.cat)+'</p><p>Depth: '+esc(guide.depth)+' · Spacing: '+esc(guide.spacing)+'</p>'+
   '<p>Light: '+esc(guide.light)+' · '+esc(guide.days)+'</p>'+
-  (danger?'<strong>'+esc(danger)+'</strong>':'')+'<small>DK Seed Bank · '+esc(today())+'</small></article>';
+  (danger?'<strong>'+esc(danger)+'</strong>':'')+'<small>DK Chef Companion · '+esc(today())+'</small></article>';
  }).join("")||'<p class="wb-empty">Select a seed to create print-ready labels.</p>';
 }
 document.addEventListener("click",event=>{
@@ -917,7 +917,7 @@ function journalCalendar(guide){
 function journalDetailsHTML(entry,linked,candidates,guide){
  const label=linked?"Linked variety: "+linked.name:"Plant type only; exact variety unconfirmed";
  const comparison=linked?"These instructions follow your selected seed entry.":candidates.length?
-  "Multiple varieties exist in your Seed Bank. This is general crop guidance, not proof of which was planted.":
+  "Multiple varieties exist in your seed collection. This is general crop guidance, not proof of which was planted.":
   "This herb does not currently have a matching seed card in your inventory. General plant-type guidance only.";
  const options='<option value="">Exact variety unknown / not linked</option>'+candidates.map(p=>
   '<option value="'+esc(p.key)+'"'+(linked&&linked.key===p.key?' selected':'')+'>'+esc(p.name)+'</option>').join("");
@@ -1231,7 +1231,7 @@ function makeBackTopButton(className){
  const button=document.createElement("button");button.type="button";button.className=className;
  const withinCategory=className.includes("wb-back-category");
  button.textContent=withinCategory?"↑ Back to category top":"↑ Back to page top";
- button.setAttribute("aria-label",withinCategory?"Back to the beginning of this seed category":"Back to the top of DK Seed Bank");
+ button.setAttribute("aria-label",withinCategory?"Back to the beginning of this seed category":"Back to the top of DK Chef Companion");
  button.addEventListener("click",()=>{
   const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const behavior=reduced?"auto":"smooth";

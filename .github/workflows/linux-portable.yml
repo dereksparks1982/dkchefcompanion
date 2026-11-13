@@ -1,18 +1,13 @@
 name: Portable Linux application folder
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'desktop/**'
-      - '.github/workflows/linux-portable.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: dk-seed-bank-linux-release
+  group: dk-chef-companion-linux-release
   cancel-in-progress: false
 
 jobs:
@@ -58,38 +53,38 @@ jobs:
       - name: Compile real ELF launcher and make portable folder
         working-directory: desktop
         run: |
-          gcc -O2 -Wall -Wextra -Werror launcher.c -o "dist/linux-unpacked/DK Seed Bank"
-          chmod 755 "dist/linux-unpacked/DK Seed Bank" "dist/linux-unpacked/dk-seed-bank"
-          mv dist/linux-unpacked "dist/DK Seed Bank"
-          tar -C dist -czf "dist/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz" "DK Seed Bank"
+          gcc -O2 -Wall -Wextra -Werror launcher.c -o "dist/linux-unpacked/DK Chef Companion"
+          chmod 755 "dist/linux-unpacked/DK Chef Companion" "dist/linux-unpacked/dk-chef-companion"
+          mv dist/linux-unpacked "dist/DK Chef Companion"
+          tar -C dist -czf "dist/DK-Chef-Companion-0.9.9-Linux-x86_64.tar.gz" "DK Chef Companion"
       - name: Extract as an ordinary user and launch without command-line options
         working-directory: desktop
         run: |
           mkdir -p "${RUNNER_TEMP}/dk-seed-portable-test"
-          tar -C "${RUNNER_TEMP}/dk-seed-portable-test" -xzf "dist/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz"
-          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank"
-          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/dk-seed-bank"
-          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/resources/app.asar"
-          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/resources/seedbank/index.html"
-          file "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank" | grep -q 'ELF 64-bit'
-          xvfb-run -a timeout 80 "${RUNNER_TEMP}/dk-seed-portable-test/DK Seed Bank/DK Seed Bank" --smoke-test
+          tar -C "${RUNNER_TEMP}/dk-seed-portable-test" -xzf "dist/DK-Chef-Companion-0.9.9-Linux-x86_64.tar.gz"
+          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/DK Chef Companion"
+          test -x "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/dk-chef-companion"
+          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/resources/app.asar"
+          test -f "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/resources/seedbank/index.html"
+          file "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/DK Chef Companion" | grep -q 'ELF 64-bit'
+          xvfb-run -a timeout 80 "${RUNNER_TEMP}/dk-seed-portable-test/DK Chef Companion/DK Chef Companion" --smoke-test
       - name: Upload tested portable archive
         uses: actions/upload-artifact@v4
         with:
-          name: DK-Seed-Bank-Linux-Portable
-          path: desktop/dist/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz
+          name: DK-Chef-Companion-Linux-Portable
+          path: desktop/dist/DK-Chef-Companion-0.9.9-Linux-x86_64.tar.gz
           if-no-files-found: error
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.9.9-linux-portable
-          name: DK Seed Bank 0.9.9 Portable Linux desktop
+          name: DK Chef Companion 0.9.9 Portable Linux desktop
           prerelease: true
           generate_release_notes: false
-          files: desktop/dist/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz
+          files: desktop/dist/DK-Chef-Companion-0.9.9-Linux-x86_64.tar.gz
           body: |
             Portable Linux desktop application folder for x86-64 Ubuntu and compatible systems.
-            Download the tar.gz archive, extract it using Files/Archive Manager, open the DK Seed Bank folder, and double-click the executable named DK Seed Bank.
+            Download the tar.gz archive, extract it using Files/Archive Manager, open the DK Chef Companion folder, and double-click the executable named DK Chef Companion.
             This is a real Linux ELF executable with its supporting files. No AppImage, installer, Terminal commands, or separate dependency downloads.
             Keep the bundled files together. Personal records are stored separately in the Linux user profile and persist across app updates.
             Web-app records do not transfer automatically: export a backup in the browser and import it in the desktop program.

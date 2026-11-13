@@ -15,7 +15,7 @@ test("serves only bundled assets",()=>{
  }
 });
 
-test("desktop bundle holds the complete seed bank",()=>{
+test("desktop bundle holds the complete Chef Companion seed collection",()=>{
  const html=fs.readFileSync(path.join(dir,"index.html"),"utf8");
  assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  assert.ok(html.includes('value="ru">Русский</option>'));

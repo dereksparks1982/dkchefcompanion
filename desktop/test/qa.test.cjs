@@ -65,9 +65,9 @@ test("desktop update check accepts only real portable GitHub release paths",()=>
  const {selectLatest}=require("../update-check.cjs");
  const release=(version)=>({
   tag_name:"v"+version+"-linux-portable",draft:false,
-  html_url:"https://github.com/dereksparks1982/seedrepo/releases/tag/v"+version+"-linux-portable",
-  assets:[{name:"DK-Seed-Bank-"+version+"-Linux-x86_64.tar.gz",state:"uploaded",
-   browser_download_url:"https://github.com/dereksparks1982/seedrepo/releases/download/v"+version+"-linux-portable/DK-Seed-Bank-"+version+"-Linux-x86_64.tar.gz"}]
+  html_url:"https://github.com/dereksparks1982/dkchefcompanion/releases/tag/v"+version+"-linux-portable",
+  assets:[{name:"DK-Chef-Companion-"+version+"-Linux-x86_64.tar.gz",state:"uploaded",
+   browser_download_url:"https://github.com/dereksparks1982/dkchefcompanion/releases/download/v"+version+"-linux-portable/DK-Chef-Companion-"+version+"-Linux-x86_64.tar.gz"}]
  });
  assert.equal(selectLatest([release("0.9.3"),release("0.9.9"),release("0.10.0")],"0.9.4").version,"0.10.0");
  assert.equal(selectLatest([release("0.9.3")],"0.9.4"),null);
@@ -99,14 +99,16 @@ test("service worker precaches the entire offline shell and uses a network timeo
  assert.match(source,/cache\.match\(request/);
 });
 
-test("README stays concise and points at the portable Linux folder",()=>{
- const text=read("README.md");
- assert.ok(text.includes("v0.9.9-linux-portable/DK-Seed-Bank-0.9.9-Linux-x86_64.tar.gz"));
- assert.ok(text.includes("https://dereksparks1982.github.io/seedrepo/"));
- assert.ok(!text.includes("inventory/"));
- assert.ok(!text.includes(".AppImage"));
+test("README describes DK Chef Companion and current project URL without private catalog disclosures",()=>{
+ const description=read("README.md");
+ assert.match(description,/^# DK Chef Companion/m);
+ assert.match(description,/From Seed to Table/);
+ assert.ok(description.includes("https://dereksparks1982.github.io/dkchefcompanion/"));
+ assert.ok(description.includes("Shared Pantry"));
+ assert.ok(description.includes("Root Cellar"));
+ assert.ok(!description.includes("inventory/"));
+ assert.ok(!description.includes(".AppImage"));
 });
-
 
 test("English and Russian banners contain no collection eyebrow",()=>{
  const english=read("index.html");

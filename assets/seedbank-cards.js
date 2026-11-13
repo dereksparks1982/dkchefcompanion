@@ -681,7 +681,7 @@ section.innerHTML='<summary>📔 Planting Journal</summary>'+
 '<form id="journalForm" hidden><h3 id="journalFormTitle">Record planting</h3><div class="form-grid">'+
 '<label>Plant name<input name="plant" required maxlength="100" placeholder="e.g. Basil"></label>'+
 '<label>Variety (optional)<input name="variety" maxlength="120" placeholder="Unknown / basic variety"></label>'+
-'<label class="full-span">Link exact variety from my Seed Bank<select name="seedKey" id="journalSeedKey"><option value="">Unknown / not selected</option></select><small>Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.</small></label>'+
+'<label class="full-span">Link exact variety from my collection<select name="seedKey" id="journalSeedKey"><option value="">Unknown / not selected</option></select><small>Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.</small></label>'+
 '<label class="full-span">Source packet (optional)<select name="seedLotId" id="journalSeedLotId"><option value="">Not linked to a packet</option></select><small>Choose a packet you actually used. Leaving this blank does not deduct seeds from another packet.</small></label>'+
 '<label>Date planted<input name="date" type="date" required></label>'+
 '<label>Approximate time<input name="time" type="time"></label>'+
@@ -1095,7 +1095,7 @@ async function createFullBackup(){
  if(digest)snapshot.integrity={algorithm:"SHA-256",digest};
  return snapshot;
 }
-function downloadJSON(data,prefix="dk-seedbank-backup"){
+function downloadJSON(data,prefix="dk-chef-companion-backup"){
  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob),link=document.createElement("a");
  link.href=url;link.download=prefix+"-"+today()+".json";
@@ -1155,7 +1155,7 @@ document.getElementById("importJournal").addEventListener("change",async e=>{
   if(!window.confirm(review))return;
   // A safety export is created before any local content is replaced.
   const previous=await createFullBackup();
-  downloadJSON(previous,"dk-seedbank-before-restore");
+  downloadJSON(previous,"dk-chef-companion-before-restore");
   const keys=new Set(plants.keys());
   for(const addition of data.workbench?.additions||[]){
    if(addition&&typeof addition.category==="string"&&typeof addition.name==="string")

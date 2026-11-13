@@ -16,4 +16,4 @@ fs.copyFileSync(path.join(root,"manifest.webmanifest"),path.join(out,"manifest.w
 fs.writeFileSync(path.join(out,"index.html"),rendered);
 fs.copyFileSync(path.join(__dirname,"desktop-offline.js"),path.join(out,"assets","desktop-offline.js"));
 fs.copyFileSync(path.join(__dirname,"desktop-update.css"),path.join(out,"assets","desktop-update.css"));
-console.log("Bundled DK Seed Bank catalog and assets:",(rendered.match(/<article class="seed"/g)||[]).length,"seed cards");
+console.log("Bundled DK Chef Companion catalog and assets:",(rendered.match(/<article class="seed"/g)||[]).length,"seed cards");

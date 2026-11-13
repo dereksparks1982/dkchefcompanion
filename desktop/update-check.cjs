@@ -17,12 +17,12 @@ function selectLatest(releases,current){
   if(!r||r.draft||typeof r.tag_name!=="string")continue;
   const match=/^v(\d+\.\d+\.\d+)-linux-portable$/.exec(r.tag_name);
   if(!match||!isNewer(match[1],current))continue;
-  const expected="DK-Seed-Bank-"+match[1]+"-Linux-x86_64.tar.gz";
+  const expected="DK-Chef-Companion-"+match[1]+"-Linux-x86_64.tar.gz";
   const asset=Array.isArray(r.assets)?r.assets.find(a=>a&&a.name===expected&&
    a.state==="uploaded"&&typeof a.browser_download_url==="string"&&
    a.browser_download_url===
-    "https://github.com/dereksparks1982/seedrepo/releases/download/"+r.tag_name+"/"+expected):null;
-  const url="https://github.com/dereksparks1982/seedrepo/releases/tag/"+r.tag_name;
+    "https://github.com/dereksparks1982/dkchefcompanion/releases/download/"+r.tag_name+"/"+expected):null;
+  const url="https://github.com/dereksparks1982/dkchefcompanion/releases/tag/"+r.tag_name;
   if(!asset||r.html_url!==url)continue;
   if(!found||isNewer(match[1],found.version))
    found={version:match[1],url,download:asset.browser_download_url};

@@ -15,7 +15,7 @@ protocol.registerSchemesAsPrivileged([{
  scheme:"dkseed",privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}
 }]);
 
-app.setName("DK Seed Bank");
+app.setName("DK Chef Companion");
 app.setPath("userData",path.join(app.getPath("appData"),"DK Seed Bank"));
 const googleAuth=createAuth({userData:app.getPath("userData"),openExternal:url=>shell.openExternal(url)});
 const singleInstance=app.requestSingleInstanceLock();
@@ -225,7 +225,7 @@ function createWindow(){
     if(Object.entries(info).some(([key,value])=>key==="cards"?value!==319:value!==true)){
      throw new Error("Desktop smoke test failed: "+JSON.stringify(info));
     }
-    console.log("DK Seed Bank desktop smoke test passed:",JSON.stringify(info));
+    console.log("DK Chef Companion desktop smoke test passed:",JSON.stringify(info));
     finished=true;app.exit(0);
    }catch(error){
     console.error("Desktop smoke test failed:",error);
@@ -256,7 +256,7 @@ app.whenReady().then(()=>{
   const timeout=setTimeout(()=>controller.abort(),9000);
   try{
    const response=await net.fetch(
-    "https://api.github.com/repos/dereksparks1982/seedrepo/releases?per_page=12",
+    "https://api.github.com/repos/dereksparks1982/dkchefcompanion/releases?per_page=12",
     {headers:{Accept:"application/vnd.github+json"},signal:controller.signal}
    );
    if(!response.ok)return {status:"unavailable"};

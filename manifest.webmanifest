@@ -1,7 +1,7 @@
 {
-  "name": "DK Seed Bank",
-  "short_name": "DK Seed Bank",
-  "description": "An offline-capable seed catalog and garden recordkeeping tool",
+  "name": "DK Chef Companion",
+  "short_name": "DK Chef",
+  "description": "From Seed to Table: a companion for gardening, food storage, preservation, and cooking.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
