@@ -123,6 +123,20 @@ function validate(data){
     row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||
     typeof row.updatedAt!=="string"||Number.isNaN(Date.parse(row.updatedAt)))
     throw Error("Invalid food inventory item.");
+   if(row.medicineInfo!=null){
+    const info=row.medicineInfo;
+    if(row.location!=="medicine"||!isObject(info)||
+     typeof info.verifiedUPC!=="string"||info.verifiedUPC!==row.barcode||
+     !/^\d{8,14}$/.test(info.verifiedUPC)||
+     typeof info.ndc!=="string"||info.ndc.length>40||
+     typeof info.generic!=="string"||info.generic.length>140||
+     typeof info.ingredient!=="string"||info.ingredient.length>280||
+     typeof info.dosageForm!=="string"||info.dosageForm.length>70||
+     info.source!=="openFDA NDC Directory"||
+     typeof info.labelUrl!=="string"||info.labelUrl.length>180||
+     info.labelUrl!==""&&!/^https:\/\/dailymed\.nlm\.nih\.gov\/dailymed\/drugInfo\.cfm\?setid=[a-f0-9-]{36}$/i.test(info.labelUrl))
+     throw Error("Invalid FDA medicine inventory metadata.");
+   }
    ids.add(row.id);
   }
   for(const row of provisions.deleted){

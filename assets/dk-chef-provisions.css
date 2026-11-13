@@ -42,3 +42,7 @@
  .chef-item-buttons{width:100%}
  .chef-item-buttons button{flex:1}
 }
+
+/* Official drug label references are separate from food/recipe inventory. */
+.chef-store-item .chef-regulatory-note{margin:7px 0 0;font-size:.79rem;line-height:1.5;color:#345668;background:#eff6fa;border:1px solid #d6e4eb;border-radius:7px;padding:7px}
+.chef-regulatory-note a{color:#225d85;text-decoration:underline;text-underline-offset:2px}

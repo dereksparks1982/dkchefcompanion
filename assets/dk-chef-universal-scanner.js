@@ -5,6 +5,7 @@
 "use strict";
 const host=document.getElementById("dkProductStation");
 const camera=window.DKChefBarcodeScanner,products=window.DKChefProductLookup,inventory=window.DKSeedBankRecipes;
+const medicine=window.DKChefMedicineLookup;
 if(!host||!camera||!products||!inventory)return;
 const ru=()=>document.documentElement.lang==="ru";
 const t=(en,russian)=>ru()?russian:en;
@@ -25,6 +26,10 @@ host.innerHTML='<div class="chef-station-header"><div><h2 id="chefScanTitle"></h
  '<p id="chefScanStatus" class="chef-station-status" role="status" aria-live="polite"></p>'+
  '<div id="chefScanResult" class="chef-station-result" hidden><div class="chef-station-result-head"><strong id="chefScanProductName"></strong>'+
  '<small id="chefScanProductSource"></small></div><p id="chefScanProductDetails"></p></div>'+
+ '<div class="chef-medicine-verify" id="chefFDABox" hidden>'+
+ '<strong id="chefFDATitle"></strong><p id="chefFDAStatus" role="status"></p>'+
+ '<p id="chefFDADetails" hidden></p><a id="chefFDALabel" hidden target="_blank" rel="noopener noreferrer"></a>'+
+ '<small id="chefFDANotice"></small></div>'+
  '<div class="chef-station-save" id="chefScanSaveArea" hidden>'+
  '<div class="chef-station-fields"><label><span id="chefScanNameLabel"></span><input id="chefScanName" maxlength="140"></label>'+
  '<label><span id="chefScanBrandLabel"></span><input id="chefScanBrand" maxlength="100"></label>'+
@@ -42,10 +47,11 @@ const statusNode=$("chefScanStatus"),result=$("chefScanResult"),saveArea=$("chef
 const barcode=$("chefScanBarcode"),name=$("chefScanName"),brand=$("chefScanBrand"),size=$("chefScanSize");
 const destination=$("chefScanDestination"),ingredient=$("chefScanIngredient"),count=$("chefScanCount");
 const cameraSelect=$("chefScanCamera"),cameraRow=$("chefScanCameraRow");
+const fdaBox=$("chefFDABox"),fdaStatus=$("chefFDAStatus"),fdaDetails=$("chefFDADetails"),fdaLabel=$("chefFDALabel");
 let muted=false;
 try{muted=localStorage.getItem(STORAGE)==="1";}catch(error){}
 $("chefScanMute").checked=muted;
-let audio=null,active=false,sessionNumber=0,lookupNumber=0,lastCode="",lastProduct=null,deviceId="",retries=0;
+let audio=null,active=false,sessionNumber=0,lookupNumber=0,lastCode="",lastProduct=null,deviceId="",retries=0,lastVerification=null;
 function feedback(message){statusNode.textContent=message;}
 function localized(){
  const labels={
@@ -67,7 +73,10 @@ function localized(){
   chefScanCountLabel:t("Packages","Упаковки"),
   chefScanIngredientLabel:t("Recipe ingredient (food only, optional)","Ингредиент для рецептов (только еда, необязательно)"),
   chefScanAdd:t("Add to inventory","Добавить в запасы"),
-  chefScanSaveHelp:t("Review the product details before saving. Medicines and household supplies never count as recipe ingredients.","Проверьте данные перед сохранением. Лекарства и бытовые товары не считаются ингредиентами рецептов.")
+  chefScanSaveHelp:t("Review the product details before saving. Medicines and household supplies never count as recipe ingredients.","Проверьте данные перед сохранением. Лекарства и бытовые товары не считаются ингредиентами рецептов."),
+  chefFDATitle:t("FDA drug directory check","Проверка справочника FDA"),
+  chefFDALabel:t("Read the official DailyMed label","Открыть официальную инструкцию DailyMed"),
+  chefFDANotice:t("FDA NDC records are submitted by manufacturers. Listing does not mean FDA approval. Check the actual package and consult a pharmacist for medical questions.","Записи NDC подаются производителями. Наличие в справочнике не означает одобрения FDA. Проверяйте упаковку и консультируйтесь с фармацевтом.")
  };
  for(const [id,value]of Object.entries(labels))$(id).textContent=value;
  $("chefScanSources").innerHTML=t("Product data from publicly available databases. Only the barcode is sent for lookup.","Данные товаров из открытых баз. Для поиска отправляется только штрихкод.")+
@@ -109,7 +118,9 @@ function ding(){
  }catch(error){}
 }
 function resetResult(){
- result.hidden=true;saveArea.hidden=true;lastProduct=null;
+ result.hidden=true;saveArea.hidden=true;lastProduct=null;lastVerification=null;
+ fdaBox.hidden=true;fdaStatus.textContent="";fdaDetails.hidden=true;fdaDetails.textContent="";
+ fdaLabel.hidden=true;fdaLabel.removeAttribute("href");
 }
 function guessIngredient(product){
  if(product?.category!=="food")return "";
@@ -124,6 +135,7 @@ function guessIngredient(product){
  return "";
 }
 function locationFor(product){
+ if(product.category==="medicine")return "medicine";
  if(product.category==="food"||product.category==="petfood")return product.category==="food"?"pantry":"household";
  const title=(String(product.name||"")+" "+String(product.brand||"")).toLowerCase();
  if(/\b(pepcid|famotidine|ibuprofen|acetaminophen|tablet|capsule|medicine|antacid|pain relief|allergy relief)\b/.test(title))
@@ -134,7 +146,12 @@ function showProduct(product){
  lastProduct=product;
  $("chefScanProductName").textContent=product.name;
  $("chefScanProductSource").textContent=t("Source: ","Источник: ")+product.source;
- $("chefScanProductDetails").textContent=[product.brand,product.size,product.description].filter(Boolean).join(" · ");
+ const categories={food:t("Food","Продукты"),medicine:t("Medicine","Лекарства"),
+  beauty:t("Personal care","Средства ухода"),petfood:t("Pet food","Корм для животных"),
+  general:t("General merchandise","Другие товары")};
+ $("chefScanProductDetails").textContent=[t("Suggested category: ","Предполагаемая категория: ")+
+  (categories[product.category]||categories.general),product.brand,product.size,product.description]
+  .filter(Boolean).join(" · ");
  result.hidden=false;saveArea.hidden=false;
  name.value=product.name;
  brand.value=product.brand||"";
@@ -142,6 +159,42 @@ function showProduct(product){
  destination.value=locationFor(product);
  ingredient.value=guessIngredient(product);
  count.value="1";
+}
+function showVerification(record){
+ fdaBox.hidden=false;
+ if(record?.status!=="verified"){lastVerification=null;return;}
+ lastVerification=record;
+ fdaStatus.textContent=t("Exact UPC appears in an FDA NDC directory record. This does not confirm FDA approval.",
+  "Точный UPC найден в справочнике FDA NDC. Это не подтверждает одобрение препарата FDA.");
+ fdaDetails.textContent=[record.brand,record.generic,record.ingredient,record.dosageForm,
+  record.ndc?t("NDC: ","NDC: ")+record.ndc:""].filter(Boolean).join(" · ");
+ fdaDetails.hidden=false;
+ if(record.labelUrl?.startsWith("https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=")){
+  fdaLabel.href=record.labelUrl;fdaLabel.hidden=false;
+ }else{fdaLabel.hidden=true;fdaLabel.removeAttribute("href");}
+}
+async function verifyMedicine(code,token,already=null){
+ if(!medicine||!code||destination.value!=="medicine"||!/^\d{8,14}$/.test(code))return;
+ fdaBox.hidden=false;fdaStatus.textContent=t("Checking for an exact UPC match in the FDA NDC directory…",
+   "Поиск точного совпадения UPC в справочнике FDA NDC…");
+ fdaDetails.hidden=true;fdaLabel.hidden=true;
+ const record=already?.status==="verified"?already:await medicine.verifyUPC(code);
+ if(token!==lookupNumber||destination.value!=="medicine"||barcode.value!==code)return;
+ if(record?.status==="verified"){showVerification(record);return;}
+ const reasons={
+  "not-found":t("No exact UPC match in FDA's NDC directory. Retail UPCs and NDC codes are not interchangeable.",
+   "В справочнике FDA нет точного совпадения UPC. Розничные UPC и коды NDC не взаимозаменяемы."),
+  ambiguous:t("Several different drug listings share this UPC. Check the package. No identity was assumed.",
+   "Несколько разных лекарств связаны с этим UPC. Проверьте упаковку. Препарат не определён автоматически."),
+  "rate-limited":t("FDA service rate limit reached. Check again later or use DailyMed directly.",
+   "Превышен лимит запросов к FDA. Повторите позже или посетите DailyMed."),
+  unsupported:t("FDA UPC verification supports US 12-digit UPC-A codes only.",
+   "Проверка FDA поддерживает только 12-значный UPC-A США."),
+  unavailable:t("FDA directory cannot be reached. The product name from the other database is not FDA-verified.",
+   "Справочник FDA недоступен. Название товара из другой базы не подтверждено FDA.")
+ };
+ fdaStatus.textContent=reasons[record?.status]||reasons["not-found"];
+ lastVerification=null;
 }
 async function find(code){
  const token=++lookupNumber;
@@ -159,8 +212,12 @@ async function find(code){
   if(product?.found){
    showProduct(product);
    feedback(t("Product identified. Confirm details and choose where to store it.","Товар найден. Проверьте сведения и выберите место хранения."));
+   if(destination.value==="medicine")void verifyMedicine(code,token,product.verification);
   }else{
    const why=product?.reason;
+   // A medicine can still be checked against the NDC directory even when
+   // general retail catalogs lack a matching product record.
+   destination.value="pantry";
    feedback(why==="rate-limited"?t("Databases are rate-limited. Barcode retained. Enter a product name to save.","Превышен лимит запросов. Штрихкод сохранён. Введите название товара."):
     why==="unavailable"?t("Databases could not be reached. Check internet access. Barcode retained; you can enter a name.","Базы товаров недоступны. Проверьте интернет. Штрихкод сохранён; введите название."):
     t("Barcode read, but no database has a confirmed product match. Enter a name to save.","Штрихкод считан, но товар не найден в базах. Введите название для сохранения."));
@@ -282,6 +339,8 @@ $("chefScanMute").addEventListener("change",event=>{
 });
 destination.addEventListener("change",()=>{
  if(destination.value==="medicine"||destination.value==="household")ingredient.value="";
+ if(destination.value==="medicine")void verifyMedicine(barcode.value.trim(),lookupNumber,lastProduct?.verification);
+ else{fdaBox.hidden=true;lastVerification=null;}
 });
 $("chefScanAdd").addEventListener("click",()=>{
  const productName=name.value.trim(),code=barcode.value.trim(),packages=Number(count.value);
@@ -293,7 +352,12 @@ $("chefScanAdd").addEventListener("click",()=>{
  }
  const location=destination.value;
  const record={name:productName,brand:brand.value.trim(),size:size.value.trim(),
-  barcode:code,packages,location,ingredient:(location==="pantry"||location==="cellar")?ingredient.value.trim():"",available:true};
+  barcode:code,packages,location,ingredient:(location==="pantry"||location==="cellar")?ingredient.value.trim():"",available:true,
+  ...(location==="medicine"&&lastVerification?.status==="verified"?{medicineInfo:{
+   ndc:lastVerification.ndc||"",generic:lastVerification.generic||"",
+   ingredient:lastVerification.ingredient||"",dosageForm:lastVerification.dosageForm||"",
+   labelUrl:lastVerification.labelUrl||"",source:"openFDA NDC Directory",verifiedUPC:code
+  }}:{})};
  if(!inventory.saveProvision(record)){
   feedback(t("Could not save. Check the fields and try again.","Не удалось сохранить. Проверьте поля и повторите попытку."));return;
  }

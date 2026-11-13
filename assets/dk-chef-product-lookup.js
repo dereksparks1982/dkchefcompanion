@@ -32,13 +32,31 @@ function factsProduct(data,source){
  return {found:true,name,brand:clean(p.brands,100),size:clean(p.quantity,80),
   source:source.name||source,category:source.category||"general",description:""};
 }
+function classifyUPCitem(item){
+ const categories=(Array.isArray(item.category)?item.category.join(" "):String(item.category||"")).toLowerCase();
+ const title=String(item.title||"").toLowerCase();
+ // Explicit drug product names take priority over broad "Health & Beauty" categories.
+ if(/\b(pepcid|famotidine|ibuprofen|acetaminophen|tylenol|advil|antacid|omeprazole)\b/.test(title))
+  return "medicine";
+ // Prefer provider-supplied categories, never claim all UPCitemdb items are food.
+ if(/\b(medicines?|pharmacy|otc|over.the.counter|antacids?|pharmaceuticals?|drug products?)\b/.test(categories))
+  return "medicine";
+ if(/\b(pet food|dog food|cat food|pet treats)\b/.test(categories))return "petfood";
+ if(/\b(cosmetics?|skin care|hair care|beauty|shampoo|personal care)\b/.test(categories))return "beauty";
+ if(/\b(food|beverages?|grocery|groceries|snacks?|vegetables?|fruit|meat|canned goods|drinks?)\b/.test(categories))
+  return "food";
+ // Extremely clear product names can help when the provider omitted category.
+ if(/\b(root beer|soda|cola|canned peas|sweet peas|green beans|potatoes|olive oil|tomato sauce)\b/.test(title))
+  return "food";
+ return "general";
+}
 function upcProduct(data){
  if(!data||!Array.isArray(data.items)||!data.items.length)return null;
  const p=data.items[0];
  const name=clean(p.title);
  if(!name)return null;
  return {found:true,name,brand:clean(p.brand,100),size:clean(p.size,80),
-  source:"UPCitemdb",category:"general",description:clean(p.description,220)};
+  source:"UPCitemdb",category:classifyUPCitem(p),description:clean(p.description,220)};
 }
 async function batchFacts(code){
  let failures=0,limited=false,notFound=0;
@@ -87,6 +105,17 @@ async function search(code){
    notFound++;
   }catch(error){failures++;}
  }
+ // Only an *exact UPC annotation* in FDA's NDC directory can identify a drug.
+ // A retail UPC is NOT an NDC; never infer/convert either identifier.
+ try{
+  const fda=await root.DKChefMedicineLookup?.verifyUPC(code);
+  if(fda?.status==="verified"){
+   return {found:true,name:fda.name,brand:fda.brand,size:"",
+    category:"medicine",source:fda.source,description:fda.ingredient||fda.generic||"",
+    verification:fda};
+  }
+  if(fda?.status==="rate-limited")limited=true;
+ }catch(error){/* A medicine provider must not break food/general lookup. */}
  return {found:false,reason:limited?"rate-limited":notFound?"not-found":"unavailable"};
 }
 async function lookup(value){
@@ -102,5 +131,5 @@ async function lookup(value){
  pending.set(code,task);
  return task;
 }
-root.DKChefProductLookup=Object.freeze({lookup,factsProduct,upcProduct});
+root.DKChefProductLookup=Object.freeze({lookup,factsProduct,upcProduct,classifyUPCitem});
 })(window);

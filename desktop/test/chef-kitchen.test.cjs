@@ -26,8 +26,8 @@ test("one combined Pantry & Root Cellar section holds the original shared invent
   assert.match(html,/<summary>🫙 Pantry &amp; Root Cellar<\/summary>/);
   assert.ok(html.indexOf('id="dkPantry"')<html.indexOf('id="recipeGuide"'));
   assert.ok(html.indexOf('id="dkMedicine"')<html.indexOf('id="recipeGuide"'));
-  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-stream2/);
-  assert.match(html,/dk-chef-provisions\.css\?v=20261113-stream2/);
+  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-medicine1/);
+  assert.match(html,/dk-chef-provisions\.css\?v=20261113-medicine1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
@@ -36,7 +36,7 @@ test("one combined Pantry & Root Cellar section holds the original shared invent
  assert.doesNotMatch(script,/startScan|data-chef-scan|data-chef-camera/);
  assert.doesNotMatch(script,/scanPhoto|data-chef-photo/);
  assert.match(read("index.html"),/quagga2\.min\.js\?v=20261113/);
- assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-stream2/);
+ assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-medicine1/);
  assert.match(read("assets/dk-chef-product-lookup.js"),/world\.openfoodfacts\.org/);
  assert.match(read("assets/dk-chef-universal-scanner.js"),/DKChefProductLookup/);
  assert.match(script,/sourceHarvestId/);
@@ -44,7 +44,7 @@ test("one combined Pantry & Root Cellar section holds the original shared invent
  assert.doesNotMatch(script,/name="barcode"|Barcode \(optional\)/);
  assert.match(script,/lowStockAt/);
  assert.match(script,/expiryNotice/);
- assert.match(read("sw.js"),/dk-seedbank-app-v58/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v59/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
@@ -187,4 +187,25 @@ test("barcode is retained on inventory edits; low stock and zero remaining are p
  assert.doesNotThrow(()=>w.DKSeedBankBackup.validate(backup));
  backup.recipeGuide.provisions.items[0].lowStockAt=-1;
  assert.throws(()=>w.DKSeedBankBackup.validate(backup));
+});
+
+
+test("exact FDA directory metadata is persisted only for matching medicine UPCs",()=>{
+ const {api}=harness();
+ const LABEL="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=01c77e6a-6381-4005-b647-481bbcd442aa";
+ const info={verifiedUPC:"036000291452",ndc:"54321-111",generic:"famotidine",ingredient:"Famotidine 20 mg",
+  dosageForm:"TABLET",labelUrl:LABEL,source:"openFDA NDC Directory"};
+ assert.equal(api.saveProvision({name:"Pepcid",location:"medicine",barcode:"036000291452",
+  packages:1,medicineInfo:info}),true);
+ let row=api.provisions().items[0];
+ assert.equal(row.medicineInfo.ndc,"54321-111");
+ const w={};vm.runInNewContext(read("assets/seedbank-backup-utils.js"),{window:w,Date,Map,Set,URL});
+ const snapshot={format:"dk-seedbank-v1",journal:[],recipeGuide:api.exportData()};
+ assert.doesNotThrow(()=>w.DKSeedBankBackup.validate(snapshot));
+ assert.equal(api.saveProvision({id:row.id,name:"Pepcid",location:"medicine",packages:2}),true);
+ assert.equal(api.provisions().items[0].medicineInfo.ndc,"54321-111");
+ assert.equal(api.saveProvision({id:row.id,name:"Pepcid",location:"household",packages:2}),true);
+ assert.equal(api.provisions().items[0].medicineInfo,undefined);
+ snapshot.recipeGuide.provisions.items[0].medicineInfo={...info,labelUrl:"javascript:alert(1)"};
+ assert.throws(()=>w.DKSeedBankBackup.validate(snapshot));
 });

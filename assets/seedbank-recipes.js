@@ -169,6 +169,22 @@ function saveProvision(value){
   row={id:"provision-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)};
   provisions().push(row);row.packages=packages;
  }
+ // Preserve exact UPC-linked FDA directory details as optional inventory metadata.
+ // A retail UPC is never converted into or assumed to be a National Drug Code.
+ if(location==="medicine"&&value.medicineInfo&&typeof value.medicineInfo==="object"){
+  const info=value.medicineInfo;
+  if(String(info.verifiedUPC||"")===barcode&&/^\d{8,14}$/.test(barcode)){
+   const clean=(v,n)=>String(v||"").trim().slice(0,n);
+   const link=clean(info.labelUrl,180);
+   row.medicineInfo={
+    verifiedUPC:barcode,ndc:clean(info.ndc,40),generic:clean(info.generic,140),
+    ingredient:clean(info.ingredient,280),dosageForm:clean(info.dosageForm,70),
+    labelUrl:/^https:\/\/dailymed\.nlm\.nih\.gov\/dailymed\/drugInfo\.cfm\?setid=[a-f0-9-]{36}$/i.test(link)?link:"",
+    source:"openFDA NDC Directory"
+   };
+  }
+ }
+ if(location!=="medicine"||row.medicineInfo?.verifiedUPC!==barcode)delete row.medicineInfo;
  Object.assign(row,{key,name,ingredient,location,barcode,lowStockAt:value.lowStockAt==null?Number(row.lowStockAt??0):threshold,brand:String(value.brand||"").trim().slice(0,100),
   size:String(value.size||"").trim().slice(0,80),amount:String(value.amount||"").trim().slice(0,80),
   expiry:String(value.expiry||"").slice(0,10),obtained:String(value.obtained||"").slice(0,10),

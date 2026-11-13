@@ -3,18 +3,20 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
 const root=path.resolve(__dirname,"../..");
 const read=file=>fs.readFileSync(path.join(root,file),"utf8");
 const universal=read("assets/dk-chef-universal-scanner.js");
-function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green Giant",size:"15 oz",category:"food",source:"Open Food Facts"}){
+function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green Giant",size:"15 oz",category:"food",source:"Open Food Facts"},verification=null){
  const ids=["dkProductStation","dkLanguageSelect","chefScanStart","chefScanStop","chefScanMute","chefScanCamera",
   "chefScanCameraRow","chefScanNext","chefScanPreview","chefScanStatus","chefScanResult","chefScanSaveArea",
   "chefScanBarcode","chefScanName","chefScanBrand","chefScanSize","chefScanDestination","chefScanIngredient",
   "chefScanCount","chefScanLookup","chefScanAdd","chefScanProductName","chefScanProductSource","chefScanProductDetails"];
  const more=["chefScanTitle","chefScanIntro","chefScanOne","chefScanMuteText","chefScanCameraLabel",
   "chefScanAutomatic","chefScanBarcodeLabel","chefScanNameLabel","chefScanBrandLabel",
-  "chefScanSizeLabel","chefScanDestinationLabel","chefScanCountLabel","chefScanIngredientLabel","chefScanSaveHelp","chefScanSources"];
+  "chefScanSizeLabel","chefScanDestinationLabel","chefScanCountLabel","chefScanIngredientLabel","chefScanSaveHelp","chefScanSources",
+  "chefFDABox","chefFDATitle","chefFDAStatus","chefFDADetails","chefFDALabel","chefFDANotice"];
  const map=new Map();
  for(const id of ids.concat(more))map.set(id,{
   id,value:"",textContent:"",innerHTML:"",hidden:false,checked:false,listeners:{},
-  addEventListener(type,fn){this.listeners[type]=fn;}
+  addEventListener(type,fn){this.listeners[type]=fn;},
+  removeAttribute(name){if(name==="href")this.href="";}
  });
  const destination=map.get("chefScanDestination");
  destination.options=[{value:"pantry",textContent:"Pantry"},{value:"cellar",textContent:"Root Cellar"},
@@ -22,7 +24,7 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
  Object.defineProperty(destination,"selectedOptions",{get(){return destination.options.filter(x=>x.value===destination.value);}});
  map.get("chefScanCount").value="1";
  map.get("chefScanBarcode").value="";
- const events={beeps:0,saved:[],lookup:[],stop:0,starts:0,resumes:0,pauses:0};
+ const events={beeps:0,saved:[],lookup:[],medLookup:[],stop:0,starts:0,resumes:0,pauses:0};
  const audioCtx=class{
   state="running";currentTime=0;destination={};
   createOscillator(){return {frequency:{setValueAtTime(){},exponentialRampToValueAtTime(){}},
@@ -37,6 +39,7 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
  const products={async lookup(code){events.lookup.push(code);return product;}};
  const inventory={saveProvision(row){events.saved.push(row);return true;}};
  const window={DKChefBarcodeScanner:camera,DKChefProductLookup:products,
+  DKChefMedicineLookup:{async verifyUPC(code){events.medLookup.push(code);return verification||{status:"not-found"};}},
   DKSeedBankRecipes:inventory,AudioContext:audioCtx,
   addEventListener(){}};
  const document={documentElement:{lang:"en"},getElementById:id=>map.get(id)||null};
@@ -58,8 +61,8 @@ test("exactly one scanner lives before storage; old seed catalog starts closed a
   assert.equal((html.match(/id="chefKitchenApp"/g)||[]).length,1);
   assert.equal((html.match(/id="dkPantry"/g)||[]).length,1);
   assert.equal((html.match(/id="dkRootCellar"/g)||[]).length,0);
-  assert.match(html,/dk-chef-universal-scanner\.js\?v=20261113-stream2/);
-  assert.match(html,/dk-chef-universal-scanner\.css\?v=20261113-stream2/);
+  assert.match(html,/dk-chef-universal-scanner\.js\?v=20261113-medicine1/);
+  assert.match(html,/dk-chef-universal-scanner\.css\?v=20261113-medicine1/);
  }
  const inventory=read("assets/dk-chef-provisions-ui.js");
  assert.doesNotMatch(inventory,/startScan|data-chef-scan|data-chef-camera|data-chef-photo/);
@@ -131,7 +134,36 @@ test("scanner audio and lookup remain independent of Quagga2's built-in live eng
  assert.match(universal,/camera\.start\(/);
  assert.match(universal,/products\.lookup\(/);
  assert.doesNotMatch(universal,/decodeSingle|toDataURL|drawImage|getUserMedia\(/);
- assert.match(read("sw.js"),/dk-seedbank-app-v58/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v59/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
  assert.doesNotThrow(()=>new Function(universal));
+});
+
+
+test("medicine product gets an optional exact FDA UPC check and stores only verified details",async()=>{
+ const LABEL="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=01c77e6a-6381-4005-b647-481bbcd442aa";
+ const verified={status:"verified",found:true,name:"Pepcid",brand:"Pepcid",generic:"famotidine",ingredient:"Famotidine 20 mg",
+  dosageForm:"TABLET",ndc:"12345-678",source:"openFDA NDC Directory",labelUrl:LABEL};
+ const h=harness({found:true,name:"Pepcid AC 20 mg Tablets",brand:"Pepcid",category:"medicine",source:"UPCitemdb"},verified);
+ await h.window.DKChefUniversalScanner.find("036000291452");
+ await flush();
+ assert.equal(h.map.get("chefScanDestination").value,"medicine");
+ assert.deepEqual(h.events.medLookup,["036000291452"]);
+ assert.equal(h.map.get("chefFDABox").hidden,false);
+ assert.equal(h.map.get("chefFDALabel").href,LABEL);
+ h.click("chefScanAdd");
+ assert.equal(h.events.saved.length,1);
+ assert.equal(h.events.saved[0].medicineInfo.ndc,"12345-678");
+ assert.equal(h.events.saved[0].medicineInfo.verifiedUPC,"036000291452");
+ assert.equal(h.events.saved[0].ingredient,"");
+});
+test("medicine lookup miss never invents NDC or blocks saving a retail product",async()=>{
+ const h=harness({found:true,name:"Pepcid AC",brand:"Pepcid",category:"medicine",source:"UPCitemdb"},
+  {status:"not-found",found:false});
+ await h.window.DKChefUniversalScanner.find("036000291452");
+ await flush();
+ assert.match(h.map.get("chefFDAStatus").textContent,/No exact UPC match/);
+ h.click("chefScanAdd");
+ assert.equal(h.events.saved[0].medicineInfo,undefined);
+ assert.equal(h.events.saved[0].name,"Pepcid AC");
 });

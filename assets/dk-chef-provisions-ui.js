@@ -78,10 +78,19 @@ function rowHtml(row,id){
  const flags=(isLow(row)?'<span class="chef-stock-warning">'+t("Low stock","Мало запасов")+'</span>':"")+
   (expiryNotice(row.expiry)?'<span class="chef-expiry-warning">'+esc(expiryNotice(row.expiry))+'</span>':"");
  const description=[row.brand,row.size,row.amount,row.expiry?t("Best by","Срок")+": "+row.expiry:"",row.notes].filter(Boolean).map(esc).join(" · ");
+ const medicineInfo=id==="medicine"&&row.medicineInfo?.source==="openFDA NDC Directory"?row.medicineInfo:null;
+ const officialUrl=String(medicineInfo?.labelUrl||"");
+ const safeLink=/^https:\/\/dailymed\.nlm\.nih\.gov\/dailymed\/drugInfo\.cfm\?setid=[a-f0-9-]{36}$/i.test(officialUrl);
+ const drugNote=medicineInfo?
+  '<p class="chef-regulatory-note">'+t("FDA directory listing (not FDA approval)","Запись FDA (не означает одобрения FDA)")+
+  (medicineInfo.ndc?" · NDC "+esc(medicineInfo.ndc):"")+
+  (medicineInfo.ingredient?" · "+esc(medicineInfo.ingredient):"")+
+  (safeLink?' · <a href="'+esc(officialUrl)+'" target="_blank" rel="noopener noreferrer">'+
+   t("DailyMed label","Инструкция DailyMed")+'</a>':"")+'</p>':"";
  return '<article class="chef-store-item'+(row.available===false?" chef-unavailable":"")+'" data-chef-stock-item data-search="'+esc([row.name,row.brand,row.notes].join(" ").toLowerCase())+'">'+
  '<div><strong>'+esc(row.name)+'</strong><small>'+(id==="kitchen"?storageName(row.location)+" · ":"")+
  t("Packages","Упаковки")+': '+esc(row.packages??1)+' · '+(row.available!==false?t("On hand","В наличии"):t("Unavailable","Нет в наличии"))+'</small>'+
- (description?'<p>'+description+'</p>':"")+flags+'</div>'+
+ (description?'<p>'+description+'</p>':"")+drugNote+flags+'</div>'+
  '<div class="chef-item-buttons"><button type="button" data-chef-qty="add" data-chef-id="'+esc(row.id)+'" aria-label="'+t("Add one package","Добавить одну упаковку")+'">+1</button>'+
  '<button type="button" data-chef-qty="use" data-chef-id="'+esc(row.id)+'"'+(Number(row.packages)<=0?' disabled':'')+' aria-label="'+t("Use one package","Израсходовать одну упаковку")+'">−1</button>'+
  '<button type="button" data-chef-edit="'+esc(row.id)+'">'+t("Edit","Изменить")+'</button>'+

@@ -60,3 +60,29 @@ test("output contains no private tokens and accepts only numeric barcodes",async
  assert.doesNotMatch(source,/user_key|api_key|secret/i);
  assert.doesNotThrow(()=>new Function(source));
 });
+
+
+test("UPCitemdb classifies canned peas and root beer as food while Pepcid stays medicine",()=>{
+ const h=harness(()=>null);
+ assert.equal(h.api.upcProduct({items:[{title:"Root Beer 12 pack",brand:"Soda Works",category:"Beverages"}]}).category,"food");
+ assert.equal(h.api.upcProduct({items:[{title:"Canned Sweet Peas",category:["Grocery","Vegetables"]}]}).category,"food");
+ assert.equal(h.api.upcProduct({items:[{title:"Pepcid AC Tablets",category:"Health & Beauty"}]}).category,"medicine");
+ assert.equal(h.api.upcProduct({items:[{title:"Toilet paper",category:"Home"}]}).category,"general");
+});
+test("FDA fallback can identify a drug only when an exact UPC match was checked",async()=>{
+ const result={status:"verified",name:"Exact UPC Drug",brand:"Example",ndc:"54321-111",
+  category:"medicine",source:"openFDA NDC Directory",ingredient:"Drug 10mg"};
+ const h=harness(()=>null);
+ const verified=[];
+ h.api; // The original mock contains no FDA module, so no result may be assumed.
+ assert.equal((await h.api.lookup("036000291452")).found,false);
+ const moduleCode=fs.readFileSync(path.join(root,"assets/dk-chef-product-lookup.js"),"utf8");
+ const window={DKChefMedicineLookup:{async verifyUPC(code){verified.push(code);return result;}}};
+ const fetch=async()=>({status:404,ok:false});
+ vm.runInNewContext(moduleCode,{window,fetch,AbortController,setTimeout,clearTimeout});
+ const product=await window.DKChefProductLookup.lookup("036000291452");
+ assert.equal(product.found,true);
+ assert.equal(product.category,"medicine");
+ assert.equal(product.verification.ndc,"54321-111");
+ assert.deepEqual(verified,["036000291452"]);
+});
