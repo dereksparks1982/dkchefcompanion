@@ -290,7 +290,7 @@ function renderLots(){
   const count=countSeeds(key),used=usedSeeds(key),remaining=Math.max(0,count-used);
   return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+count+' known seeds − '+used+' recorded sown = <strong>'+remaining+' estimated remaining</strong>'+
    '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+
-   state.savedSeeds.filter(s=>s.seedKey===key).map(s=>'<li>Saved from garden · '+esc(s.batch||s.date||'year unknown')+' · '+number(s.count)+' seeds · '+esc(s.place||'storage unrecorded')+'</li>').join("")+'</ul></div>';
+   state.savedSeeds.filter(s=>s.seedKey===key).map(s=>'<li>'+(document.documentElement.lang==="ru"?'Семена из сада':'Saved from garden')+' · '+esc(s.batch||s.date||(document.documentElement.lang==="ru"?'год неизвестен':'year unknown'))+' · '+number(s.count)+(document.documentElement.lang==="ru"?' семян · ':' seeds · ')+esc(s.place||(document.documentElement.lang==="ru"?'место хранения не указано':'storage unrecorded'))+'</li>').join("")+'</ul></div>';
  }).join(""):'<p class="wb-empty">No seed lots recorded yet. Add one above to track actual seed counts.</p>';
 }
 function monthlyCandidates(year,month){
@@ -440,7 +440,7 @@ function renderViability(){
    "Counts refer only to recorded seed lots. Sowing windows use your entered frost date and are estimates, not a weather forecast.",
    "Учитываются только записанные партии семян. Сроки посева основаны на указанной дате последних заморозков и являются ориентировочными.")+'</p>';
 }
-$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(renderViability));
+$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(()=>{renderViability();renderLots();renderHarvests();renderSavedSeeds();refreshPlantingLinks();}));
 $("#wbBedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  state.beds.push({id:id(),updatedAt:changed(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});
@@ -520,12 +520,22 @@ $("#wbSavedForm").addEventListener("submit",event=>{
  state.savedSeeds.push({id:id(),updatedAt:changed(),seedKey:String(v.get("seedKey")),date:String(v.get("date")),count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),notes:String(v.get("notes")||"").slice(0,300),plantingId:linkedPlantingId(v),batch:String(v.get("batch")||"").trim().slice(0,90),parentType:String(v.get("parentType")||"unknown"),isolation:String(v.get("isolation")||"unknown"),method:String(v.get("method")||"unknown")});
  persist();f.reset();f.elements.date.value=today();renderAll();
 });
+function savedMetaValue(field,value){
+ const ru=document.documentElement.lang==="ru",key=String(value||"unknown");
+ const names={
+  parentType:{unknown:["Not verified","Не проверено"],open:["Open-pollinated","Открытоопыляемый"],heirloom:["Heirloom / open-pollinated","Старинный / открытоопыляемый"],hybrid:["F1 hybrid","Гибрид F1"]},
+  isolation:{unknown:["Not verified","Не проверено"],isolated:["Isolated","Изолировано"],bagged:["Protected / hand-pollinated","Защищено / ручное опыление"],open:["Not isolated","Без изоляции"],possible:["Possible crossing","Возможно переопыление"]},
+  method:{unknown:["Not recorded","Не записано"],dry:["Dry thresh / winnow","Сухой обмолот / веяние"],wet:["Wet wash","Промывка"],ferment:["Fermentation","Ферментация"],other:["Crop-specific method","Особый способ для этой культуры"]}
+ };
+ const labels=names[field]?.[key];
+ return esc(labels?labels[ru?1:0]:key);
+}
 function renderSavedSeeds(){
  $("#wbSavedList").innerHTML=state.savedSeeds.length?state.savedSeeds.slice().reverse().map(r=>{
   const p=item(r.seedKey);
-  return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.count)+' collected seeds · '+esc(r.place||"storage unrecorded")+
+  return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.count)+(document.documentElement.lang==="ru"?' собранных семян · ':' collected seeds · ')+esc(r.place||(document.documentElement.lang==="ru"?'место хранения не указано':'storage unrecorded'))+
   (r.batch?'<p>'+(document.documentElement.lang==="ru"?"Партия: ":"Batch: ")+esc(r.batch)+'</p>':'')+linkedPlantingLabel(r.plantingId)+
-  '<p>'+(document.documentElement.lang==="ru"?"Исходные семена: ":"Parent: ")+esc(r.parentType||'unknown')+' · '+(document.documentElement.lang==="ru"?"Изоляция: ":"Isolation: ")+esc(r.isolation||'unknown')+' · '+(document.documentElement.lang==="ru"?"Очистка: ":"Cleaning: ")+esc(r.method||'unknown')+'</p>'+ 
+  '<p>'+(document.documentElement.lang==="ru"?"Исходные семена: ":"Parent: ")+savedMetaValue('parentType',r.parentType)+' · '+(document.documentElement.lang==="ru"?"Изоляция: ":"Isolation: ")+savedMetaValue('isolation',r.isolation)+' · '+(document.documentElement.lang==="ru"?"Очистка: ":"Cleaning: ")+savedMetaValue('method',r.method)+'</p>'+ 
   (r.notes?'<p>'+esc(r.notes)+'</p>':'')+' <button type="button" class="wb-small" data-wb-delete="savedSeeds" data-id="'+esc(r.id)+'">Remove</button></div>';
  }).join(""):'<p class="wb-empty">No saved seed harvests recorded yet.</p>';
 }
