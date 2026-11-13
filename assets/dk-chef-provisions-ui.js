@@ -56,13 +56,15 @@ function formHtml(section,row){
  '<option value="pantry"'+(record.location==="cellar"?"":" selected")+">"+t("Pantry","Кладовая")+'</option>'+
  '<option value="cellar"'+(record.location==="cellar"?" selected":"")+">"+t("Root Cellar","Погреб")+'</option></select></label>':"")+
  labeledInput(t("Brand","Марка"),"brand",value("brand"),'maxlength="100"')+
- labeledInput(t("Package size","Размер упаковки"),"size",value("size"),'maxlength="80"')+
+ labeledInput(t("Package size (each)","Размер одной упаковки"),"size",value("size"),'maxlength="80"')+
  labeledInput(t("Packages","Упаковки"),"packages",record.packages??1,'type="number" min="0" max="999999" step="1" required')+
  labeledInput(t("Low-stock alert (0 = off)","Порог малого запаса (0 = выкл.)"),"lowStockAt",record.lowStockAt??0,'type="number" min="0" max="999999" step="1"')+
- labeledInput(t("Amount (optional)","Количество (необязательно)"),"amount",value("amount"),'maxlength="80"')+
+ labeledInput(t("Total amount on hand (optional)","Всего в наличии (необязательно)"),"amount",value("amount"),'maxlength="80"')+
  labeledInput(t("Date obtained","Дата покупки"),"obtained",value("obtained"),'type="date"')+
  labeledInput(t("Best by / expiry","Срок годности"),"expiry",value("expiry"),'type="date"')+'</div>';
  return header+
+ (kitchen?'<p class="chef-source-note">'+t("For recipe quantity checks, enter 500 g total or 250 g per package, for example. A package count alone does not prove a usable amount.",
+ "Для проверки количества в рецептах укажите, например, всего 500 г или 250 г на упаковку. Число упаковок само по себе не подтверждает количество продукта.")+"</p>":"")+
  (kitchen?labeledInput(t("Recipe ingredient (optional)","Ингредиент для рецептов (необязательно)"),"ingredient",value("ingredient"),'maxlength="140" class="chef-full"'):"")+
  (kitchen&&harvestChoices().length?'<label>'+t("Copy a recorded garden harvest (optional)","Перенести собранный урожай (необязательно)")+
   '<select name="harvestChoice"><option value="">'+t("Choose a harvest…","Выберите урожай…")+'</option>'+
