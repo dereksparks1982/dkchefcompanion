@@ -44,6 +44,13 @@ function matchesName(entry){
  const exactPlant=all.filter(p=>p.name.toLowerCase()===plant);
  return exactPlant.length===1?exactPlant[0].key:null;
 }
+function catalogPacketOptions(selected=""){
+ const options=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes"&&
+  p.card.dataset.source==="packet"&&Number(p.card.dataset.amount)>0)
+  .sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
+ return '<option value="">Choose an existing packet variety…</option>'+options.map(p=>
+  '<option value="'+esc(p.key)+'"'+(selected===p.key?" selected":"")+'>'+esc(p.cat+" · "+p.name+" ("+p.card.dataset.amount+")")+'</option>').join("");
+}
 function seedOptions(selected=""){
  const values=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes").sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
  return '<option value="">Choose a seed variety…</option>'+values.map(p=>'<option value="'+esc(p.key)+'"'+(p.key===selected?' selected':'')+'>'+esc(p.cat+" · "+p.name)+'</option>').join("");
@@ -138,7 +145,21 @@ host.innerHTML=
  '<label>Known seeds in lot<input name="count" type="number" min="0" max="9999999" placeholder="Leave 0 if unknown"></label>'+
  '<label>Storage place<input name="place" maxlength="100" placeholder="Tin, fridge, freezer…"></label>'+
  '<label>Supplier<input name="supplier" maxlength="100"></label>'+
+ '<label>Date obtained (optional)<input name="obtained" type="date"></label>'+
+ '<label>Record type<select name="kind"><option value="packet">Individual seed packet</option><option value="bulk">Loose seeds / bulk lot</option></select></label>'+
+ '<p class="wb-note wb-span">For separate packet histories, record each physical packet as its own entry.</p>'+
  '<button type="submit">Add seed lot</button></form><div id="wbLotList"></div>'+
+ '<h3>Finish a packet already in your collection</h3>'+
+ '<p class="wb-note">For packets counted on an existing seed card, mark one empty without deleting the variety or its other packets.</p>'+
+ '<form id="wbArchiveCatalog" class="wb-form">'+
+ '<label class="wb-span">Packet variety<select name="seedKey" required>'+catalogPacketOptions()+'</select></label>'+
+ '<label>Packet label (optional)<input name="lot" maxlength="90" placeholder="Supplier or label"></label>'+
+ '<label>Date emptied<input name="date" type="date" required></label>'+
+ '<button type="submit">Mark one packet empty</button></form>'+
+ '<details id="wbPacketArchive" class="wb-packet-archive">'+
+ '<summary>📦 Packet archive and history <span id="wbArchivedCount"></span></summary>'+
+ '<p class="wb-note">An empty packet stays in your history. Restore it if you marked it empty by mistake. Other packets stay untouched.</p>'+
+ '<div id="wbArchivedPackets"></div></details>'+
  '</div></details>'+
  '<details class="wb-panel" id="wb-calendar"><summary>📅 Monthly planting assistant and succession reminders</summary><div class="wb-panel-body">'+
  '<p class="wb-note">Calendar dates are approximations based on your last frost date in Garden Planner, not local weather forecasts or packet-specific guarantees.</p>'+
@@ -217,6 +238,8 @@ function refreshSelects(){
   if(existing.has(current))select.value=current;
  });
  const set=$("#wbEditSeed [name=seedKey]");if(set&&!set.value){const first=[...existing.keys()][0];if(first){set.value=first;fillEdit();}}
+ const catalog=$("#wbArchiveCatalog [name=seedKey]");
+ if(catalog){const previous=catalog.value;catalog.innerHTML=catalogPacketOptions(previous);}
 }
 function fillEdit(){
  const f=$("#wbEditSeed"),p=item(f.elements.seedKey.value);
@@ -273,26 +296,132 @@ $("#wbEditSeed").addEventListener("submit",event=>{
 $("#wbLotForm").addEventListener("submit",event=>{
  event.preventDefault();const form=event.currentTarget,v=new FormData(form),seedKey=String(v.get("seedKey")||"");
  if(!item(seedKey))return;
- state.lots.push({id:id(),updatedAt:changed(),seedKey,lot:String(v.get("lot")||"").slice(0,90),year:number(v.get("year"))||null,count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),supplier:String(v.get("supplier")||"").slice(0,100)});
- persist();form.reset();renderAll();notice("Seed lot recorded.");
+ const entry={id:id(),updatedAt:changed(),seedKey,
+  lot:String(v.get("lot")||"").slice(0,90),year:number(v.get("year"))||null,
+  count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),
+  supplier:String(v.get("supplier")||"").slice(0,100),obtained:String(v.get("obtained")||""),
+  kind:v.get("kind")==="bulk"?"bulk":"packet",status:"active",archivedAt:"",history:[]};
+ if(state.lots.length>=3000){notice("Seed lot limit reached. Export a backup before adding more.");return;}
+ state.lots.push(entry);
+ if(!persist()){state.lots.pop();return;}
+ form.reset();renderAll();notice("Seed lot recorded.");
 });
 function usedSeeds(key){
  return core.journal().filter(e=>matchesName(e)===key).reduce((n,e)=>n+number(e.maxSeeds||e.minSeeds),0);
 }
+// Earlier lot records have no status and must remain active after an upgrade.
+function activeRecordedSeeds(lots,key){
+ return lots.filter(row=>row.seedKey===key&&row.status!=="empty"&&row.origin!=="catalog")
+  .reduce((sum,row)=>sum+(Number.isFinite(Number(row.count))?Math.max(0,Number(row.count)):0),0);
+}
+function transitionPacket(row,status,at){
+ if(!row||!["active","empty"].includes(status)||((row.status==="empty")?"empty":"active")===status)return false;
+ row.history=[...(Array.isArray(row.history)?row.history:[]).slice(-29),{status,at,date:at.slice(0,10)}];
+ row.status=status;row.archivedAt=status==="empty"?at.slice(0,10):"";row.updatedAt=at;
+ return true;
+}
 function countSeeds(key){
- return state.lots.filter(x=>x.seedKey===key).reduce((n,x)=>n+number(x.count),0)+state.savedSeeds.filter(x=>x.seedKey===key).reduce((n,x)=>n+number(x.count),0);
+ return activeRecordedSeeds(state.lots,key)+state.savedSeeds.filter(x=>x.seedKey===key).reduce((n,x)=>n+number(x.count),0);
 }
 function renderLots(){
- const grouped=new Map();state.lots.forEach(l=>{const k=l.seedKey;if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(l);});
+ const grouped=new Map();
+ state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog").forEach(l=>{
+  const key=l.seedKey;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(l);
+ });
  state.savedSeeds.forEach(l=>{if(!grouped.has(l.seedKey))grouped.set(l.seedKey,[]);});
  $("#wbLotList").innerHTML=grouped.size?[...grouped].map(([key,lots])=>{
   const p=item(key);if(!p)return "";
   const count=countSeeds(key),used=usedSeeds(key),remaining=Math.max(0,count-used);
   return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+count+' known seeds − '+used+' recorded sown = <strong>'+remaining+' estimated remaining</strong>'+
-   '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+
+   '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+
+   (l.obtained?' · '+esc(l.obtained):"")+(l.supplier?' · '+esc(l.supplier):"")+
+   ' <button type="button" class="wb-small" data-wb-packet-status="empty" data-id="'+esc(l.id)+'">'+(document.documentElement.lang==="ru"?"Отметить пустым":"Mark empty")+'</button>'+
+   ' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+
    state.savedSeeds.filter(s=>s.seedKey===key).map(s=>'<li>'+(document.documentElement.lang==="ru"?'Семена из сада':'Saved from garden')+' · '+esc(s.batch||s.date||(document.documentElement.lang==="ru"?'год неизвестен':'year unknown'))+' · '+number(s.count)+(document.documentElement.lang==="ru"?' семян · ':' seeds · ')+esc(s.place||(document.documentElement.lang==="ru"?'место хранения не указано':'storage unrecorded'))+'</li>').join("")+'</ul></div>';
- }).join(""):'<p class="wb-empty">No seed lots recorded yet. Add one above to track actual seed counts.</p>';
+ }).join(""):'<p class="wb-empty">No active seed lots recorded yet. Add one above to track actual seed counts.</p>';
+ const ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+ const history=state.lots.filter(row=>row.status==="empty"||(row.origin==="catalog"&&Array.isArray(row.history)&&row.history.length))
+  .slice().sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+ $("#wbArchivedCount").textContent="("+history.length+")";
+ $("#wbArchivedPackets").innerHTML=history.length?history.map(row=>{
+  const plant=item(row.seedKey),isEmpty=row.status==="empty",events=Array.isArray(row.history)?row.history:[];
+  return '<div class="wb-record wb-archived-packet"><strong>'+esc(plant?.name||row.seedKey)+'</strong>'+
+   ' · '+esc(row.lot||l("Unlabeled packet","Пакет без названия"))+
+   '<p>'+l("Status: ","Состояние: ")+(isEmpty?l("Empty / archived","Пустой / в архиве"):l("Restored to active catalog","Возвращён в коллекцию"))+
+   (row.archivedAt?' · '+l("Emptied ","Опустел ")+esc(row.archivedAt):"")+'</p>'+
+   (row.year?'<p>'+l("Year: ","Год: ")+esc(row.year)+'</p>':"")+
+   (row.origin==="catalog"?'<p>'+l("Original card packet (individual seed count unknown)","Пакет из коллекции (количество семян неизвестно)")+'</p>':
+    '<p>'+l("Originally recorded seeds: ","Исходное количество семян: ")+number(row.count)+'</p>')+
+   (row.obtained?'<p>'+l("Obtained: ","Получен: ")+esc(row.obtained)+'</p>':"")+
+   (row.supplier?'<p>'+l("Supplier: ","Поставщик: ")+esc(row.supplier)+'</p>':"")+
+   (row.place?'<p>'+l("Stored at: ","Место хранения: ")+esc(row.place)+'</p>':"")+
+   (events.length?'<details class="wb-packet-history"><summary>'+l("Status history","История состояния")+'</summary><ol>'+
+    events.map(e=>'<li>'+esc(e.date||"")+' · '+(e.status==="empty"?l("Marked empty","Отмечен пустым"):l("Restored","Восстановлен"))+'</li>').join("")+'</ol></details>':"")+
+   '<button type="button" class="wb-small" data-wb-packet-status="'+(isEmpty?"active":"empty")+'" data-id="'+esc(row.id)+'">'+
+   (isEmpty?l("Restore packet","Восстановить пакет"):l("Mark empty again","Снова отметить пустым"))+'</button></div>';
+ }).join(""):'<p class="wb-empty">'+l("No packets archived yet.","В архиве пока нет пустых пакетов.")+'</p>';
 }
+function updatePacket(row,status,archiveDate=""){
+ if(!row)return false;
+ const before={...row,history:Array.isArray(row.history)?row.history.slice():[]};
+ const at=changed(),oldOverride=state.overrides[row.seedKey];
+ let updatedAmount=null;
+ if(row.origin==="catalog"){
+  const plant=item(row.seedKey),oldAmount=Number(plant?.card.dataset.amount);
+  if(!plant||plant.card.dataset.source!=="packet"||!Number.isInteger(oldAmount)){
+   notice("The original catalog entry is unavailable or no longer contains a packet.");return false;
+  }
+  updatedAmount=oldAmount+(status==="empty"?-1:1);
+  if(updatedAmount<0||updatedAmount>999999){
+   notice("No recorded packet available to archive or restore.");return false;
+  }
+ }
+ if(!transitionPacket(row,status,at))return false;
+ if(status==="empty"&&archiveDate){
+  row.archivedAt=archiveDate;
+  row.history[row.history.length-1].date=archiveDate;
+ }
+ if(updatedAmount!==null)state.overrides[row.seedKey]={...oldOverride,amount:updatedAmount,updatedAt:at};
+ if(!persist()){
+  Object.assign(row,before);
+  if(updatedAmount!==null){
+   if(oldOverride===undefined)delete state.overrides[row.seedKey];else state.overrides[row.seedKey]=oldOverride;
+  }
+  return false;
+ }
+ if(updatedAmount!==null&&!core.patchInventoryCard(row.seedKey,{amount:updatedAmount})){
+  Object.assign(row,before);
+  if(oldOverride===undefined)delete state.overrides[row.seedKey];else state.overrides[row.seedKey]=oldOverride;
+  persist();return false;
+ }
+ renderAll();
+ notice(status==="empty"?
+  (document.documentElement.lang==="ru"?"Пакет архивирован. История сохранена.":"Packet archived. Its history is retained."):
+  (document.documentElement.lang==="ru"?"Пакет восстановлен.":"Packet restored."));
+ return true;
+}
+$("#wbArchiveCatalog [name=date]").value=today();
+$("#wbArchiveCatalog").addEventListener("submit",event=>{
+ event.preventDefault();
+ const form=event.currentTarget,v=new FormData(form),seedKey=String(v.get("seedKey")||""),plant=item(seedKey);
+ if(!plant||plant.card.dataset.source!=="packet"||!(Number(plant.card.dataset.amount)>0)){
+  notice("Choose a variety with at least one recorded commercial packet.");return;
+ }
+ if(state.lots.length>=3000){notice("Seed lot limit reached. Export a backup before archiving more.");return;}
+ if(!window.confirm("Mark ONE existing packet of "+plant.name+" empty? All other packets stay in the collection."))return;
+ const date=String(v.get("date")||today());
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>today()){notice("Choose a valid past or current date.");return;}
+ const row={id:id(),updatedAt:changed(),seedKey,lot:String(v.get("lot")||"").slice(0,90),
+  count:0,kind:"packet",origin:"catalog",status:"active",archivedAt:"",history:[]};
+ state.lots.push(row);
+ if(!updatePacket(row,"empty",date)){state.lots=state.lots.filter(x=>x!==row);return;}
+ form.reset();form.elements.date.value=today();refreshSelects();renderLots();
+});
+document.addEventListener("click",event=>{
+ const button=event.target.closest?.("[data-wb-packet-status]");if(!button)return;
+ const row=state.lots.find(x=>x.id===button.dataset.id);
+ if(row)updatePacket(row,button.dataset.wbPacketStatus);
+});
 function monthlyCandidates(year,month){
  const settings=core.settings(),frost=parseDate(settings.lastFrost);
  if(!frost)return {error:"Set your actual last spring frost date in Garden Planner first. Region alone is not accurate enough for a planting calendar.",items:[]};
@@ -405,7 +534,7 @@ function renderViability(){
   count:countSeeds(key),used:usedSeeds(key)
  }));
  const assessment=window.DKSeedBankAlerts?.assess({
-  plants,lots:state.lots,tests:state.tests,lowStock:state.lowStock,
+  plants,lots:state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog"),tests:state.tests,lowStock:state.lowStock,
   lastFrost:core.settings().lastFrost,today:today(),locale:ru?"ru":"en"
  });
  const types={
@@ -440,7 +569,7 @@ function renderViability(){
    "Counts refer only to recorded seed lots. Sowing windows use your entered frost date and are estimates, not a weather forecast.",
    "Учитываются только записанные партии семян. Сроки посева основаны на указанной дате последних заморозков и являются ориентировочными.")+'</p>';
 }
-$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(()=>{renderViability();renderLots();renderHarvests();renderSavedSeeds();refreshPlantingLinks();}));
+$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(()=>{renderViability();renderLots();renderHarvests();renderSavedSeeds();refreshPlantingLinks();refreshSelects();}));
 $("#wbBedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  state.beds.push({id:id(),updatedAt:changed(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});

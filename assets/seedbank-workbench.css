@@ -141,3 +141,13 @@
 #growPlanner #seedWorkbench .wb-panel{max-width:100%}
 html[lang="ru"] #growPlanner #seedWorkbench .wb-tools-heading{color:#8f304b}
 @media(max-width:580px){#growPlanner #seedWorkbench .wb-inner{padding:12px}}
+
+/* A finished packet's archive lives inside the existing Garden Planner. */
+#wbPacketArchive{margin:12px 0;border:1px solid #d1e2d1;border-radius:9px;background:#fbfdfa}
+#wbPacketArchive>summary{cursor:pointer;padding:12px 14px;font-weight:750;color:#275b3d;background:#f0f7ed}
+#wbPacketArchive .wb-note{margin:12px}
+#wbArchivedPackets{padding:0 12px 10px}
+#wbArchivedPackets .wb-archived-packet{border-left:3px solid #9cae9c}
+#wbArchivedPackets .wb-packet-history>summary{font-size:.8rem;cursor:pointer;font-weight:700}
+#wbArchivedPackets .wb-packet-history ol{margin:6px 0 10px;padding-left:22px}
+html[lang="ru"] #wbPacketArchive>summary{color:#863c50;background:#faf0f1}
