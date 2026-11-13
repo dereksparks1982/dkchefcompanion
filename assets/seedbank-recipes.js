@@ -214,6 +214,30 @@ function recipeTabMarkup(){
  tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
  '<button type="button" class="rg-section-button'+(activeCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(activeCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>';
 }
+
+function quantityText(q){
+ if(!q||!["enough","short","unverified"].includes(q.status))return "";
+ const units={g:say("g","г"),ml:say("mL","мл"),egg:say("eggs","яиц"),
+  can:say("cans","банок"),clove:say("cloves","зубчиков"),
+  leaf:say("leaves","листьев"),piece:say("pieces","шт.")};
+ const unit=units[q.unit]||q.unit;
+ const fmt=n=>Number(n.toFixed(1)).toLocaleString(ru()?"ru-RU":"en-US")+" "+unit;
+ if(q.status==="enough")return say("Measured amount appears sufficient: ","По указанным количествам хватает: ")+fmt(q.measured)+" / "+fmt(q.required);
+ if(q.status==="short")return say("Measured shortfall: ","По указанным количествам не хватает: ")+fmt(q.measured)+" / "+fmt(q.required);
+ return say("Quantity unverified. Some matching stock has no comparable unit.",
+  "Количество не проверено. У части запасов нет сопоставимых единиц измерения.");
+}
+function recipeQuantityNote(ingredient){
+ const matcher=window.DKChefRecipeMatch;
+ if(!matcher||!ingredient?.amount)return "";
+ const q=matcher.assessQuantity(ingredient,provisions());
+ const message=q.status==="not-specified"&&matcher.matches(ingredient,provisions()).length?
+  say("Quantity not verified. Add a total amount or package size in Pantry & Root Cellar.",
+   "Количество не проверено. Укажите общий объём или размер упаковки в кладовой и погребе."):quantityText(q);
+ return message?'<p class="rg-quantity-note'+(q.status==="short"?" rg-quantity-short":"")+
+  '">'+esc(message)+'</p>':"";
+}
+
 function cookPlanner(recipes){
  const matcher=window.DKChefRecipeMatch;
  if(!matcher)return '<p class="rg-note">'+say("Recipe matching is unavailable. Reload the app.","Не удалось сопоставить рецепты. Обновите приложение.")+'</p>';
@@ -234,8 +258,8 @@ function cookPlanner(recipes){
    say("nearly ready","почти готово")+'</span><span><strong>'+stocked+'</strong> '+
    say("available food records","доступных записей продуктов")+'</span></div>'+
   '<p class="rg-cook-caution">'+say(
-   "Ingredient-name matching does not verify quantities, freshness or suitability. Opening a recipe never deducts stock. Optional substitutions are not automatically counted.",
-   "Совпадения названий не подтверждают количество, свежесть или пригодность продуктов. Просмотр рецептов не списывает запасы. Возможные замены не считаются имеющимися ингредиентами.")+'</p>'+
+   "Ingredient names alone do not prove enough stock; comparable measured amounts are checked conservatively. Opening a recipe never deducts stock. Optional substitutions are not automatically counted.",
+   "Одного совпадения названий недостаточно: сравниваются только сопоставимые количества. Свежесть проверяйте отдельно. Просмотр рецептов не списывает запасы. Возможные замены не считаются имеющимися ингредиентами.")+'</p>'+
   '<div class="rg-cook-filters" role="group" aria-label="'+say("Recipe filter","Фильтр рецептов")+'">'+
   [["all",say("All recipes","Все рецепты")],["ready",say("All ingredients on hand","Все ингредиенты есть")],
    ["near",say("Missing 1–2","Не хватает 1–2")]].map(([id,label])=>
@@ -252,6 +276,11 @@ function cookPlanner(recipes){
     '<small>'+esc(labels[category(recipe)]||labels.kitchen)+'</small></div>'+
     '<strong class="rg-cook-score">'+score.ready+' / '+score.total+'</strong></div>'+
     '<p class="rg-cook-state">'+status+'</p>'+
+'<p class="rg-cook-quantity">'+say("Measured enough: ","По меркам хватает: ")+score.measuredEnough+
+ ' · '+say("Measured short: ","По меркам мало: ")+score.measuredShort+
+ ' · '+say("Check amount: ","Уточнить количество: ")+score.quantityUnverified+'</p>'+
+ (score.measuredShort?'<p class="rg-cook-short">'+say("Need more: ","Нужно больше: ")+
+ score.details.filter(x=>x.quantity.status==="short").map(x=>esc(localized(x.ingredient,"name"))).join(', ')+'</p>':'')+
     (missing.length?'<p class="rg-cook-missing"><strong>'+say("Missing: ","Не хватает: ")+'</strong>'+
      missing.map(x=>esc(localized(x.ingredient,"name"))).join(", ")+'</p>':
     '<p class="rg-cook-missing">'+say("No tracked ingredients missing.","По вашим записям все ингредиенты есть.")+'</p>')+
@@ -307,6 +336,7 @@ function render(){
   ing.type==="pantry"?say("Not marked on hand","Не отмечено в запасах"):
   found.length?say("Seeds recorded; edible ingredient not confirmed","Семена есть; пищевой ингредиент не подтверждён"):
   say("No matching seed recorded","Нет подходящих семян"))+'</div>'+
+   recipeQuantityNote(ing)+
    (found.length?'<p class="rg-matches">Your seed records: '+esc(found.join(", "))+'</p>':"")+
    (ing.note?'<p class="rg-detail">'+esc(ing.note)+'</p>':"")+'</div>'
   ).join("")+'</div>'+
