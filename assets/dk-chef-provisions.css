@@ -30,3 +30,9 @@
 .chef-source-note a{color:#1b6550;text-decoration:underline}
 .chef-empty{font-size:.85rem;color:#587464;padding:10px;margin:0}
 @media(max-width:660px){.chef-store-grid{grid-template-columns:1fr}.chef-store-inner{padding:12px}.chef-store-item{align-items:flex-start;flex-wrap:wrap}}
+/* Responsive camera/photo barcode reader. */
+.chef-scan-reader{width:100%;min-height:100px;overflow:hidden}
+.chef-scan-reader video{width:100%!important;max-height:330px;object-fit:contain;border-radius:8px;background:#0f1814}
+.chef-photo-trigger{position:relative;display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;background:#eaf3e7;color:#24563b!important;border:1px solid #bdcfbd;border-radius:7px;padding:8px 11px;font:inherit;font-size:.8rem!important;font-weight:700!important;overflow:hidden}
+.chef-photo-trigger input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.chef-photo-trigger:focus-within{outline:2px solid #276347;outline-offset:2px}

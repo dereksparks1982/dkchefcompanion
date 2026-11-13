@@ -35,8 +35,9 @@ function createForm(location,editing){
  '<label>'+t("Barcode (optional)","Штрихкод (необязательно)")+'<input name="barcode" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{8,14}" value="'+show("barcode")+'" placeholder="UPC / EAN"></label>'+
  '</div>'+
  '<div class="chef-barcode-actions"><button type="button" data-chef-lookup="'+location+'">'+t("Identify barcode","Найти по штрихкоду")+'</button> '+
- '<button type="button" data-chef-scan="'+location+'">'+t("Scan with camera","Сканировать камерой")+'</button></div>'+
- '<div class="chef-camera" data-chef-camera="'+location+'" hidden><video muted playsinline autoplay></video><button type="button" data-chef-stop="'+location+'">'+t("Stop camera","Остановить камеру")+'</button></div>'+
+ '<button type="button" data-chef-scan="'+location+'">'+t("Scan with camera","Сканировать камерой")+'</button> '+
+ '<label class="chef-photo-trigger">'+t("Scan a barcode photo","Сканировать штрихкод с фото")+'<input type="file" accept="image/*" capture="environment" data-chef-photo="'+location+'"></label></div>'+
+ '<div class="chef-camera" data-chef-camera="'+location+'" hidden><div class="chef-scan-reader" id="chef-scan-reader-'+location+'"></div><button type="button" data-chef-stop="'+location+'">'+t("Stop camera","Остановить камеру")+'</button></div>'+
  '<div class="chef-store-grid">'+
  '<label>'+t("Recognize as ingredient (optional)","Ингредиент для рецептов (необязательно)")+'<input name="ingredient" maxlength="140" value="'+show("ingredient")+'" placeholder="'+t("Olive oil, salt, flour…","Оливковое масло, соль, мука…")+'"></label>'+
  '<label>'+t("Brand (optional)","Марка (необязательно)")+'<input name="brand" maxlength="100" value="'+show("brand")+'"></label>'+
@@ -73,7 +74,7 @@ function render(location){
  }).join(""):'<p class="chef-empty">'+t("Nothing recorded yet. Add foods manually or scan a product barcode.","Пока нет записей. Добавьте продукты вручную или отсканируйте штрихкод.")+'</p>')+'</div>'+
  '<h3 class="chef-store-heading">'+t(editing?"Edit food":"Add food",editing?"Изменить продукт":"Добавить продукт")+'</h3>'+
  createForm(location,editing)+
- '<p class="chef-source-note">'+t("Barcode lookup needs internet and uses Open Food Facts. Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Camera scanning works only in supported browsers; manual entry always works.","Поиск штрихкода требует интернета и использует Open Food Facts. Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера работает только в поддерживаемых браузерах; ручной ввод доступен всегда.")+
+ '<p class="chef-source-note">'+t("Barcode lookup needs internet and uses Open Food Facts. Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Camera and photo scanning can read grocery barcodes offline; product lookup requires internet. Allow camera permission or enter the barcode manually.","Поиск штрихкода требует интернета и использует Open Food Facts. Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера и фото позволяют читать штрихкоды без интернета; для поиска продукта нужен интернет. Разрешите доступ к камере или введите номер вручную.")+
  ' <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a> (ODbL).</p>';
  if(messages[location])host.querySelector("[data-chef-status]").textContent=messages[location];
 }
@@ -115,54 +116,119 @@ async function identify(location){
   status(location,t("Product found. Verify the name and package size, then add it.","Продукт найден. Проверьте название и размер упаковки, затем добавьте."));
  }catch(error){status(location,t("Product lookup unavailable. You can still enter it manually.","Поиск недоступен. Продукт можно добавить вручную."));}
 }
+// Offline-capable ZXing decoder bundled in assets/vendor, not the native BarcodeDetector.
+let scanGeneration=0;
+function normalizeBarcode(value){
+ const code=String(value||"").trim();
+ return /^\d{8,14}$/.test(code)?code:"";
+}
+function createReader(location){
+ const formats=window.Html5QrcodeSupportedFormats||{};
+ const supported=[formats.EAN_13,formats.EAN_8,formats.UPC_A,formats.UPC_E,formats.CODE_128]
+  .filter(Number.isInteger);
+ return new window.Html5Qrcode("chef-scan-reader-"+location,{
+  formatsToSupport:supported,useBarCodeDetectorIfSupported:false,verbose:false
+ });
+}
+function disposeScan(session){
+ if(!session)return Promise.resolve();
+ if(session.disposalPromise)return session.disposalPromise;
+ session.disposalPromise=(async()=>{
+  if(session.starting){try{await session.starting;}catch(error){/* Camera denied or unreadable photo. */}}
+  if(session.started){try{await session.reader.stop();}catch(error){/* Already stopped. */}}
+  try{session.reader.clear();}catch(error){/* A partially started scanner may not clear. */}
+ })();
+ return session.disposalPromise;
+}
 function stopScan(){
- if(!scanner)return;
- scanner.active=false;
- for(const track of scanner.stream?.getTracks?.()||[])track.stop();
- const host=$("#"+stores.find(x=>x.id===scanner.location)?.host);
- const area=host?.querySelector("[data-chef-camera]");
- if(area){const video=area.querySelector("video");if(video)video.srcObject=null;area.hidden=true;}
+ ++scanGeneration;
+ const previous=scanner;
  scanner=null;
+ if(previous){
+  const area=$('[data-chef-camera="'+previous.location+'"]');
+  if(area)area.hidden=true;
+ }
+ return disposeScan(previous);
+}
+async function beginScan(location,fromPhoto){
+ const area=$('[data-chef-camera="'+location+'"]');
+ if(!area)return null;
+ if(typeof window.Html5Qrcode!=="function"||!window.Html5QrcodeSupportedFormats){
+  status(location,t("Barcode scanner did not load. Reload the app or enter the number manually.","Сканер не загрузился. Обновите приложение или введите номер вручную."));
+  return null;
+ }
+ if(!fromPhoto&&!navigator.mediaDevices?.getUserMedia){
+  status(location,t("Camera access needs HTTPS and browser permission. Try Scan a barcode photo or enter the number.","Для камеры необходимы HTTPS и разрешение браузера. Используйте фото штрихкода или введите номер."));
+  return null;
+ }
+ const request=++scanGeneration;
+ const previous=scanner;
+ scanner=null;
+ if(previous){
+  const old=$('[data-chef-camera="'+previous.location+'"]');
+  if(old)old.hidden=true;
+  await disposeScan(previous);
+ }
+ if(request!==scanGeneration)return null;
+ area.hidden=false;
+ const session={location,reader:null,started:false,starting:null,done:false,disposalPromise:null};
+ try{session.reader=createReader(location);}
+ catch(error){
+  area.hidden=true;
+  status(location,t("Could not initialize the barcode reader. Enter the number manually.","Не удалось запустить сканер. Введите номер вручную."));
+  return null;
+ }
+ scanner=session;
+ return session;
 }
 async function startScan(location){
- const area=$('[data-chef-camera="'+location+'"]');
- if(!area)return;
- if(!window.BarcodeDetector||!navigator.mediaDevices?.getUserMedia){
-  status(location,t("This browser has no camera barcode reader. Enter the printed UPC/EAN number instead.","Этот браузер не поддерживает распознавание штрихкодов камерой. Введите номер UPC/EAN вручную."));
-  return;
- }
- stopScan();
- let stream;
+ const session=await beginScan(location,false);
+ if(!session)return;
+ status(location,t("Opening camera… Allow camera access when asked.","Открытие камеры… Разрешите доступ к камере."));
  try{
-  const formats=["ean_13","ean_8","upc_a","upc_e","code_128"];
-  const supported=typeof window.BarcodeDetector.getSupportedFormats==="function"?
-   await window.BarcodeDetector.getSupportedFormats():formats;
-  const usable=formats.filter(format=>supported.includes(format));
-  if(!usable.length)throw Error("No supported grocery barcode formats");
-  const detector=new window.BarcodeDetector({formats:usable});
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
-  const video=area.querySelector("video");
-  video.srcObject=stream;area.hidden=false;
-  scanner={location,stream,active:true};
-  await video.play();
-  status(location,t("Point the camera at a barcode. You can stop scanning any time.","Наведите камеру на штрихкод. Сканирование можно остановить."));
-  const scan=async()=>{
-   if(!scanner?.active||scanner.location!==location)return;
-   try{
-    const codes=await detector.detect(video);
-    const code=codes?.map(x=>String(x.rawValue||"")).find(x=>/^\d{8,14}$/.test(x));
-    if(code){
-     $('[data-chef-form="'+location+'"]').elements.barcode.value=code;
-     stopScan();await identify(location);return;
-    }
-   }catch(error){stopScan();status(location,t("Camera scanning stopped. Enter the barcode manually.","Сканирование остановлено. Введите штрихкод вручную."));return;}
-   if(scanner?.active)requestAnimationFrame(scan);
-  };
-  requestAnimationFrame(scan);
+  session.starting=session.reader.start({facingMode:"environment"},{fps:10,disableFlip:true},value=>{
+   if(scanner!==session||session.done)return;
+   const code=normalizeBarcode(value);
+   if(!code)return;
+   session.done=true;
+   const form=$('[data-chef-form="'+location+'"]');
+   if(form)form.elements.barcode.value=code;
+   void stopScan().then(()=>identify(location));
+  },()=>{});
+  await session.starting;
+  session.started=true;
+  if(scanner!==session){await disposeScan(session);return;}
+  if(!session.done)status(location,t("Point the camera at a UPC or EAN barcode. Hold it steady in good light.","Наведите камеру на штрихкод UPC или EAN. Держите ровно при хорошем освещении."));
  }catch(error){
-  for(const track of stream?.getTracks?.()||[])track.stop();
-  stopScan();
-  status(location,t("Camera unavailable or permission denied. Manual barcode entry still works.","Камера недоступна или нет разрешения. Можно ввести штрихкод вручную."));
+  if(scanner!==session){await disposeScan(session);return;}
+  await stopScan();
+  const denied=error?.name==="NotAllowedError"||error?.name==="PermissionDeniedError";
+  status(location,denied?
+   t("Camera permission denied. Allow camera in browser settings, or scan a photo.","Доступ к камере запрещён. Разрешите его в браузере или используйте фото."):
+   t("Could not start camera. Check camera permissions and try a barcode photo or manual entry.","Не удалось включить камеру. Проверьте разрешения, используйте фото или введите номер."));
+ }
+}
+async function scanPhoto(location,file){
+ if(!file||file.type&&!file.type.startsWith("image/"))return;
+ const session=await beginScan(location,true);
+ if(!session)return;
+ status(location,t("Reading barcode photo on this device…","Чтение штрихкода с фотографии на устройстве…"));
+ try{
+  session.starting=session.reader.scanFile(file,true);
+  const code=normalizeBarcode(await session.starting);
+  if(scanner!==session){await disposeScan(session);return;}
+  await stopScan();
+  if(!code){
+   status(location,t("No grocery barcode found in that image. Try a clearer photo or enter the number.","На фото не найден штрихкод продукта. Попробуйте более чёткое фото или введите номер."));
+   return;
+  }
+  const form=$('[data-chef-form="'+location+'"]');
+  if(form)form.elements.barcode.value=code;
+  await identify(location);
+ }catch(error){
+  if(scanner!==session){await disposeScan(session);return;}
+  await stopScan();
+  status(location,t("Could not read that photo. Try one with a sharp, fully visible barcode.","Не удалось прочитать фото. Попробуйте чёткий снимок целого штрихкода."));
  }
 }
 for(const store of stores){
@@ -182,6 +248,12 @@ for(const store of stores){
   if(event.target.closest("[data-chef-stop]")){stopScan();return;}
  });
  host.addEventListener("change",event=>{
+  if(event.target.matches?.("[data-chef-photo]")){
+   const file=event.target.files?.[0];
+   event.target.value="";
+   if(file)void scanPhoto(store.id,file);
+   return;
+  }
   if(event.target.name!=="harvestChoice")return;
   const h=harvestChoices().find(x=>x.id===event.target.value);
   const form=event.target.form;if(!h||!form)return;

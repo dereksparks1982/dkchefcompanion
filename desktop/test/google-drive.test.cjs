@@ -129,7 +129,8 @@ test("desktop client starts disconnected, authorizes via loopback PKCE, and stor
 test("Google Drive remains opt-in with no Google request on first app load",()=>{
  const code=source("assets/seedbank-drive-sync.js");
  assert.match(code,/Connect my Google Drive/);
- assert.match(code,/if\(!window\.confirm\(confirmation\)\)return/);
+ assert.match(code,/\$\("dkDriveConnect"\)\.addEventListener\("click",connect\)/);
+ assert.match(code,/if\(busy\|\|ready\(\)\)return/);
  assert.match(code,/if\(saved\.auto&&connected&&ready\(\)/);
  assert.match(code,/navigator\.onLine/);
  assert.match(code,/document\.visibilityState==="visible"/);

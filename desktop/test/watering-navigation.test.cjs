@@ -41,6 +41,6 @@ test("saved watering data, bilingual pages and offline shell are preserved",()=>
   assert.equal((page.match(/<article class="seed"/g)||[]).length,319);
  }
  assert.match(read("assets/seedbank-i18n.js"),/Учёт полива сада/);
- assert.match(read("sw.js"),/dk-seedbank-app-v50/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v51/);
  assert.match(read("README.md"),/Garden Watering Manager lives inside the Planting Journal/);
 });
