@@ -151,3 +151,13 @@ html[lang="ru"] #growPlanner #seedWorkbench .wb-tools-heading{color:#8f304b}
 #wbArchivedPackets .wb-packet-history>summary{font-size:.8rem;cursor:pointer;font-weight:700}
 #wbArchivedPackets .wb-packet-history ol{margin:6px 0 10px;padding-left:22px}
 html[lang="ru"] #wbPacketArchive>summary{color:#863c50;background:#faf0f1}
+
+/* Packet-specific sowing history stays usable in narrow phone layouts. */
+.wb-packet-plantings{margin:8px 0;border:1px solid #d9e7da;border-radius:8px;padding:7px 9px;background:#f5faf4}
+.wb-packet-plantings>summary{cursor:pointer;font-weight:750;color:#285b41}
+.wb-packet-plantings ul{padding-left:17px;margin:8px 0}
+.wb-packet-plantings li{padding:7px 0;border-bottom:1px solid #e2ece1}
+.wb-packet-plantings li:last-child{border:0}
+.wb-record li .wb-small{margin:3px}
+@media(max-width:580px){.wb-packet-plantings{padding:9px}.wb-packet-plantings .wb-small{min-height:40px}.wb-record{word-break:normal}}
+html[lang="ru"] .wb-packet-plantings>summary{color:#8f304b}

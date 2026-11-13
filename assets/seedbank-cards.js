@@ -682,6 +682,7 @@ section.innerHTML='<summary>📔 Planting Journal</summary>'+
 '<label>Plant name<input name="plant" required maxlength="100" placeholder="e.g. Basil"></label>'+
 '<label>Variety (optional)<input name="variety" maxlength="120" placeholder="Unknown / basic variety"></label>'+
 '<label class="full-span">Link exact variety from my Seed Bank<select name="seedKey" id="journalSeedKey"><option value="">Unknown / not selected</option></select><small>Only choose a specific seed if you know it was planted. Reference pictures alone do not identify a variety.</small></label>'+
+'<label class="full-span">Source packet (optional)<select name="seedLotId" id="journalSeedLotId"><option value="">Not linked to a packet</option></select><small>Choose a packet you actually used. Leaving this blank does not deduct seeds from another packet.</small></label>'+
 '<label>Date planted<input name="date" type="date" required></label>'+
 '<label>Approximate time<input name="time" type="time"></label>'+
 '<label>Minimum seeds<input name="minSeeds" type="number" min="0" max="999999" inputmode="numeric"></label>'+
@@ -739,6 +740,7 @@ function renderJournal(){
   return '<article class="journal-entry"><h3>'+esc(entry.plant)+'</h3><span class="status">'+esc(entry.status||"Sown")+'</span>'+
    '<p><strong>Planted:</strong> '+when+'</p><p><strong>Quantity:</strong> '+esc(qty)+'</p>'+
    '<p><strong>Variety:</strong> '+esc(entry.variety||"Not specified")+'</p>'+
+   (entry.seedLotId?'<p class="journal-packet-linked"><strong>Source packet:</strong> '+esc(window.DKSeedBankWorkbench?.packetById?.(entry.seedLotId)?.lot||"Previously linked packet")+'</p>':"")+
    '<p><strong>Method:</strong> '+esc(entry.medium||"Not recorded")+'; '+esc(entry.soakHours||0)+' h soak</p>'+
    (entry.sprouted?'<p><strong>Sprouted:</strong> '+esc(entry.sprouted)+'</p>':'')+(entry.germinatedCount!=null?'<p><strong>Germinated:</strong> '+esc(entry.germinatedCount)+' plants</p>':'')+(entry.survivedCount!=null?'<p><strong>Survived:</strong> '+esc(entry.survivedCount)+' plants</p>':'')+
    (entry.location&&entry.location!=="Not recorded"?'<p><strong>Location:</strong> '+esc(entry.location)+'</p>':'')+
@@ -748,6 +750,22 @@ function renderJournal(){
  document.dispatchEvent(new CustomEvent("dkseedbank:journal-rendered",{detail:{entries:sorted}}));
 }
 function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
+function updateJournalPacketOptions(preferred=""){
+ const key=journalForm.elements.namedItem("seedKey").value;
+ const select=journalForm.elements.namedItem("seedLotId");
+ const choices=window.DKSeedBankWorkbench?.packetChoicesFor?.(key)||[];
+ select.innerHTML='<option value="">Not linked to a packet</option>'+choices.map(p=>
+  '<option value="'+esc(p.id)+'">'+esc(p.label+(p.empty?" · archived":""))+'</option>').join("");
+ if(preferred&&choices.some(p=>p.id===preferred))select.value=preferred;
+ else if(preferred&&editId&&journal.find(e=>e.id===editId)?.seedLotId===preferred&&
+         journal.find(e=>e.id===editId)?.seedKey===key){
+  const unavailable=document.createElement("option");
+  unavailable.value=preferred;
+  unavailable.textContent="Previously linked packet (record unavailable)";
+  select.appendChild(unavailable);select.value=preferred;
+ }
+}
+journalForm.elements.namedItem("seedKey").addEventListener("change",()=>updateJournalPacketOptions());
 function openForm(entry){
  section.open=true;journalForm.hidden=false;editId=entry?entry.id:null;journalForm.dataset.seedKey=entry&&entry.seedKey?entry.seedKey:"";
  const select=journalForm.elements.namedItem("seedKey");
@@ -755,6 +773,7 @@ function openForm(entry){
 
  const obj=entry||{plant:"",date:today(),time:"",minSeeds:"",maxSeeds:"",soakHours:"",medium:"",location:"",status:"Sown",sprouted:"",germinatedCount:"",survivedCount:"",variety:"",notes:""};
  Array.from(journalForm.elements).forEach(el=>{if(el.name)el.value=obj[el.name]==null?"":obj[el.name];});
+ updateJournalPacketOptions(obj.seedLotId||"");
  document.getElementById("journalFormTitle").textContent=entry?"Edit planting":"Record planting";
  journalForm.scrollIntoView({behavior:"smooth",block:"center"});
  journalForm.elements.namedItem("plant").focus();
@@ -782,7 +801,15 @@ journalForm.addEventListener("submit",event=>{
  const f=new FormData(journalForm);
  const requestedKey=String(f.get("seedKey")||"");
  const selectedKey=plants.has(requestedKey)?requestedKey:"";
- const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),seedKey:selectedKey,
+ const requestedLot=String(f.get("seedLotId")||"");
+ const linkedLot=window.DKSeedBankWorkbench?.packetChoicesFor?.(selectedKey)?.some(p=>p.id===requestedLot);
+ const oldEntry=editId?journal.find(e=>e.id===editId):null;
+ const unchangedMissingLot=oldEntry?.seedKey===selectedKey&&oldEntry?.seedLotId===requestedLot;
+ if(requestedLot&&!linkedLot&&!unchangedMissingLot){
+  alert("Choose a packet belonging to the selected variety, or leave the source packet unlinked.");return;
+ }
+ const seedLotId=requestedLot&&(linkedLot||unchangedMissingLot)?requestedLot:"";
+ const item={id:editId||"log-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),seedKey:selectedKey,seedLotId,
  plant:String(f.get("plant")||"").trim(),variety:selectedKey&&(!String(f.get("variety")||"").trim()||/standard type; exact cultivar not specified/i.test(String(f.get("variety")||"")))?plants.get(selectedKey).name:String(f.get("variety")||"").trim(),
  date:String(f.get("date")||""),time:String(f.get("time")||""),approxTime:false,
  minSeeds:Number(f.get("minSeeds")||0),maxSeeds:Number(f.get("maxSeeds")||0),

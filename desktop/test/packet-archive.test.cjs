@@ -34,5 +34,5 @@ test("archiving is integrated with existing inventory, both web copies and offli
   assert.match(html,/seedbank-workbench\.js\?v=20261112-packetarchive1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v42/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v43/);
 });

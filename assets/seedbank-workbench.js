@@ -51,6 +51,17 @@ function catalogPacketOptions(selected=""){
  return '<option value="">Choose an existing packet variety…</option>'+options.map(p=>
   '<option value="'+esc(p.key)+'"'+(selected===p.key?" selected":"")+'>'+esc(p.cat+" · "+p.name+" ("+p.card.dataset.amount+")")+'</option>').join("");
 }
+function packetById(id){
+ return state.lots.find(row=>String(row.id)===String(id))||null;
+}
+function packetChoicesFor(key){
+ if(!key)return [];
+ return state.lots.filter(row=>row.seedKey===key&&row.kind!=="bulk"&&typeof row.id==="string")
+  .map(row=>({id:row.id,label:row.lot||
+   (document.documentElement.lang==="ru"?"Пакет":"Packet")+
+    (row.year?" · "+row.year:"")+(row.supplier?" · "+row.supplier:""),
+   empty:row.status==="empty"}));
+}
 function seedOptions(selected=""){
  const values=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes").sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
  return '<option value="">Choose a seed variety…</option>'+values.map(p=>'<option value="'+esc(p.key)+'"'+(p.key===selected?' selected':'')+'>'+esc(p.cat+" · "+p.name)+'</option>').join("");
@@ -307,7 +318,9 @@ $("#wbLotForm").addEventListener("submit",event=>{
  form.reset();renderAll();notice("Seed lot recorded.");
 });
 function usedSeeds(key){
- return core.journal().filter(e=>matchesName(e)===key).reduce((n,e)=>n+number(e.maxSeeds||e.minSeeds),0);
+ const tracker=window.DKSeedBankPacketTracking;
+ return state.lots.filter(row=>row.seedKey===key&&row.status!=="empty"&&row.origin!=="catalog")
+  .reduce((n,row)=>n+(tracker?.lotUsage(core.journal(),row.id).maximum||0),0);
 }
 // Earlier lot records have no status and must remain active after an upgrade.
 function activeRecordedSeeds(lots,key){
@@ -323,23 +336,76 @@ function transitionPacket(row,status,at){
 function countSeeds(key){
  return activeRecordedSeeds(state.lots,key)+state.savedSeeds.filter(x=>x.seedKey===key).reduce((n,x)=>n+number(x.count),0);
 }
+// Harvests and germination outcomes belong to an individual planting, not automatically to a seed variety.
+function packetPlantingHistory(row){
+ const tracker=window.DKSeedBankPacketTracking,entries=tracker?.lotUsage(core.journal(),row.id).linked||[];
+ const ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+ if(!entries.length)return '<p class="wb-note">'+l("No linked plantings yet.","Пока нет связанных посадок.")+'</p>';
+ return '<details class="wb-packet-plantings"><summary>'+l("Plantings and results","Посадки и результаты")+' ('+entries.length+')</summary>'+
+  '<ul>'+entries.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(entry=>{
+   const amount=tracker.amountSown(entry);
+   const quantity=amount.max===null?l("amount not fully recorded","количество уточняется"):
+    amount.min===amount.max?String(amount.min):amount.min+"–"+amount.max;
+   const harvests=state.harvests.filter(h=>h.plantingId===entry.id);
+   return '<li><strong>'+esc(entry.date||"")+' · '+esc(entry.plant||"")+'</strong>'+
+    '<p>'+l("Seeds sown: ","Посеяно семян: ")+esc(quantity)+
+    (entry.germinatedCount!=null?' · '+l("Germinated: ","Взошло: ")+number(entry.germinatedCount):"")+
+    (entry.survivedCount!=null?' · '+l("Survived: ","Выжило: ")+number(entry.survivedCount):"")+'</p>'+
+    (harvests.length?'<p>'+l("Harvests: ","Урожаи: ")+harvests.map(h=>esc(h.date)+" · "+number(h.amount)+" "+esc(h.unit)).join("; ")+'</p>':"")+
+    ' <button type="button" class="wb-small" data-wb-journal="'+esc(entry.id)+'">'+l("View planting","Открыть посадку")+'</button></li>';
+  }).join("")+'</ul></details>';
+}
 function renderLots(){
+ const tracker=window.DKSeedBankPacketTracking,ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+ const active=state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog");
  const grouped=new Map();
- state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog").forEach(l=>{
-  const key=l.seedKey;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(l);
- });
- state.savedSeeds.forEach(l=>{if(!grouped.has(l.seedKey))grouped.set(l.seedKey,[]);});
+ active.forEach(row=>{if(!grouped.has(row.seedKey))grouped.set(row.seedKey,[]);grouped.get(row.seedKey).push(row);});
+ state.savedSeeds.forEach(row=>{if(!grouped.has(row.seedKey))grouped.set(row.seedKey,[]);});
  $("#wbLotList").innerHTML=grouped.size?[...grouped].map(([key,lots])=>{
   const p=item(key);if(!p)return "";
-  const count=countSeeds(key),used=usedSeeds(key),remaining=Math.max(0,count-used);
-  return '<div class="wb-record"><strong>'+esc(p.name)+'</strong> · '+count+' known seeds − '+used+' recorded sown = <strong>'+remaining+' estimated remaining</strong>'+
-   '<ul>'+lots.map(l=>'<li>'+esc(l.lot||"Unlabeled lot")+' · '+(l.year||"year unknown")+' · '+number(l.count)+' seeds · '+esc(l.place||"storage unrecorded")+
-   (l.obtained?' · '+esc(l.obtained):"")+(l.supplier?' · '+esc(l.supplier):"")+
-   ' <button type="button" class="wb-small" data-wb-packet-status="empty" data-id="'+esc(l.id)+'">'+(document.documentElement.lang==="ru"?"Отметить пустым":"Mark empty")+'</button>'+
-   ' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(l.id)+'">Remove</button></li>').join("")+
-   state.savedSeeds.filter(s=>s.seedKey===key).map(s=>'<li>'+(document.documentElement.lang==="ru"?'Семена из сада':'Saved from garden')+' · '+esc(s.batch||s.date||(document.documentElement.lang==="ru"?'год неизвестен':'year unknown'))+' · '+number(s.count)+(document.documentElement.lang==="ru"?' семян · ':' seeds · ')+esc(s.place||(document.documentElement.lang==="ru"?'место хранения не указано':'storage unrecorded'))+'</li>').join("")+'</ul></div>';
- }).join(""):'<p class="wb-empty">No active seed lots recorded yet. Add one above to track actual seed counts.</p>';
- const ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+  const counted=lots.reduce((sum,row)=>sum+(tracker?.balance(row,core.journal()).count||0),0);
+  const unknown=lots.filter(row=>!tracker?.balance(row,core.journal()).count).length;
+  const saved=state.savedSeeds.filter(row=>row.seedKey===key);
+  const savedCount=saved.reduce((sum,row)=>sum+(Number(row.count)>0?number(row.count):0),0);
+  const unassigned=tracker?.unassigned(core.journal(),key)||[];
+  const cardPackets=p.card.dataset.source==="packet"?number(p.card.dataset.amount):0;
+  return '<div class="wb-record"><strong>'+esc(p.name)+'</strong>'+
+   '<p>'+l("Packets on variety card: ","Пакетов в карточке сорта: ")+cardPackets+
+   ' · '+l("Individually tracked active lots: ","Отдельно учтённых активных партий: ")+lots.length+
+   ' · '+l("Known seeds in tracked lots: ","Известное количество семян в партиях: ")+counted+
+   (unknown?' · '+unknown+' '+l("lot(s) with unknown quantity","партий с неизвестным количеством"):"")+
+   (saved.length?' · '+l("Known saved seeds: ","Известное количество сохранённых семян: ")+savedCount:"")+'</p>'+
+   '<p class="wb-note">'+l("Card packet totals and tracked lots may overlap; they are not added together.",
+    "Пакеты в карточке и учтённые партии могут совпадать; их количества не складываются.")+'</p>'+
+   (unassigned.length?'<p class="wb-note">'+unassigned.length+' '+l("planting(s) not assigned to a specific packet; no packet was debited.",
+    "посадок без указания пакета; ни один пакет не списан.")+'</p>':"")+
+   '<ul>'+lots.map(row=>{
+    const usage=tracker?.balance(row,core.journal());
+    const count=usage?.count;
+    let accounting=count===null?l("Seed count unknown","Количество семян неизвестно"):
+      l("Initially counted: ","Изначально подсчитано: ")+count;
+    if(usage?.linked.length){
+     const used=usage.maximum===null?l("not fully known","не полностью известно"):
+      usage.minimum===usage.maximum?String(usage.minimum):usage.minimum+"–"+usage.maximum;
+     accounting+=' · '+l("Used from this lot: ","Использовано из партии: ")+used;
+     if(count!==null){
+      accounting+=' · '+l("Estimated remaining: ","Примерно осталось: ")+
+       (usage.maximum===null?l("unknown","неизвестно"):
+       usage.lower===usage.upper?String(usage.lower):usage.lower+"–"+usage.upper);
+     }
+     if(usage.possibleOverdraw)accounting+=' · '+l("Review counts: recorded sowing may exceed lot size","Проверьте количество: посев может превышать партию");
+    }
+    return '<li><strong>'+esc(row.lot||l("Unlabeled lot","Партия без названия"))+'</strong>'+
+     (row.year?' · '+row.year:"")+(row.obtained?' · '+esc(row.obtained):"")+
+     (row.supplier?' · '+esc(row.supplier):"")+
+     '<p>'+esc(accounting)+'</p>'+packetPlantingHistory(row)+
+     ' <button type="button" class="wb-small" data-wb-packet-status="empty" data-id="'+esc(row.id)+'">'+l("Mark empty","Отметить пустым")+'</button>'+
+     ' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(row.id)+'">'+l("Remove","Удалить")+'</button></li>';
+   }).join("")+
+   saved.map(row=>'<li>'+l("Saved from garden","Семена из сада")+' · '+esc(row.batch||row.date||"")+
+    ' · '+(Number(row.count)>0?number(row.count)+" "+l("seeds","семян"):l("quantity unknown","количество неизвестно"))+'</li>').join("")+
+   '</ul></div>';
+ }).join(""):'<p class="wb-empty">'+l("No active seed lots recorded yet.","Активные партии семян пока не записаны.")+'</p>';
  const history=state.lots.filter(row=>row.status==="empty"||(row.origin==="catalog"&&Array.isArray(row.history)&&row.history.length))
   .slice().sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
  $("#wbArchivedCount").textContent="("+history.length+")";
@@ -351,10 +417,11 @@ function renderLots(){
    (row.archivedAt?' · '+l("Emptied ","Опустел ")+esc(row.archivedAt):"")+'</p>'+
    (row.year?'<p>'+l("Year: ","Год: ")+esc(row.year)+'</p>':"")+
    (row.origin==="catalog"?'<p>'+l("Original card packet (individual seed count unknown)","Пакет из коллекции (количество семян неизвестно)")+'</p>':
-    '<p>'+l("Originally recorded seeds: ","Исходное количество семян: ")+number(row.count)+'</p>')+
+    '<p>'+l("Originally recorded seeds: ","Изначально подсчитано семян: ")+(Number(row.count)>0?number(row.count):l("unknown","неизвестно"))+'</p>')+
    (row.obtained?'<p>'+l("Obtained: ","Получен: ")+esc(row.obtained)+'</p>':"")+
    (row.supplier?'<p>'+l("Supplier: ","Поставщик: ")+esc(row.supplier)+'</p>':"")+
    (row.place?'<p>'+l("Stored at: ","Место хранения: ")+esc(row.place)+'</p>':"")+
+   packetPlantingHistory(row)+
    (events.length?'<details class="wb-packet-history"><summary>'+l("Status history","История состояния")+'</summary><ol>'+
     events.map(e=>'<li>'+esc(e.date||"")+' · '+(e.status==="empty"?l("Marked empty","Отмечен пустым"):l("Restored","Восстановлен"))+'</li>').join("")+'</ol></details>':"")+
    '<button type="button" class="wb-small" data-wb-packet-status="'+(isEmpty?"active":"empty")+'" data-id="'+esc(row.id)+'">'+
@@ -883,7 +950,12 @@ document.addEventListener("click",event=>{
 });
 function renderSummary(){
  const packets=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes");
+ const catalogPackets=packets.filter(p=>p.card.dataset.source==="packet")
+  .reduce((n,p)=>n+number(p.card.dataset.amount),0);
+ const trackedPackets=state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog"&&row.kind!=="bulk").length;
  $("#wbSummary").innerHTML='<span><strong>'+packets.length+'</strong> active varieties</span>'+
+  '<span><strong>'+catalogPackets+'</strong> packets on cards</span>'+
+  '<span><strong>'+trackedPackets+'</strong> individually tracked packets (may overlap)</span>'+
   '<span><strong>'+core.journal().length+'</strong> plantings</span>'+
   '<span><strong>'+state.beds.length+'</strong> garden spaces</span>'+
   '<span><strong>'+state.harvests.length+'</strong> harvests</span>'+
@@ -922,7 +994,7 @@ function importData(data,options={}){
  if(!options.noReload)setTimeout(()=>window.location.reload(),500);
  return true;
 }
-window.DKSeedBankWorkbench=Object.freeze({exportData:()=>structuredClone(state),importData});
+window.DKSeedBankWorkbench=Object.freeze({exportData:()=>structuredClone(state),importData,packetChoicesFor,packetById});
 $$("[data-wb-open]",host).forEach(button=>button.addEventListener("click",()=>{
  const panel=document.getElementById(button.dataset.wbOpen);
  if(!panel)return;
