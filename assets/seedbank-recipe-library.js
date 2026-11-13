@@ -1126,7 +1126,251 @@ const recipes=[
    "Венчиком тщательно смешайте молотые специи.",
    "Храните герметично в тёмном месте. На один пирог обычно берут примерно 1–2 ч. л., учитывая свой рецепт."
   ]
- }
+ },
+{
+  "id": "homemade-spaghetti-sauce",
+  "name": "Homemade spaghetti sauce",
+  "family": "Kitchen",
+  "intro": "Slow-simmered Italian-American tomato sauce with onions, garlic, basil and oregano. Brown ground beef for a hearty meat sauce, or omit it for a meatless version. Not a tested canning recipe.",
+  "serves": "Makes about 6 servings (for 1 lb / 450 g dry spaghetti)",
+  "ingredients": [
+    {
+      "id": "tomatoes",
+      "name": "Crushed tomatoes",
+      "type": "garden",
+      "amount": "2 cans (28 oz / 794 g each)",
+      "aliases": [
+        "tomato"
+      ],
+      "nameRu": "Измельчённые томаты",
+      "amountRu": "2 банки по 794 г"
+    },
+    {
+      "id": "onion",
+      "name": "Yellow onion",
+      "type": "garden",
+      "amount": "1 medium, diced",
+      "aliases": [
+        "onion"
+      ],
+      "nameRu": "Жёлтый репчатый лук",
+      "amountRu": "1 средняя луковица, кубиками"
+    },
+    {
+      "id": "garlic",
+      "name": "Garlic",
+      "type": "garden",
+      "amount": "4 cloves, minced",
+      "aliases": [
+        "garlic"
+      ],
+      "nameRu": "Чеснок",
+      "amountRu": "4 зубчика, измельчить"
+    },
+    {
+      "id": "oil",
+      "name": "Olive oil",
+      "type": "pantry",
+      "amount": "2 tbsp",
+      "aliases": [],
+      "nameRu": "Оливковое масло",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "paste",
+      "name": "Tomato paste",
+      "type": "pantry",
+      "amount": "2 tbsp",
+      "aliases": [],
+      "nameRu": "Томатная паста",
+      "amountRu": "2 ст. л."
+    },
+    {
+      "id": "basil",
+      "name": "Dried basil or fresh basil",
+      "type": "garden",
+      "amount": "2 tsp dried or 2 tbsp fresh",
+      "aliases": [
+        "basil"
+      ],
+      "nameRu": "Сушёный или свежий базилик",
+      "amountRu": "2 ч. л. сушёного или 2 ст. л. свежего"
+    },
+    {
+      "id": "oregano",
+      "name": "Dried oregano",
+      "type": "garden",
+      "amount": "1½ tsp",
+      "aliases": [
+        "oregano"
+      ],
+      "nameRu": "Сушёный орегано",
+      "amountRu": "1½ ч. л."
+    },
+    {
+      "id": "bay",
+      "name": "Bay leaf",
+      "type": "pantry",
+      "amount": "1 leaf",
+      "aliases": [],
+      "nameRu": "Лавровый лист",
+      "amountRu": "1 лист"
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "type": "pantry",
+      "amount": "1 tsp to start; adjust to taste",
+      "aliases": [],
+      "nameRu": "Соль",
+      "amountRu": "1 ч. л. для начала, затем по вкусу"
+    },
+    {
+      "id": "pepper",
+      "name": "Black pepper",
+      "type": "pantry",
+      "amount": "½ tsp",
+      "aliases": [],
+      "nameRu": "Чёрный перец",
+      "amountRu": "½ ч. л."
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar (optional, if tomatoes taste sharp)",
+      "type": "pantry",
+      "amount": "½–1 tsp",
+      "aliases": [],
+      "nameRu": "Сахар (по желанию, если томаты слишком кислые)",
+      "amountRu": "½–1 ч. л."
+    },
+    {
+      "id": "beef",
+      "name": "Ground beef (optional for meat sauce)",
+      "type": "pantry",
+      "amount": "1 lb (450 g)",
+      "aliases": [],
+      "nameRu": "Говяжий фарш (по желанию, для мясного соуса)",
+      "amountRu": "450 г"
+    },
+    {
+      "id": "parsley",
+      "name": "Fresh parsley (optional)",
+      "type": "garden",
+      "amount": "2 tbsp, chopped",
+      "aliases": [
+        "parsley"
+      ],
+      "nameRu": "Свежая петрушка (по желанию)",
+      "amountRu": "2 ст. л., нарезать"
+    }
+  ],
+  "steps": [
+    "If making meat sauce, brown ground beef in a heavy pot over medium heat, breaking it into small pieces. Drain excess fat if needed. If making a meatless sauce, skip the beef.",
+    "Add olive oil and diced onion to the pot; cook gently 5–7 minutes until soft. Stir in minced garlic and tomato paste; cook 1 minute without scorching.",
+    "Add crushed tomatoes, basil, oregano, bay leaf, salt, and black pepper. Stir well, bring to a gentle bubble, then lower the heat. Simmer partly covered for 35–50 minutes, stirring occasionally so the bottom does not catch. If adding beef, simmer until fully cooked (160°F / 71°C for ground beef).",
+    "Taste and adjust salt and pepper. Add up to 1 tsp sugar only if the tomatoes need balancing. Remove the bay leaf, stir in parsley if using, and serve over freshly cooked spaghetti.",
+    "Refrigerate leftovers promptly in shallow containers and use within 3–4 days, or freeze. Do not use this recipe for shelf-stable home canning: a tested canning formula is required."
+  ],
+  "nameRu": "Домашний соус для спагетти",
+  "introRu": "Томатный соус в итало-американском стиле с луком, чесноком, базиликом и орегано. Для мясного варианта можно добавить говяжий фарш. Это не проверенный рецепт для консервирования.",
+  "servesRu": "Около 6 порций (на 450 г сухих спагетти)",
+  "stepsRu": [
+    "Для мясного варианта обжарьте говяжий фарш в кастрюле с толстым дном на среднем огне, разбивая комочки. При необходимости слейте лишний жир. Для постного варианта пропустите этот шаг.",
+    "Добавьте оливковое масло и лук, готовьте на слабом огне 5–7 минут до мягкости. Вмешайте чеснок и томатную пасту, прогрейте 1 минуту, не допуская подгорания.",
+    "Добавьте измельчённые томаты, базилик, орегано, лавровый лист, соль и чёрный перец. Доведите до слабого кипения, затем убавьте огонь. Томите под неплотно закрытой крышкой 35–50 минут, иногда помешивая. Если добавлен фарш, готовьте его до внутренней температуры 71°C.",
+    "Попробуйте соус, добавьте соль и перец по вкусу. Если томаты слишком кислые, положите немного сахара (не более 1 ч. л.). Выньте лавровый лист, добавьте петрушку по желанию и подавайте со свежесваренными спагетти.",
+    "Быстро охладите остатки в неглубоких ёмкостях и храните в холодильнике 3–4 дня либо заморозьте. Для консервирования без холодильника требуется отдельный проверенный рецепт."
+  ]
+},
+{
+  "id": "classic-hollandaise",
+  "name": "Classic Hollandaise sauce",
+  "family": "Kitchen",
+  "intro": "A traditional lemony butter-and-egg-yolk emulsion, seasoned with salt, white pepper and a pinch of cayenne. Includes both clarified butter and ordinary melted-butter methods.",
+  "serves": "Makes about ¾ cup (4 small servings)",
+  "ingredients": [
+    {
+      "id": "yolks",
+      "name": "Egg yolks (preferably pasteurized)",
+      "type": "pantry",
+      "amount": "3 large",
+      "aliases": [],
+      "nameRu": "Яичные желтки (предпочтительно пастеризованные)",
+      "amountRu": "3 крупных"
+    },
+    {
+      "id": "butter",
+      "name": "Unsalted butter",
+      "type": "pantry",
+      "amount": "⅔ cup (150 g) to clarify, or ½ cup (115 g) for whole melted butter",
+      "aliases": [],
+      "nameRu": "Несолёное сливочное масло",
+      "amountRu": "150 г для осветления или 115 г растопленного обычного масла"
+    },
+    {
+      "id": "lemon",
+      "name": "Fresh lemon juice",
+      "type": "pantry",
+      "amount": "1 tbsp, plus more to taste",
+      "aliases": [],
+      "nameRu": "Свежий лимонный сок",
+      "amountRu": "1 ст. л., затем по вкусу"
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "type": "pantry",
+      "amount": "1 tbsp, plus a little warm water if needed",
+      "aliases": [],
+      "nameRu": "Вода",
+      "amountRu": "1 ст. л., при необходимости ещё немного тёплой"
+    },
+    {
+      "id": "salt",
+      "name": "Fine salt",
+      "type": "pantry",
+      "amount": "¼ tsp, or to taste",
+      "aliases": [],
+      "nameRu": "Мелкая соль",
+      "amountRu": "¼ ч. л. или по вкусу"
+    },
+    {
+      "id": "whitepepper",
+      "name": "Ground white pepper",
+      "type": "pantry",
+      "amount": "⅛ tsp",
+      "aliases": [],
+      "nameRu": "Молотый белый перец",
+      "amountRu": "⅛ ч. л."
+    },
+    {
+      "id": "cayenne",
+      "name": "Cayenne pepper",
+      "type": "pantry",
+      "amount": "tiny pinch, optional",
+      "aliases": [],
+      "nameRu": "Кайенский перец",
+      "amountRu": "маленькая щепотка, по желанию"
+    }
+  ],
+  "steps": [
+    "Choose the butter method. For clarified butter, gently melt ⅔ cup (150 g) unsalted butter over low heat without stirring. Skim off white foam, let the milky solids settle, and carefully pour the clear golden fat into a warm jug, leaving solids behind. Alternatively, simply melt ½ cup (115 g) unsalted butter gently and use it as-is.",
+    "Place egg yolks, 1 tbsp lemon juice and 1 tbsp water in a heatproof bowl set over a saucepan of barely simmering water; the bowl must not touch the water. Whisk constantly until the yolks become pale, slightly thickened and warm. Do not let them scramble. Pasteurized egg yolks are the safer choice for this gently heated sauce.",
+    "Take the bowl off the heat. While whisking continuously, add the warm (not sizzling-hot) clarified or ordinary melted butter a few drops at a time, then in a thin steady stream as the sauce thickens. If it becomes too thick, whisk in 1 tsp warm water at a time.",
+    "Season with salt, white pepper and, if desired, a tiny pinch of cayenne. Taste and adjust lemon juice. The sauce should be glossy and pourable. If it begins to separate, whisk 1 tsp warm water in a clean bowl and slowly whisk the broken sauce into it.",
+    "Serve promptly with eggs Benedict, asparagus, fish or vegetables. Because this sauce contains lightly heated eggs, use pasteurized yolks, especially for people at higher risk of foodborne illness; do not leave it standing lukewarm. Refrigerate leftovers promptly, but freshly made Hollandaise has the best texture."
+  ],
+  "nameRu": "Классический голландский соус",
+  "introRu": "Традиционный соус-эмульсия из желтков, сливочного масла и лимонного сока с солью, белым и кайенским перцем. Описаны способы с осветлённым и обычным растопленным маслом.",
+  "servesRu": "Около ¾ стакана (4 небольшие порции)",
+  "stepsRu": [
+    "Выберите способ подготовки масла. Для осветлённого масла медленно растопите 150 г несолёного сливочного масла на слабом огне, не перемешивая. Снимите белую пену, дайте молочным частицам осесть и осторожно перелейте прозрачный золотистый жир в тёплую посуду, оставив осадок. Либо просто растопите 115 г обычного масла и используйте его целиком.",
+    "Соедините желтки, 1 ст. л. лимонного сока и 1 ст. л. воды в жаропрочной миске над кастрюлей с едва кипящей водой; дно миски не должно касаться воды. Постоянно взбивайте, пока масса не станет светлой, тёплой и немного густой. Не допускайте сворачивания желтков. Для соуса с таким мягким нагревом безопаснее использовать пастеризованные желтки.",
+    "Снимите миску с нагрева. Непрерывно взбивая, добавляйте тёплое, но не горячее масло сначала по каплям, затем тонкой струйкой, пока соус не загустеет. Если соус слишком густой, добавляйте по 1 ч. л. тёплой воды.",
+    "Приправьте солью, белым перцем и, по желанию, щепоткой кайенского перца. Добавьте лимонный сок по вкусу. Соус должен быть гладким и текучим. Если он расслоился, взбейте 1 ч. л. тёплой воды в чистой миске и понемногу вмешайте расслоившийся соус.",
+    "Подавайте сразу к яйцам бенедикт, спарже, рыбе или овощам. Поскольку яйца подвергаются лишь мягкому нагреву, особенно для людей с повышенным риском пищевых инфекций используйте пастеризованные желтки. Не оставляйте соус надолго тёплым; остатки быстро уберите в холодильник. Свежий голландский соус имеет лучшую текстуру."
+  ]
+}
 ];
 root.DKSeedBankRecipeLibrary=Object.freeze({recipes});
 })(window);
