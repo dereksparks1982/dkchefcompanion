@@ -38,11 +38,11 @@ test("UPC and EAN barcode normalization checks the actual check digit",()=>{
  const {api}=harness();
  assert.equal(api.normalize("036000291452","upc_a"),"036000291452");
  assert.equal(api.normalize("4006381333931","ean_13"),"4006381333931");
- assert.equal(api.normalize("04006381333931","ean_13"),""); // incorrect GTIN-14
+ assert.equal(api.normalize("04006381333932","ean_13"),""); // deliberately incorrect GTIN-14
  assert.equal(api.normalize("4006381333932","ean_13"),"");
  assert.equal(api.normalize("0036000291452","ean_13"),"036000291452");
  assert.equal(api.normalize("stuff","code_128"),"");
- assert.equal(api.validGTIN("123456789012"),false);
+ assert.equal(api.validGTIN("123456789013"),false);
 });
 test("desktop uses default webcam, enumerates cameras, recognizes valid UPC/EAN and releases stream",async()=>{
  const {api,camera}=harness();

@@ -28,7 +28,7 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
- assert.match(script,/getUserMedia/);
+ assert.match(read("assets/dk-chef-barcode-scanner.js"),/getUserMedia/);
  assert.match(script,/window\.DKChefBarcodeScanner/);
  assert.match(script,/startScan/);
  assert.match(script,/scanPhoto/);

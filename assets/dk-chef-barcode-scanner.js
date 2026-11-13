@@ -126,11 +126,12 @@ function scanFile(file){
    };
    const timer=setTimeout(()=>finish(new Error("Image decoding timed out")),20000);
    try{
-    scanner.decodeSingle({
+    const task=scanner.decodeSingle({
      src,numOfWorkers:0,locate:true,inputStream:{size:1600},
      locator:{halfSample:false,patchSize:"medium"},
      decoder:{readers:READERS}
     },result=>finish(null,normalize(result?.codeResult?.code,result?.codeResult?.format)));
+    if(task&&typeof task.catch==="function")task.catch(error=>finish(error));
    }catch(error){finish(error);}
   });
  });
