@@ -45,7 +45,7 @@ The **combined Pantry & Root Cellar inventory**, shared recipe ingredients, basi
 | Future improvement | Scope |
 | --- | --- |
 | **More storage detail** | Condition checks, storage environment and optional reminders for perishable foods. |
-| **Precise recipe stock math** | Calculate recipe portions from verified quantities and units before optionally deducting food consumed. Reading a recipe never deducts stock. |
+| **Precise recipe stock math** | First-stage conservative checks now compare compatible recorded food amounts. Future work can support serving scaling and optional, confirmed consumption. Opening recipes never deducts stock. |
 | **More detailed harvest allocations** | Account for a harvest divided among fresh use, preservation, Pantry and Root Cellar, rather than just copying its details. |
 
 The goal remains: **know what you have, what you are growing, where your food is stored, and what you can make with it.**
@@ -158,3 +158,11 @@ The matching engine is a small new read-only module, `assets/dk-chef-recipe-matc
 The new category requires no new storage keys, permissions, network calls, APIs or user accounts. It derives every result from existing `recipeGuide.provisions` records, so changes to shared Pantry & Root Cellar inventory and optional Google Drive imports are reflected whenever the guide renders. Previous manual on-hand checkboxes and existing recipes remain. Recipe matching is updated to respect zero quantities. The seed catalog remains minimized, Seed Suppliers remains last, and the single Quagga2 scanner stays unchanged. The English and Russian Recipe Guide headings for available/missing ingredient metrics are more consistent.
 
 **Third-party notice:** `assets/vendor/quagga2.min.js` is the browser bundle from [ericblade/quagga2](https://github.com/ericblade/quagga2) (`docs/examples/dist/quagga.min.js`), distributed under the **MIT license** with copyright notice retained in `assets/vendor/quagga2-LICENSE.txt`. The previous `html5-qrcode` files remain in the repository for historical provenance but are no longer loaded or cached by the app. No changes were made to persistent Google Drive identifiers, folder authorizations or existing personal food records.
+
+### Quantity-aware recipes (2026-11-13)
+
+The **Cook from Pantry** finder now distinguishes matched ingredient names from quantities that are **enough**, **short**, or **unverified**. Individual recipes also show measured comparisons. A name-only match does **not** guarantee enough food is available to cook the dish.
+
+For Pantry & Root Cellar food, **Total amount on hand** means the usable total across all packages (e.g. `500 g`). If no total is entered, **Package size (each)** (e.g. `250 g`) is multiplied by the stored package count. The engine compares compatible mass (g, kg, oz, lb), volume (mL, L, tsp, tbsp, cups, fl oz, pints, quarts) and identical counted units (eggs, cloves, cans, leaves, pieces). Incompatible units, ranges, vague quantities and package counts alone remain unverified. No guessed conversions between mass and volume. Best-by dates do not automatically determine food safety.
+
+Viewing, opening, or ranking recipes **never consumes stock**. Existing inventories, seeds, the one Product Scanner, Google Drive account authorizations, storage keys, sync rules and backup format remain unchanged. No required data migration.

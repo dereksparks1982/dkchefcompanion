@@ -1,7 +1,7 @@
 /* DK Seed Bank offline app shell and previously viewed external photos.
    Personal records remain in their existing browser storage. */
 "use strict";
-const APP_CACHE="dk-seedbank-app-v60";
+const APP_CACHE="dk-seedbank-app-v60"; // Quantity check update: refresh the existing versioned shell.
 const IMAGE_CACHE="dk-seedbank-images-v1";
 const CACHE_PREFIX="dk-seedbank-";
 const IMAGE_LIMIT=180;
@@ -13,7 +13,7 @@ self.addEventListener("install",event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(APP_CACHE);
     // Install only if every file needed by the app is available offline.
-    await cache.addAll(APP_URLS);
+    await cache.addAll(APP_URLS.map(url=>new Request(url,{cache:"reload"})));
     await self.skipWaiting();
   })());
 });
