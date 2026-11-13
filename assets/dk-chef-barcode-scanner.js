@@ -56,6 +56,19 @@ async function devices(){
   .filter(item=>item.kind==="videoinput"&&item.deviceId)
   .map((item,i)=>({deviceId:item.deviceId,label:item.label||("Camera "+(i+1))}));
 }
+// Re-arm Quagga2's existing live stream. No new getUserMedia/permission request.
+function pause(){
+ if(!current)return false;
+ current.recognized=true;
+ return true;
+}
+function resume(){
+ if(!current)return false;
+ current.recognized=false;
+ current.frames=0;
+ current.holdUntil=Date.now()+1200; // Give the user time to point at the next package.
+ return true;
+}
 function stop(){
  const old=current;current=null;
  if(!old)return lastStop;
@@ -88,24 +101,58 @@ async function start(options){
    if(front)chosen=front.deviceId;
   }catch(error){/* Fall back to facingMode:user. */}
  }
- const session={options,detected:null,processed:null,frames:0,recognized:false};
+ const session={options,detected:null,processed:null,frames:0,recognized:false,holdUntil:0};
  current=session;
+ // Surface Pro / Firefox can report NotReadableError even with permission granted.
+ // Quagga2 owns every attempt. Retry with lighter capture constraints rather
+ // than requesting a separate custom media stream or blaming permissions.
  const config=configuration(options.target,chosen,navigator.userAgent);
+ const profiles=[{label:"Preferred camera",constraints:config.inputStream.constraints}];
+ if(chosen){
+  profiles.push({label:"Front camera · low resolution",
+    constraints:{deviceId:{exact:chosen},width:{ideal:640},height:{ideal:480}}});
+  profiles.push({label:"Front camera · device defaults",constraints:{deviceId:{ideal:chosen}}});
+ }else{
+  profiles.push({label:"Camera · low resolution",
+    constraints:{facingMode:config.inputStream.constraints.facingMode,width:{ideal:640},height:{ideal:480}}});
+ }
+ if(!options.deviceId)profiles.push({label:"Browser camera defaults",constraints:{}});
  try{
-  await new Promise((resolve,reject)=>{
-   try{quagga.init(config,error=>error?reject(error):resolve());}
-   catch(error){reject(error);}
+  devices().then(list=>{if(current===session)options.onCameras?.(list,chosen);}).catch(()=>{});
+  let ready=false,lastError=null;
+  for(let i=0;i<profiles.length;i++){
+   if(current!==session)return;
+   const profile=profiles[i];
+   config.inputStream.constraints=profile.constraints;
+   options.onAttempt?.(profile.label,i+1,profiles.length);
+   try{
+    await new Promise((resolve,reject)=>{
+     try{quagga.init(config,error=>error?reject(error):resolve());}
+     catch(error){reject(error);}
+    });
+    ready=true;break;
+   }catch(error){
+    lastError=error;
+    // Ensure Quagga2 releases any partially opened camera before retry.
+    try{await quagga.stop();}catch(releaseError){}
+    const retryable=/NotReadable|Overconstrained|AbortError|NotFound|TypeError/i.test(String(error?.name||""));
+    if(!retryable)break;
+   }
+  }
+  if(!ready)throw Object.assign(lastError||new Error("Could not open camera"),{
+   attempted:profiles.map(profile=>profile.label),
+   selectedDevice:chosen
   });
   if(current!==session)return;
   session.detected=result=>{
-   if(current!==session||session.recognized)return;
+   if(current!==session||session.recognized||Date.now()<session.holdUntil)return;
    const barcode=normalize(result?.codeResult?.code,result?.codeResult?.format);
    if(!barcode)return;
    session.recognized=true;
    options.onCode?.(barcode);
   };
   session.processed=()=>{
-   if(current!==session)return;
+   if(current!==session||session.recognized)return;
    session.frames++;
    if(session.frames===1)options.onProgress?.("live");
    else if(session.frames===35)options.onProgress?.("searching");
@@ -114,8 +161,8 @@ async function start(options){
   quagga.onDetected(session.detected);
   quagga.onProcessed?.(session.processed);
   quagga.start();
-  devices().then(list=>{if(current===session)options.onCameras?.(list,chosen);}).catch(()=>{});
   const track=quagga.CameraAccess?.getActiveTrack?.();
+  if(track&&current===session)options.onActiveCamera?.(track.label||"",track.getSettings?.()||{});
   track?.addEventListener?.("ended",()=>{
    if(current===session)options.onProgress?.("disconnected");
   });
@@ -125,6 +172,6 @@ async function start(options){
  }
 }
 root.DKChefBarcodeScanner=Object.freeze({
- start,stop,devices,normalize,validGTIN,configuration
+ start,stop,pause,resume,devices,normalize,validGTIN,configuration
 });
 })(window);

@@ -92,6 +92,39 @@ test("explicit camera selection and second scan release first stream",async()=>{
  await decoder.stop();
  assert.equal(quagga.stopped,2);
 });
+test("Surface Quagga2 retries lower resolution without a homemade camera pipeline",async()=>{
+ const {decoder,quagga}=harness();
+ let tries=0;
+ const original=quagga.init.bind(quagga);
+ quagga.init=(config,callback)=>{
+  tries++;
+  if(tries===1){
+   quagga.initialized++;
+   callback(Object.assign(new Error("Device could not start"),{name:"NotReadableError"}));
+  }else original(config,callback);
+ };
+ const attempts=[];
+ await decoder.start({target,onAttempt:(label)=>attempts.push(label)});
+ assert.equal(tries,2);
+ assert.equal(quagga.started,1);
+ assert.equal(quagga.config.inputStream.type,"LiveStream");
+ assert.equal(quagga.config.inputStream.constraints.width.ideal,640);
+ assert.equal(attempts.length,2);
+ await decoder.stop();
+});
+test("one live camera decodes one barcode per arming without reopening the stream",async()=>{
+ const {decoder,quagga}=harness();
+ const captured=[];
+ await decoder.start({target,onCode:value=>captured.push(value)});
+ quagga.detected({codeResult:{code:"036000291452",format:"upc_a"}});
+ quagga.detected({codeResult:{code:"036000291452",format:"upc_a"}});
+ assert.equal(captured.length,1);
+ assert.equal(decoder.pause(),true);
+ assert.equal(decoder.resume(),true);
+ assert.equal(quagga.stopped,0);
+ assert.equal(quagga.started,1);
+ await decoder.stop();
+});
 test("Surface front-facing camera wins over rear camera",async()=>{
  const {decoder,quagga}=harness();
  quagga.CameraAccess.enumerateVideoDevices=async()=>[
@@ -118,13 +151,13 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
  for(const page of ["index.html","docs/index.html"]){
   const html=read(page);
   const quagga=html.indexOf("assets/vendor/quagga2.min.js");
-  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-lookup1");
-  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-station1");
-  const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-station1");
-  const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-station1");
+  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-stream2");
+  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-stream2");
+  const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-stream2");
+  const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-stream2");
   assert.ok(quagga>0&&bridge>quagga&&product>bridge&&app>product&&station>app,page);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v57/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v58/);
  assert.match(read("README.md"),/Quagga2 direct live-camera integration/);
  assert.match(read("sw.js"),/"assets\/dk-chef-product-lookup.js"/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);

@@ -57,3 +57,7 @@
  .chef-seed-panel .chef-seed-count{width:100%}
  .chef-seed-inner{padding:10px}
 }
+
+/* Keep the repeated-scan action visually prominent without a new camera session. */
+#chefScanNext{background:#25694b;color:#fff;border-color:#236143}
+#chefScanNext[hidden]{display:none}

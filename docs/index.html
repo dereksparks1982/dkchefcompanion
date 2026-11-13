@@ -66,8 +66,8 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <link rel="stylesheet" href="../assets/seedbank-field-guides.css?v=20261112-harvest1">
 <link rel="stylesheet" href="../assets/seedbank-watering.css?v=20261112-journalwater1">
 <link rel="stylesheet" href="../assets/seedbank-i18n.css?v=20261112-ru-black1">
-<link rel="stylesheet" href="../assets/dk-chef-provisions.css?v=20261113-lookup1">
-<link rel="stylesheet" href="../assets/dk-chef-universal-scanner.css?v=20261113-station1">
+<link rel="stylesheet" href="../assets/dk-chef-provisions.css?v=20261113-stream2">
+<link rel="stylesheet" href="../assets/dk-chef-universal-scanner.css?v=20261113-stream2">
 <link rel="stylesheet" href="../assets/seedbank-recipes.css?v=20261112-recipes2">
 <link rel="stylesheet" href="../assets/seedbank-resilience.css?v=20261112-syncbackup1">
 <link rel="stylesheet" href="../assets/seedbank-chevrons.css?v=20261112-chevron2">
@@ -86,12 +86,8 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <section id="dkProductStation" class="chef-scan-station" aria-label="Product scanner" data-dk-no-translate><h2>Product Scanner</h2><p>Loading the barcode scanner…</p></section>
 
 <details id="dkPantry" class="chef-store">
- <summary>🫙 Pantry</summary>
- <div class="chef-store-inner" id="chefPantryApp"></div>
-</details>
-<details id="dkRootCellar" class="chef-store">
- <summary>🥔 Root Cellar</summary>
- <div class="chef-store-inner" id="chefCellarApp"></div>
+ <summary>🫙 Pantry &amp; Root Cellar</summary>
+ <div class="chef-store-inner" id="chefKitchenApp"></div>
 </details>
 <details id="dkMedicine" class="chef-store">
  <summary>💊 Medicine Cabinet</summary>
@@ -563,7 +559,7 @@ document.getElementById("reset").addEventListener("click",function(){
 });
 function setAllPanels(open){
  sections.forEach(function(section){if(!open||!section.hidden)section.open=open;});
- ["growPlanner","seedJournal","dkSyncBackup","waterManager","dkPantry","dkRootCellar","recipeGuide","dkPreservationGuide","monasteryGuide"].forEach(function(id){
+ ["growPlanner","seedJournal","dkSyncBackup","waterManager","dkPantry","recipeGuide","dkPreservationGuide","monasteryGuide"].forEach(function(id){
   var panel=document.getElementById(id);if(panel)panel.open=open;
  });
 }
@@ -581,22 +577,22 @@ document.querySelectorAll("[data-jump]").forEach(function(button){
 update();
 })();</script>
 <script defer src="../assets/seedbank-variety-images.js?v=20261111-blueflax1"></script>
-<script defer src="../assets/seedbank-backup-utils.js?v=20261112-finaldata4"></script>
+<script defer src="../assets/seedbank-backup-utils.js?v=20261113-unified2"></script>
 <script defer src="../assets/seedbank-storage-transaction.js?v=20261112-slice1"></script>
 <script defer src="../assets/seedbank-alerts.js?v=20261112-alerts1"></script>
 <script defer src="../assets/seedbank-packet-tracking.js?v=20261112-packetedit1"></script>
 <script defer src="../assets/seedbank-cards.js?v=20261112-chefbrand1"></script>
 <script defer src="../assets/seedbank-workbench.js?v=20261112-chefbrand1"></script>
 <script defer src="../assets/seedbank-recipe-library.js?v=20261112-breads1"></script>
-<script defer src="../assets/seedbank-recipes.js?v=20261112-kitchen1"></script>
+<script defer src="../assets/seedbank-recipes.js?v=20261113-unified2"></script>
 <script defer src="../assets/vendor/quagga2.min.js?v=20261113"></script>
-<script defer src="../assets/dk-chef-barcode-scanner.js?v=20261113-lookup1"></script>
+<script defer src="../assets/dk-chef-barcode-scanner.js?v=20261113-stream2"></script>
 <script defer src="../assets/dk-chef-product-lookup.js?v=20261113-station1"></script>
-<script defer src="../assets/dk-chef-provisions-ui.js?v=20261113-station1"></script>
-<script defer src="../assets/dk-chef-universal-scanner.js?v=20261113-station1"></script>
+<script defer src="../assets/dk-chef-provisions-ui.js?v=20261113-stream2"></script>
+<script defer src="../assets/dk-chef-universal-scanner.js?v=20261113-stream2"></script>
 <script defer src="../assets/seedbank-watering.js?v=20261112-journalwater1"></script>
 <script defer src="../assets/seedbank-monastery.js?v=20261112-preservationtab1"></script>
-<script defer src="../assets/seedbank-i18n.js?v=20261112-kitchen1"></script>
+<script defer src="../assets/seedbank-i18n.js?v=20261113-unified2"></script>
 <script defer src="../assets/seedbank-growth-photos.js?v=20261112-growth1"></script>
 <script defer src="../assets/seedbank-growth-measurements.js?v=20261112-height1"></script>
 <script defer src="../assets/seedbank-field-guides.js?v=20261112-preservationtab1"></script>

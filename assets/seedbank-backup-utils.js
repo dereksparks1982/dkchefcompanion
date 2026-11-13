@@ -118,7 +118,8 @@ function validate(data){
     typeof row.name!=="string"||!row.name||row.name.length>140||
     !["pantry","cellar","medicine","household"].includes(row.location)||
     row.available!=null&&typeof row.available!=="boolean"||
-    row.packages!=null&&(!Number.isSafeInteger(row.packages)||row.packages<1||row.packages>999999)||
+    row.packages!=null&&(!Number.isSafeInteger(row.packages)||row.packages<0||row.packages>999999)||
+    row.lowStockAt!=null&&(!Number.isSafeInteger(row.lowStockAt)||row.lowStockAt<0||row.lowStockAt>999999)||
     row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||
     typeof row.updatedAt!=="string"||Number.isNaN(Date.parse(row.updatedAt)))
     throw Error("Invalid food inventory item.");

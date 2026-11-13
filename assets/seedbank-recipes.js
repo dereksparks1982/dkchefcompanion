@@ -145,30 +145,35 @@ function setIngredientReady(recipe,ingredient,available){
 function saveProvision(value){
  if(!value||typeof value!=="object")return false;
  const name=String(value.name||"").trim().slice(0,140),ingredient=String(value.ingredient||"").trim().slice(0,140),key=provisionKey(ingredient||name);
- const location=["pantry","cellar","medicine","household"].includes(value.location)?value.location:"pantry",barcode=String(value.barcode||"").replace(/\s+/g,"");
- const packages=Number(value.packages||1);
- if(!name||!key||key.length>140||barcode&&!/^\d{8,14}$/.test(barcode)||
-  !Number.isSafeInteger(packages)||packages<1||packages>999999)return false;
+ const location=["pantry","cellar","medicine","household"].includes(value.location)?value.location:"pantry";
+ const packages=Number(value.packages??1);
+ const threshold=Number(value.lowStockAt??0);
+ if(!name||!key||key.length>140||
+  !Number.isSafeInteger(packages)||packages<0||packages>999999||
+  !Number.isSafeInteger(threshold)||threshold<0||threshold>999999)return false;
  const old=JSON.stringify(state.provisions),now=new Date().toISOString();
  const id=String(value.id||"");
  let row=id?provisions().find(x=>x.id===id):null;
+ // Legacy inventory edits do not contain barcode fields. Preserve existing UPCs.
+ const barcode=String(value.barcode??row?.barcode??"").replace(/\s+/g,"");
+ if(barcode&&!/^\d{8,14}$/.test(barcode))return false;
  if(row)row.packages=packages;
  if(!row){
   // Repeat scans add packages to the same barcode+storage entry.
-  row=provisions().find(x=>x.location===location&&x.key===key&&x.barcode===barcode&&
-   (barcode||String(x.brand||"")===String(value.brand||"").trim()&&String(x.size||"")===String(value.size||"").trim()));
-  if(row)row.packages=Math.min(999999,Number(row.packages||1)+packages);
+  row=provisions().find(x=>x.location===location&&
+   (barcode?x.barcode===barcode:x.key===key&&String(x.brand||"")===String(value.brand||"").trim()&&String(x.size||"")===String(value.size||"").trim()));
+  if(row)row.packages=Math.min(999999,Number(row.packages??0)+packages);
  }
  if(!row){
   if(provisions().length>=3000)return false;
   row={id:"provision-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)};
   provisions().push(row);row.packages=packages;
  }
- Object.assign(row,{key,name,ingredient,location,barcode,brand:String(value.brand||"").trim().slice(0,100),
+ Object.assign(row,{key,name,ingredient,location,barcode,lowStockAt:value.lowStockAt==null?Number(row.lowStockAt??0):threshold,brand:String(value.brand||"").trim().slice(0,100),
   size:String(value.size||"").trim().slice(0,80),amount:String(value.amount||"").trim().slice(0,80),
   expiry:String(value.expiry||"").slice(0,10),obtained:String(value.obtained||"").slice(0,10),
   notes:String(value.notes||"").trim().slice(0,300),sourceHarvestId:String(value.sourceHarvestId||"").slice(0,150),
-  available:value.available!==false,updatedAt:now});
+  available:packages>0&&value.available!==false,updatedAt:now});
  if(!persistKitchen()){state.provisions=JSON.parse(old);return false;}return true;
 }
 function removeProvision(id){

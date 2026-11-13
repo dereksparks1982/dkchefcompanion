@@ -5,7 +5,7 @@ const read=file=>fs.readFileSync(path.join(root,file),"utf8");
 const universal=read("assets/dk-chef-universal-scanner.js");
 function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green Giant",size:"15 oz",category:"food",source:"Open Food Facts"}){
  const ids=["dkProductStation","dkLanguageSelect","chefScanStart","chefScanStop","chefScanMute","chefScanCamera",
-  "chefScanCameraRow","chefScanPreview","chefScanStatus","chefScanResult","chefScanSaveArea",
+  "chefScanCameraRow","chefScanNext","chefScanPreview","chefScanStatus","chefScanResult","chefScanSaveArea",
   "chefScanBarcode","chefScanName","chefScanBrand","chefScanSize","chefScanDestination","chefScanIngredient",
   "chefScanCount","chefScanLookup","chefScanAdd","chefScanProductName","chefScanProductSource","chefScanProductDetails"];
  const more=["chefScanTitle","chefScanIntro","chefScanOne","chefScanMuteText","chefScanCameraLabel",
@@ -22,7 +22,7 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
  Object.defineProperty(destination,"selectedOptions",{get(){return destination.options.filter(x=>x.value===destination.value);}});
  map.get("chefScanCount").value="1";
  map.get("chefScanBarcode").value="";
- const events={beeps:0,saved:[],lookup:[],stop:0};
+ const events={beeps:0,saved:[],lookup:[],stop:0,starts:0,resumes:0,pauses:0};
  const audioCtx=class{
   state="running";currentTime=0;destination={};
   createOscillator(){return {frequency:{setValueAtTime(){},exponentialRampToValueAtTime(){}},
@@ -30,7 +30,10 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
   createGain(){return {gain:{setValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){}};}
   resume(){return Promise.resolve();}
  };
- const camera={stop(){events.stop++;return Promise.resolve();},async start(args){events.camera=args;}};
+ const camera={stop(){events.stop++;return Promise.resolve();},
+  pause(){events.pauses++;return true;},resume(){events.resumes++;return true;},
+  async devices(){return [{deviceId:"surface-front",label:"Surface Front Camera"}]},
+  async start(args){events.camera=args;events.starts++;}};
  const products={async lookup(code){events.lookup.push(code);return product;}};
  const inventory={saveProvision(row){events.saved.push(row);return true;}};
  const window={DKChefBarcodeScanner:camera,DKChefProductLookup:products,
@@ -52,10 +55,11 @@ test("exactly one scanner lives before storage; old seed catalog starts closed a
   assert.ok(html.indexOf('id="dkHousehold"')<html.indexOf('id="dkSeedCollection"'));
   assert.match(html,/<details id="dkSeedCollection" class="chef-seed-panel">/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
-  assert.equal((html.match(/id="chefPantryApp"/g)||[]).length,1);
-  assert.equal((html.match(/id="chefCellarApp"/g)||[]).length,1);
-  assert.match(html,/dk-chef-universal-scanner\.js\?v=20261113-station1/);
-  assert.match(html,/dk-chef-universal-scanner\.css\?v=20261113-station1/);
+  assert.equal((html.match(/id="chefKitchenApp"/g)||[]).length,1);
+  assert.equal((html.match(/id="dkPantry"/g)||[]).length,1);
+  assert.equal((html.match(/id="dkRootCellar"/g)||[]).length,0);
+  assert.match(html,/dk-chef-universal-scanner\.js\?v=20261113-stream2/);
+  assert.match(html,/dk-chef-universal-scanner\.css\?v=20261113-stream2/);
  }
  const inventory=read("assets/dk-chef-provisions-ui.js");
  assert.doesNotMatch(inventory,/startScan|data-chef-scan|data-chef-camera|data-chef-photo/);
@@ -66,7 +70,6 @@ test("a recognized grocery UPC dings once, looks up product, and can add to Pant
  h.click("chefScanStart");
  await flush();
  assert.equal(typeof h.events.camera.onCode,"function");
- h.events.camera.onCode("4006381333931");
  h.events.camera.onCode("4006381333931");
  await flush();
  assert.equal(h.events.beeps,1,"The scan sound must occur only once per valid camera scan");
@@ -104,13 +107,31 @@ test("unknown barcode remains visible with an editable name; manual lookup does 
  h.click("chefScanAdd");
  assert.equal(h.events.saved[0].name,"Unlisted canned peas");
 });
+test("iPhone camera stays open across multiple scans and only stops on user action",async()=>{
+ const h=harness();
+ h.click("chefScanStart");await flush();
+ const before=h.events.stop;
+ h.events.camera.onCode("4006381333931");await flush();
+ assert.equal(h.events.stop,before,"Successful scan must not close camera or revoke its session");
+ assert.equal(h.map.get("chefScanNext").hidden,false);
+ h.click("chefScanNext");
+ assert.equal(h.events.resumes,1);
+ h.events.camera.onCode("4006381333931");await flush();
+ assert.equal(h.events.starts,1,"No second getUserMedia/Quagga.init between items");
+ assert.equal(h.events.beeps,2);
+ h.click("chefScanStop");await flush();
+ assert.equal(h.events.stop,before+1);
+});
 test("scanner audio and lookup remain independent of Quagga2's built-in live engine",()=>{
  assert.match(universal,/createOscillator/);
  assert.match(universal,/chefScanMute/);
+ assert.match(universal,/chefScanNext/);
+ assert.match(universal,/onAttempt:/);
+ assert.match(universal,/NotReadableError/);
  assert.match(universal,/camera\.start\(/);
  assert.match(universal,/products\.lookup\(/);
  assert.doesNotMatch(universal,/decodeSingle|toDataURL|drawImage|getUserMedia\(/);
- assert.match(read("sw.js"),/dk-seedbank-app-v57/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v58/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
  assert.doesNotThrow(()=>new Function(universal));
 });

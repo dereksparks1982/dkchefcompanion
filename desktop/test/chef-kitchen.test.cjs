@@ -16,15 +16,18 @@ function harness(saved){
  vm.runInNewContext(recipes,{window:win,document:doc,localStorage,queueMicrotask:fn=>fn(),confirm:()=>true,console});
  return {api:win.DKSeedBankRecipes,app,storage,recipes:win.DKSeedBankRecipeLibrary.recipes,listeners};
 }
-test("Pantry and Root Cellar exist as independent sections with one shared inventory",()=>{
+test("one combined Pantry & Root Cellar section holds the original shared inventory",()=>{
  for(const page of ["index.html","docs/index.html"]){
   const html=read(page);
   assert.match(html,/id="dkPantry"/);
-  assert.match(html,/id="dkRootCellar"/);
+  assert.doesNotMatch(html,/id="dkRootCellar"/);
+  assert.match(html,/id="chefKitchenApp"/);
+  assert.doesNotMatch(html,/id="chefPantryApp"|id="chefCellarApp"/);
+  assert.match(html,/<summary>🫙 Pantry &amp; Root Cellar<\/summary>/);
   assert.ok(html.indexOf('id="dkPantry"')<html.indexOf('id="recipeGuide"'));
-  assert.ok(html.indexOf('id="dkRootCellar"')<html.indexOf('id="recipeGuide"'));
-  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-station1/);
-  assert.match(html,/dk-chef-provisions\.css\?v=20261113-lookup1/);
+  assert.ok(html.indexOf('id="dkMedicine"')<html.indexOf('id="recipeGuide"'));
+  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-stream2/);
+  assert.match(html,/dk-chef-provisions\.css\?v=20261113-stream2/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
@@ -33,12 +36,15 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
  assert.doesNotMatch(script,/startScan|data-chef-scan|data-chef-camera/);
  assert.doesNotMatch(script,/scanPhoto|data-chef-photo/);
  assert.match(read("index.html"),/quagga2\.min\.js\?v=20261113/);
- assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-station1/);
+ assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-stream2/);
  assert.match(read("assets/dk-chef-product-lookup.js"),/world\.openfoodfacts\.org/);
  assert.match(read("assets/dk-chef-universal-scanner.js"),/DKChefProductLookup/);
  assert.match(script,/sourceHarvestId/);
  assert.match(script,/harvestChoices/);
- assert.match(read("sw.js"),/dk-seedbank-app-v57/);
+ assert.doesNotMatch(script,/name="barcode"|Barcode \(optional\)/);
+ assert.match(script,/lowStockAt/);
+ assert.match(script,/expiryNotice/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v58/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
@@ -156,4 +162,29 @@ test("Seed Suppliers is the final main-page section without changing favorites o
   assert.ok(html.indexOf('id="dkSeedCollection"')<html.indexOf("</main>"));
   assert.ok(html.indexOf("</main>")<html.indexOf("<footer>"));
  }
+});
+
+test("barcode is retained on inventory edits; low stock and zero remaining are preserved",()=>{
+ const {api}=harness();
+ assert.equal(api.saveProvision({name:"Root Beer",location:"pantry",barcode:"012345678905",packages:2,lowStockAt:2}),true);
+ let record=api.provisions().items[0];
+ assert.equal(record.barcode,"012345678905");
+ assert.equal(record.lowStockAt,2);
+ assert.equal(api.saveProvision({id:record.id,name:"Root Beer",location:"cellar",packages:0}),true);
+ record=api.provisions().items[0];
+ assert.equal(record.location,"cellar");
+ assert.equal(record.packages,0);
+ assert.equal(record.available,false);
+ assert.equal(record.barcode,"012345678905");
+ assert.equal(record.lowStockAt,2);
+ assert.equal(api.saveProvision({name:"Root Beer 12-pack",location:"cellar",barcode:"012345678905",packages:1}),true);
+ const rows=api.provisions().items;
+ assert.equal(rows.length,1,"Same UPC should not duplicate stock on repeated scans");
+ assert.equal(rows[0].packages,1);
+ assert.equal(rows[0].lowStockAt,2);
+ const w={};vm.runInNewContext(read("assets/seedbank-backup-utils.js"),{window:w,Date,Map,Set,URL});
+ const backup={format:"dk-seedbank-v1",journal:[],recipeGuide:api.exportData()};
+ assert.doesNotThrow(()=>w.DKSeedBankBackup.validate(backup));
+ backup.recipeGuide.provisions.items[0].lowStockAt=-1;
+ assert.throws(()=>w.DKSeedBankBackup.validate(backup));
 });

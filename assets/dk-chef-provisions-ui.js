@@ -1,122 +1,179 @@
-/* DK Chef Companion: local-first shared Pantry and Root Cellar UI.
-   Stock records stay within the already backed-up recipeGuide section. */
+/* DK Chef Companion local-first inventory. One Pantry & Root Cellar section.
+   No barcode scanner or manual barcode controls in any storage section.
+   Saved UPCs remain attached to records for repeat scans and Google Drive sync. */
 (function(){
 "use strict";
-const api=window.DKSeedBankRecipes;
-if(!api)return;
+const api=window.DKSeedBankRecipes;if(!api)return;
 const stores=[
- {id:"pantry",host:"chefPantryApp",ru:"Кладовая",en:"Pantry"},
- {id:"cellar",host:"chefCellarApp",ru:"Погреб",en:"Root Cellar"},
- {id:"medicine",host:"chefMedicineApp",ru:"Аптечка",en:"Medicine Cabinet"},
- {id:"household",host:"chefHouseholdApp",ru:"Бытовые запасы",en:"Household Supplies"}
+ {id:"kitchen",host:"chefKitchenApp",title:"Pantry & Root Cellar"},
+ {id:"medicine",host:"chefMedicineApp",title:"Medicine Cabinet"},
+ {id:"household",host:"chefHouseholdApp",title:"Household Supplies"}
 ];
-const edits={pantry:"",cellar:"",medicine:"",household:""},messages={pantry:"",cellar:"",medicine:"",household:""};
+const editing={kitchen:"",medicine:"",household:""};
+const messages={kitchen:"",medicine:"",household:""};
+const searches={kitchen:"",medicine:"",household:""};
 const $=(s,root=document)=>root.querySelector(s);
 const ru=()=>document.documentElement.lang==="ru";
-const t=(en,russian)=>ru()?russian:en;
-const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-
-function items(location){return api.provisions().items.filter(x=>x.location===location)
- .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));}
+const t=(en,rus)=>ru()?rus:en;
+const esc=value=>String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+const group=loc=>loc==="medicine"||loc==="household"?loc:"kitchen";
+const items=id=>api.provisions().items.filter(row=>group(row.location)===id)
+ .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
 function harvestChoices(){
  const workbench=window.DKSeedBankWorkbench?.exportData?.()||{};
  const plants=window.DKSeedBankCore?.plants?.();
- return (workbench.harvests||[]).filter(h=>h&&h.id&&h.seedKey).slice(-100).reverse().map(h=>{
-  const crop=plants?.get(h.seedKey)?.name||String(h.seedKey).split("|").pop();
-  return {id:h.id,name:crop,date:h.date||"",amount:h.amount||"",unit:h.unit||""};
- });
+ return (workbench.harvests||[]).filter(h=>h?.id&&h.seedKey).slice(-100).reverse().map(h=>({
+  id:h.id,name:plants?.get(h.seedKey)?.name||String(h.seedKey).split("|").pop(),
+  date:h.date||"",amount:h.amount||"",unit:h.unit||""
+ }));
 }
-function createForm(location,editing){
- const row=editing||{};
- const show=field=>esc(row[field]??"");
- const harvest=location==="cellar"?harvestChoices():[];
- return '<form class="chef-store-form" data-chef-form="'+location+'">'+
- '<input type="hidden" name="id" value="'+show("id")+'">'+
- '<div class="chef-store-grid">'+
- '<label>'+t("Food or ingredient","Продукт или ингредиент")+'<input name="name" maxlength="140" required value="'+show("name")+'" placeholder="'+t("Olive oil, flour, potatoes…","Оливковое масло, мука, картофель…")+'"></label>'+
- '<label>'+t("Barcode (optional)","Штрихкод (необязательно)")+'<input name="barcode" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{8,14}" value="'+show("barcode")+'" placeholder="UPC / EAN"></label>'+
- '</div>'+
- '<div class="chef-store-grid">'+
- '<label>'+t("Recognize as ingredient (optional)","Ингредиент для рецептов (необязательно)")+'<input name="ingredient" maxlength="140" value="'+show("ingredient")+'" placeholder="'+t("Olive oil, salt, flour…","Оливковое масло, соль, мука…")+'"></label>'+
- '<label>'+t("Brand (optional)","Марка (необязательно)")+'<input name="brand" maxlength="100" value="'+show("brand")+'"></label>'+
- '<label>'+t("Package size (optional)","Размер упаковки (необязательно)")+'<input name="size" maxlength="80" value="'+show("size")+'" placeholder="'+t("28 oz can, 2 lb bag…","Банка 800 г, мешок 1 кг…")+'"></label>'+
- '<label>'+t("Number of packages","Количество упаковок")+'<input name="packages" type="number" min="1" max="999999" step="1" value="'+esc(row.packages||1)+'" required></label>'+
- '<label>'+t("Amount (optional, free text)","Количество (необязательно)")+'<input name="amount" maxlength="80" value="'+show("amount")+'" placeholder="'+t("3 kg, half a jar…","3 кг, половина банки…")+'"></label>'+
- '<label>'+t("Added or harvested (optional)","Дата добавления или сбора (необязательно)")+'<input name="obtained" type="date" value="'+show("obtained")+'"></label>'+
- '<label>'+t("Best by (optional)","Срок годности (необязательно)")+'<input name="expiry" type="date" value="'+show("expiry")+'"></label>'+
- '</div>'+
- (location==="cellar"&&harvest.length?'<label class="chef-full">'+t("Copy details from a recorded harvest (optional)","Взять сведения из записи об урожае (необязательно)")+
- '<select name="harvestChoice"><option value="">'+t("Choose a harvest…","Выберите урожай…")+'</option>'+
- harvest.map(x=>'<option value="'+esc(x.id)+'"'+(row.sourceHarvestId===x.id?" selected":"")+'>'+esc(x.name+" · "+x.date+" · "+x.amount+" "+x.unit)+'</option>').join("")+'</select></label>':'')+
- '<label class="chef-full">'+t("Storage notes (optional)","Примечания к хранению (необязательно)")+'<input name="notes" maxlength="300" value="'+show("notes")+'" placeholder="'+t("Shelf, crate, cool dry room…","Полка, ящик, прохладное сухое помещение…")+'"></label>'+
- '<label class="chef-check"><input type="checkbox" name="available"'+(row.available===false?"":" checked")+'>'+t("I have this food available","Этот продукт есть в наличии")+'</label>'+
- '<div class="chef-store-buttons"><button class="chef-primary" type="submit">'+t(editing?"Save changes":"Add to inventory",editing?"Сохранить изменения":"Добавить в запасы")+'</button>'+
- (editing?'<button type="button" data-chef-cancel="'+location+'">'+t("Cancel edit","Отменить")+'</button>':"")+'</div>'+
- '<p class="chef-form-status" data-chef-status="'+location+'" role="status"></p></form>';
+function storageName(loc){
+ return loc==="cellar"?t("Root Cellar","Погреб"):
+ loc==="pantry"?t("Pantry","Кладовая"):
+ loc==="medicine"?t("Medicine Cabinet","Аптечка"):t("Household Supplies","Бытовые запасы");
 }
-function render(location){
- const host=$("#"+stores.find(x=>x.id===location)?.host);if(!host)return;
- const rows=items(location),editing=rows.find(row=>row.id===edits[location]);
- host.innerHTML='<div class="chef-store-intro">'+
- (location==="pantry"?t("Store packaged foods, flour, spices, oils and kitchen staples. Available ingredients count for recipes.","Храните упакованные продукты, муку, специи и масло. Доступные ингредиенты учитываются в рецептах."):
- location==="cellar"?t("Track potatoes, onions, garlic, harvests and preserves stored in suitable conditions.","Учитывайте картофель, лук, чеснок, урожай и заготовки при подходящих условиях хранения."):
- location==="medicine"?t("Track medicines and first-aid supplies. Always follow the package label.","Учитывайте лекарства и аптечку. Следуйте указаниям на упаковке."):
- t("Track toiletries, cleaning products and household supplies. These are not recipe ingredients.","Учитывайте средства гигиены, уборки и хозяйственные товары. Это не ингредиенты для рецептов."))+
- '</div><p class="chef-store-note">'+t("Inventory is optional. Only Pantry and Root Cellar food can count toward recipes; stock is never automatically consumed.","Учёт запасов добровольный. Только продукты кладовой и погреба могут учитываться в рецептах; запасы не списываются автоматически.")+'</p>'+
- '<div class="chef-store-count">'+t("Entries","Записи")+': <strong>'+rows.length+'</strong> · '+t("Available","В наличии")+': <strong>'+rows.filter(x=>x.available!==false).length+'</strong></div>'+
- '<div class="chef-store-list">'+(rows.length?rows.map(row=>{
-  const detail=[row.brand,row.size,row.amount,row.barcode?"#"+row.barcode:"",row.expiry?t("Best by","Срок")+": "+row.expiry:"",row.notes].filter(Boolean).map(esc).join(" · ");
-  return '<article class="chef-store-item'+(row.available===false?" chef-unavailable":"")+'"><div><strong>'+esc(row.name)+'</strong>'+
-   '<small>'+t("Packages","Упаковки")+': '+esc(row.packages||1)+' · '+(row.available===false?t("Not available","Нет в наличии"):t("On hand","В наличии"))+'</small>'+
-   (detail?'<p>'+detail+'</p>':"")+'</div><div class="chef-item-buttons"><button type="button" data-chef-edit="'+esc(row.id)+'" data-location="'+location+'">'+t("Edit","Изменить")+'</button>'+
-   '<button type="button" data-chef-remove="'+esc(row.id)+'" data-location="'+location+'">'+t("Remove","Удалить")+'</button></div></article>';
- }).join(""):'<p class="chef-empty">'+t("Nothing recorded yet. Add foods manually or scan a product barcode.","Пока нет записей. Добавьте продукты вручную или отсканируйте штрихкод.")+'</p>')+'</div>'+
- '<h3 class="chef-store-heading">'+t(editing?"Edit food":"Add food",editing?"Изменить продукт":"Добавить продукт")+'</h3>'+
- createForm(location,editing)+
- '<p class="chef-source-note">'+t("Use the Product Scanner near the top to identify barcodes and add items here, or enter your records manually.","Используйте сканер товаров вверху страницы для распознавания штрихкодов и добавления товаров сюда. Или вводите записи вручную.")+'</p>';
- if(messages[location])host.querySelector("[data-chef-status]").textContent=messages[location];
+function expiryNotice(value){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||"")))return "";
+ const [y,m,d]=value.split("-").map(Number);
+ const date=new Date(y,m-1,d,12);
+ if(date.getFullYear()!==y||date.getMonth()+1!==m||date.getDate()!==d)return "";
+ const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);
+ const days=Math.round((date-today)/86400000);
+ if(days<0)return t("Past best-by/expiry","Срок годности истёк");
+ if(days===0)return t("Expires today","Срок истекает сегодня");
+ return days<=30?t("Expires in ","Срок истекает через ")+days+t(" days"," дн."):"";
+}
+function isLow(row){return Number(row.lowStockAt)>0&&Number(row.packages)<=Number(row.lowStockAt);}
+function labeledInput(label,key,val,attrs=""){
+ return '<label>'+label+'<input name="'+key+'" value="'+esc(val??"")+'" '+attrs+'></label>';
+}
+function formHtml(section,row){
+ const kitchen=section==="kitchen",record=row||{},value=k=>record[k]??"";
+ const header='<form class="chef-store-form" data-chef-form="'+section+'"><input type="hidden" name="id" value="'+esc(value("id"))+'">'+
+ '<div class="chef-store-grid">'+
+ labeledInput(t("Product name","Название товара"),"name",value("name"),'required maxlength="140"')+
+ (kitchen?'<label>'+t("Storage area","Место хранения")+'<select name="location">'+
+ '<option value="pantry"'+(record.location==="cellar"?"":" selected")+">"+t("Pantry","Кладовая")+'</option>'+
+ '<option value="cellar"'+(record.location==="cellar"?" selected":"")+">"+t("Root Cellar","Погреб")+'</option></select></label>':"")+
+ labeledInput(t("Brand","Марка"),"brand",value("brand"),'maxlength="100"')+
+ labeledInput(t("Package size","Размер упаковки"),"size",value("size"),'maxlength="80"')+
+ labeledInput(t("Packages","Упаковки"),"packages",record.packages??1,'type="number" min="0" max="999999" step="1" required')+
+ labeledInput(t("Low-stock alert (0 = off)","Порог малого запаса (0 = выкл.)"),"lowStockAt",record.lowStockAt??0,'type="number" min="0" max="999999" step="1"')+
+ labeledInput(t("Amount (optional)","Количество (необязательно)"),"amount",value("amount"),'maxlength="80"')+
+ labeledInput(t("Date obtained","Дата покупки"),"obtained",value("obtained"),'type="date"')+
+ labeledInput(t("Best by / expiry","Срок годности"),"expiry",value("expiry"),'type="date"')+'</div>';
+ return header+
+ (kitchen?labeledInput(t("Recipe ingredient (optional)","Ингредиент для рецептов (необязательно)"),"ingredient",value("ingredient"),'maxlength="140" class="chef-full"'):"")+
+ (kitchen&&harvestChoices().length?'<label>'+t("Copy a recorded garden harvest (optional)","Перенести собранный урожай (необязательно)")+
+  '<select name="harvestChoice"><option value="">'+t("Choose a harvest…","Выберите урожай…")+'</option>'+
+  harvestChoices().map(h=>'<option value="'+esc(h.id)+'"'+(record.sourceHarvestId===h.id?" selected":"")+'>'+
+  esc(h.name+" · "+h.date+" · "+h.amount+" "+h.unit)+'</option>').join("")+'</select></label>':"")+
+ labeledInput(t("Storage notes","Примечания к хранению"),"notes",value("notes"),'maxlength="300" class="chef-full"')+
+ '<label class="chef-check"><input type="checkbox" name="available"'+(record.available===false?"":" checked")+'>'+t("Available / on hand","В наличии")+'</label>'+
+ '<div class="chef-store-buttons"><button class="chef-primary" type="submit">'+t(row?"Save changes":"Add item",row?"Сохранить":"Добавить товар")+'</button>'+
+ (row?'<button type="button" data-chef-cancel>'+t("Cancel","Отмена")+'</button>':"")+'</div>'+
+ '<p class="chef-form-status" role="status" data-chef-status="'+section+'"></p></form>';
+}
+function rowHtml(row,id){
+ const flags=(isLow(row)?'<span class="chef-stock-warning">'+t("Low stock","Мало запасов")+'</span>':"")+
+  (expiryNotice(row.expiry)?'<span class="chef-expiry-warning">'+esc(expiryNotice(row.expiry))+'</span>':"");
+ const description=[row.brand,row.size,row.amount,row.expiry?t("Best by","Срок")+": "+row.expiry:"",row.notes].filter(Boolean).map(esc).join(" · ");
+ return '<article class="chef-store-item'+(row.available===false?" chef-unavailable":"")+'" data-chef-stock-item data-search="'+esc([row.name,row.brand,row.notes].join(" ").toLowerCase())+'">'+
+ '<div><strong>'+esc(row.name)+'</strong><small>'+(id==="kitchen"?storageName(row.location)+" · ":"")+
+ t("Packages","Упаковки")+': '+esc(row.packages??1)+' · '+(row.available!==false?t("On hand","В наличии"):t("Unavailable","Нет в наличии"))+'</small>'+
+ (description?'<p>'+description+'</p>':"")+flags+'</div>'+
+ '<div class="chef-item-buttons"><button type="button" data-chef-qty="add" data-chef-id="'+esc(row.id)+'" aria-label="'+t("Add one package","Добавить одну упаковку")+'">+1</button>'+
+ '<button type="button" data-chef-qty="use" data-chef-id="'+esc(row.id)+'"'+(Number(row.packages)<=0?' disabled':'')+' aria-label="'+t("Use one package","Израсходовать одну упаковку")+'">−1</button>'+
+ '<button type="button" data-chef-edit="'+esc(row.id)+'">'+t("Edit","Изменить")+'</button>'+
+ '<button type="button" data-chef-remove="'+esc(row.id)+'">'+t("Remove","Удалить")+'</button></div></article>';
+}
+function applySearch(host,id){
+ const query=searches[id].trim().toLowerCase();
+ for(const item of host.querySelectorAll("[data-chef-stock-item]"))
+  item.hidden=!item.dataset.search.includes(query);
+}
+function render(id){
+ const store=stores.find(x=>x.id===id);if(!store)return;
+ const host=$("#"+store.host);if(!host)return;
+ const all=items(id),edit=all.find(row=>row.id===editing[id]);
+ const desc=id==="kitchen"?
+  t("One shared food inventory. Pantry and Root Cellar are storage locations, not separate tabs. Your existing records remain in their original locations.",
+    "Единый учёт продуктов. Кладовая и погреб — места хранения, а не разные вкладки. Записи остаются на своих местах."):
+  id==="medicine"?t("Medicine inventory only. Follow the package label; this is not medical advice.","Учёт лекарств. Следуйте указаниям на упаковке."):
+  t("Household and personal-care supplies. These do not count as recipe ingredients.","Бытовые средства и товары для ухода. Они не учитываются в рецептах.");
+ host.innerHTML='<p class="chef-store-intro">'+desc+'</p>'+
+ '<div class="chef-store-count">'+t("Entries","Записи")+': <strong>'+all.length+'</strong> · '+
+ t("On hand","В наличии")+': <strong>'+all.filter(x=>x.available!==false).length+'</strong> · '+
+ t("Low stock","Мало запасов")+': <strong>'+all.filter(isLow).length+'</strong> · '+
+ t("Expiry warnings","Сроки годности")+': <strong>'+all.filter(x=>expiryNotice(x.expiry)).length+'</strong></div>'+
+ '<label class="chef-inventory-search">'+t("Search inventory","Поиск в запасах")+
+ '<input type="search" data-chef-search value="'+esc(searches[id])+'" placeholder="'+t("Find product or brand…","Найти товар или марку…")+'"></label>'+
+ '<div class="chef-store-list">'+(all.length?all.map(row=>rowHtml(row,id)).join(""):
+ '<p class="chef-empty">'+t("No items recorded. Use the scanner above or add items manually.","Нет записей. Используйте сканер вверху или добавьте товар вручную.")+'</p>')+'</div>'+
+ '<h3 class="chef-store-heading">'+t(edit?"Edit inventory item":"Add inventory item",edit?"Изменить товар":"Добавить товар")+'</h3>'+
+ formHtml(id,edit)+
+ '<p class="chef-source-note">'+t("Barcodes are read only by the single Product Scanner above; there is no camera or barcode form here.","Штрихкоды считываются только одним сканером вверху. В этой форме нет камеры или поля штрихкода.")+'</p>';
+ if(messages[id])host.querySelector("[data-chef-status]").textContent=messages[id];
+ applySearch(host,id);
 }
 function renderAll(){for(const store of stores)render(store.id);}
-function status(location,message){
- messages[location]=message;
- const node=$('[data-chef-status="'+location+'"]');if(node)node.textContent=message;
+function status(id,message){
+ messages[id]=message;
+ const node=$('[data-chef-status="'+id+'"]');if(node)node.textContent=message;
 }
 for(const store of stores){
  const host=$("#"+store.host);if(!host)continue;
+ const id=store.id;
+ host.addEventListener("input",event=>{
+  if(!event.target.matches?.("[data-chef-search]"))return;
+  searches[id]=event.target.value;applySearch(host,id);
+ });
  host.addEventListener("click",event=>{
-  const edit=event.target.closest("[data-chef-edit]");
-  if(edit){edits[store.id]=edit.dataset.chefEdit;render(store.id);return;}
-  const remove=event.target.closest("[data-chef-remove]");
-  if(remove){
-   if(!confirm(t("Remove this food record?","Удалить эту запись о продукте?")))return;
-   if(!api.removeProvision(remove.dataset.chefRemove))status(store.id,t("Unable to remove record.","Не удалось удалить запись."));
-   else{edits[store.id]="";messages[store.id]="";renderAll();}return;
+  const step=event.target.closest?.("[data-chef-qty]");
+  if(step){
+   const row=items(id).find(item=>item.id===step.dataset.chefId);
+   if(!row)return;
+   const delta=step.dataset.chefQty==="add"?1:-1;
+   const packages=Math.max(0,Math.min(999999,Number(row.packages??0)+delta));
+   if(!api.saveProvision({...row,packages,available:packages>0}))status(id,t("Could not update stock.","Не удалось изменить запас."));
+   return;
   }
-  if(event.target.closest("[data-chef-cancel]")){edits[store.id]="";render(store.id);return;}
-
+  const edit=event.target.closest?.("[data-chef-edit]");
+  if(edit){editing[id]=edit.dataset.chefEdit;render(id);return;}
+  const remove=event.target.closest?.("[data-chef-remove]");
+  if(remove){
+   if(!confirm(t("Remove this item?","Удалить товар?")))return;
+   if(!api.removeProvision(remove.dataset.chefRemove))status(id,t("Could not remove item.","Не удалось удалить товар."));
+   else {editing[id]="";messages[id]="";renderAll();}
+   return;
+  }
+  if(event.target.closest?.("[data-chef-cancel]")){editing[id]="";render(id);}
  });
  host.addEventListener("change",event=>{
   if(event.target.name!=="harvestChoice")return;
-  const h=harvestChoices().find(x=>x.id===event.target.value);
-  const form=event.target.form;if(!h||!form)return;
+  const h=harvestChoices().find(x=>x.id===event.target.value),form=event.target.form;
+  if(!h||!form)return;
   form.elements.name.value=h.name;
   form.elements.obtained.value=h.date;
   form.elements.amount.value=String(h.amount)+" "+String(h.unit);
   form.elements.ingredient.value=h.name;
-  status(store.id,t("Harvest details copied. Save to record storage; this will not subtract from the harvest.","Сведения об урожае скопированы. Сохраните запись; это не уменьшит урожай автоматически."));
+  form.elements.location.value="cellar";
+  status(id,t("Harvest details copied. Save to add to Root Cellar; the harvest record is not deducted.",
+    "Данные урожая перенесены. Сохраните в погреб; количество урожая не изменится."));
  });
  host.addEventListener("submit",event=>{
-  if(!event.target.matches("[data-chef-form]"))return;
+  if(!event.target.matches?.("[data-chef-form]"))return;
   event.preventDefault();
-  const form=event.target,d=new FormData(form),location=store.id;
-  const value=Object.fromEntries(d.entries());
-  value.location=location;value.available=form.elements.available.checked;
-  const existing=api.provisions().items.find(x=>x.id===value.id);
-  value.sourceHarvestId=value.harvestChoice||existing?.sourceHarvestId||"";
-  if(!api.saveProvision(value)){status(location,t("Check the name, quantity and barcode; the record was not saved.","Проверьте название, количество и штрихкод; запись не сохранена."));return;}
-  edits[location]="";messages[location]=t("Food inventory saved.","Запасы сохранены.");renderAll();
+  const form=event.target,value=Object.fromEntries(new FormData(form).entries());
+  value.location=id==="kitchen"?(value.location==="cellar"?"cellar":"pantry"):id;
+  value.available=form.elements.available.checked;
+  const original=api.provisions().items.find(row=>row.id===value.id);
+  // No barcode field here: preserve scanned identity through the stored row.
+  if(original)value.barcode=original.barcode||"";
+  value.sourceHarvestId=value.harvestChoice||original?.sourceHarvestId||"";
+  if(!api.saveProvision(value)){status(id,t("Check name, quantity and dates. Nothing was saved.","Проверьте название, количество и даты. Ничего не сохранено."));return;}
+  editing[id]="";messages[id]=t("Inventory saved.","Запасы сохранены.");renderAll();
  });
-
 }
 document.addEventListener("dkchef:provisions-changed",renderAll);
 document.getElementById("dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(renderAll));

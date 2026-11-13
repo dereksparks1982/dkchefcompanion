@@ -236,6 +236,8 @@ dictionary.set("🌱 Seed Collection & Catalog","🌱 Коллекция сем�
 dictionary.set("319 varieties · 19 categories","319 разновидностей · 19 категорий");
 dictionary.set("💊 Medicine Cabinet","💊 Аптечка");
 dictionary.set("🧴 Household Supplies","🧴 Бытовые запасы");
+dictionary.set("🫙 Pantry & Root Cellar","🫙 Кладовая и погреб");
+dictionary.set("Pantry & Root Cellar","Кладовая и погреб");
 const replacements=[
 [/\b(\d+)\s+packets?\b/gi,(_,n)=>n+" "+ruCount(n,"пакет","пакета","пакетов")],
 [/\b(\d+)\s+bags?\b/gi,(_,n)=>n+" "+ruCount(n,"пакет","пакета","пакетов")],

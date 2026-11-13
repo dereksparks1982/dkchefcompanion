@@ -14,6 +14,7 @@ host.innerHTML='<div class="chef-station-header"><div><h2 id="chefScanTitle"></h
  '<span class="chef-station-label" id="chefScanOne"></span></div>'+
  '<div class="chef-station-actions"><button class="chef-station-primary" type="button" id="chefScanStart"></button>'+
  '<button type="button" id="chefScanStop" hidden></button>'+
+ '<button type="button" id="chefScanNext" hidden></button>'+
  '<label class="chef-station-mute"><input type="checkbox" id="chefScanMute"><span id="chefScanMuteText"></span></label></div>'+
  '<div class="chef-station-camera-row" id="chefScanCameraRow" hidden><label for="chefScanCamera" id="chefScanCameraLabel"></label>'+
  '<select id="chefScanCamera"><option value="" id="chefScanAutomatic"></option></select></div>'+
@@ -36,7 +37,7 @@ host.innerHTML='<div class="chef-station-header"><div><h2 id="chefScanTitle"></h
  '<p class="chef-station-help" id="chefScanSaveHelp"></p></div>'+
  '<p class="chef-station-help" id="chefScanSources"></p>';
 const $=id=>document.getElementById(id);
-const start=$("chefScanStart"),stopBtn=$("chefScanStop"),preview=$("chefScanPreview");
+const start=$("chefScanStart"),stopBtn=$("chefScanStop"),nextBtn=$("chefScanNext"),preview=$("chefScanPreview");
 const statusNode=$("chefScanStatus"),result=$("chefScanResult"),saveArea=$("chefScanSaveArea");
 const barcode=$("chefScanBarcode"),name=$("chefScanName"),brand=$("chefScanBrand"),size=$("chefScanSize");
 const destination=$("chefScanDestination"),ingredient=$("chefScanIngredient"),count=$("chefScanCount");
@@ -53,6 +54,7 @@ function localized(){
   chefScanOne:t("One scanner · All inventory","Один сканер · Все запасы"),
   chefScanStart:t("Scan barcode","Сканировать штрихкод"),
   chefScanStop:t("Stop camera","Остановить камеру"),
+  chefScanNext:t("Scan next item","Следующий товар"),
   chefScanMuteText:t("Mute ding","Без звука"),
   chefScanCameraLabel:t("Camera","Камера"),
   chefScanAutomatic:t("Automatic camera","Автоматический выбор"),
@@ -171,28 +173,64 @@ function cameraError(error){
  const kind=String(error?.name||"");
  if(/NotAllowed|PermissionDenied|Security/.test(kind))return t("Camera permission blocked. Check browser site permissions.","Доступ к камере заблокирован. Проверьте разрешения браузера.");
  if(/NotFound/.test(kind))return t("No camera detected. Select or connect a webcam.","Камера не найдена. Выберите или подключите веб-камеру.");
- if(/NotReadable/.test(kind))return t("Camera is busy or unavailable. Close other camera applications.","Камера занята или недоступна. Закройте другие приложения.");
+ if(/NotReadable|AbortError/.test(kind))return t(
+  "Firefox camera permission is already granted. The video device refused to start (NotReadableError). Tried Quagga2 fallback settings. Pick another listed camera below; if every option fails, check the Surface camera driver or another app using it.",
+  "Разрешение Firefox уже получено, но видеоустройство не запускается (NotReadableError). Настройки Quagga2 проверены. Выберите другую камеру ниже; если все варианты не работают, проверьте драйвер камеры Surface и другие приложения.");
  return t("Camera could not start: ","Не удалось включить камеру: ")+String(error?.message||error||"unknown").slice(0,140);
 }
 function closeCamera(){
- active=false;sessionNumber++;
- stopBtn.hidden=true;start.hidden=false;preview.hidden=true;
+ active=false;sessionNumber++;lookupNumber++;
+ stopBtn.hidden=true;nextBtn.hidden=true;start.hidden=false;preview.hidden=true;
  return camera.stop();
+}
+function scanNext(){
+ if(!active)return;
+ lookupNumber++; // An earlier lookup cannot overwrite the next product.
+ resetResult();
+ barcode.value="";
+ nextBtn.hidden=true;
+ if(camera.resume?.()){
+  feedback(t("Camera stays open. Point at the next barcode.","Камера остаётся включённой. Наведите на следующий штрихкод."));
+ }else{
+  feedback(t("Camera disconnected. Reconnecting…","Камера отключилась. Повторное подключение…"));
+  void openCamera(deviceId);
+ }
+}
+function updateCameras(items,selected=""){
+ if(!Array.isArray(items))return;
+ cameraSelect.innerHTML='<option value="">'+t("Automatic camera","Автоматический выбор")+'</option>'+
+  items.map(item=>'<option value="'+esc(item.deviceId)+'">'+esc(item.label)+'</option>').join("");
+ cameraRow.hidden=items.length===0;
+ cameraSelect.value=items.some(item=>item.deviceId===(deviceId||selected))?(deviceId||selected):"";
 }
 async function openCamera(chosen="",recovery=0){
  const token=++sessionNumber;
  active=false;retries=recovery;deviceId=chosen;
  await camera.stop();
  if(token!==sessionNumber)return;
- preview.hidden=false;stopBtn.hidden=false;start.hidden=true;active=true;
+ preview.hidden=false;stopBtn.hidden=false;nextBtn.hidden=true;start.hidden=true;active=true;
  feedback(t("Opening camera…","Открытие камеры…"));
+ // List cameras even when Quagga2 cannot open the video stream. Do not ask for
+ // another getUserMedia permission just to enumerate already-authorized cameras.
+ Promise.resolve(camera.devices?.()).then(items=>{
+  if(token===sessionNumber)updateCameras(items,chosen);
+ }).catch(()=>{});
  try{
   await camera.start({target:preview,deviceId:chosen,
+   onAttempt:(label,number,total)=>{
+    if(token===sessionNumber)feedback(t("Opening camera: ","Открытие камеры: ")+label+
+     " ("+number+"/"+total+")");
+   },
+   onActiveCamera:(label,settings)=>{
+    if(token===sessionNumber&&label)feedback(t("Camera ready: ","Камера готова: ")+label+
+      (settings?.width?" · "+settings.width+"×"+settings.height:""));
+   },
    onCode:code=>{
     if(token!==sessionNumber||!active)return;
-    active=false;
+    // Keep Quagga2 LiveStream alive: iOS need not ask for camera access between items.
+    // Quagga2 pauses further detection until Scan next is selected.
+    nextBtn.hidden=false;
     ding();
-    void closeCamera();
     void find(code);
    },
    onProgress:event=>{
@@ -210,23 +248,32 @@ async function openCamera(chosen="",recovery=0){
     }
    },
    onCameras:(items,selected)=>{
-    if(token!==sessionNumber)return;
-    cameraSelect.innerHTML='<option value="">'+t("Automatic camera","Автоматический выбор")+'</option>'+
-     items.map(item=>'<option value="'+esc(item.deviceId)+'">'+esc(item.label)+'</option>').join("");
-    cameraRow.hidden=items.length===0;
-    cameraSelect.value=items.some(item=>item.deviceId===(chosen||selected))?(chosen||selected):"";
+    if(token===sessionNumber)updateCameras(items,selected);
    }
   });
  }catch(error){
   if(token!==sessionNumber)return;
-  void closeCamera();
-  feedback(cameraError(error));
+  await closeCamera();
+  // The camera picker must still work after Firefox reports NotReadableError.
+  // Enumeration needs no new capture request; permission was already granted.
+  try{
+   const list=await camera.devices?.();
+   if(sessionNumber===token+1&&Array.isArray(list))updateCameras(list,chosen);
+  }catch(ignored){}
+  if(sessionNumber===token+1)feedback(cameraError(error));
  }
 }
 start.addEventListener("click",()=>{armAudio();void openCamera();});
 stopBtn.addEventListener("click",()=>{void closeCamera();feedback(t("Camera stopped.","Камера остановлена."));});
-$("chefScanLookup").addEventListener("click",()=>{void closeCamera();void find(barcode.value.trim());});
-barcode.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void closeCamera();void find(barcode.value.trim());}});
+nextBtn.addEventListener("click",scanNext);
+$("chefScanLookup").addEventListener("click",()=>{
+ if(active){camera.pause?.();nextBtn.hidden=false;}
+ void find(barcode.value.trim());
+});
+barcode.addEventListener("keydown",event=>{if(event.key==="Enter"){
+ event.preventDefault();if(active){camera.pause?.();nextBtn.hidden=false;}
+ void find(barcode.value.trim());
+}});
 cameraSelect.addEventListener("change",()=>{armAudio();void openCamera(cameraSelect.value);});
 $("chefScanMute").addEventListener("change",event=>{
  muted=!!event.target.checked;
@@ -251,11 +298,11 @@ $("chefScanAdd").addEventListener("click",()=>{
   feedback(t("Could not save. Check the fields and try again.","Не удалось сохранить. Проверьте поля и повторите попытку."));return;
  }
  feedback(t("Saved ","Сохранено: ")+productName+" · "+destination.selectedOptions[0].textContent+
-  t(". You can scan the next item.",". Можно сканировать следующий товар."));
+  t(". Tap Scan next item to keep using the same camera.",". Нажмите «Следующий товар», чтобы продолжить с той же камерой."));
 });
 window.addEventListener("pagehide",()=>{void closeCamera();});
 document.getElementById("dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(localized));
 localized();
 feedback(t("Ready. Scan a barcode or enter its number.","Готово. Сканируйте штрихкод или введите его номер."));
-window.DKChefUniversalScanner=Object.freeze({find,openCamera,closeCamera,guessIngredient,locationFor});
+window.DKChefUniversalScanner=Object.freeze({find,openCamera,closeCamera,scanNext,guessIngredient,locationFor});
 })();
