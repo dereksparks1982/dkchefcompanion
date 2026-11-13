@@ -166,3 +166,14 @@ html[lang="ru"] .wb-packet-plantings>summary{color:#8f304b}
 #wbLotForm .wb-check{grid-column:1/-1;background:#f4f9f0;border:1px solid #d0e3d2;border-radius:8px;padding:11px 12px;line-height:1.4}
 #wbLotForm .wb-check input{accent-color:#276141;flex:0 0 auto}
 html[lang="ru"] #wbLotForm .wb-check{background:#fff6f7;border-color:#edd7dc}
+
+/* In-place metadata editor for active and archived seed packets. */
+#wbLotEditForm{margin:14px 0 24px;padding:15px;border:1px solid #adc7b1;border-radius:10px;background:#f8fbf6}
+#wbLotEditForm[hidden]{display:none!important}
+#wbLotEditForm .wb-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+#wbLotEditForm .wb-actions button{min-height:40px;padding:9px 14px;border-radius:8px;border:1px solid #b4cbb5;cursor:pointer;font:inherit;font-size:.82rem;font-weight:700}
+.wb-packet-count-history{margin:8px 0;font-size:.79rem}
+.wb-packet-count-history>summary{cursor:pointer;font-weight:750;color:#315d40}
+.wb-packet-count-history ul{margin:4px 0 9px;padding-left:20px}
+html[lang="ru"] #wbLotEditForm{background:#fff6f8;border-color:#dcbec5}
+html[lang="ru"] .wb-packet-count-history>summary{color:#89334b}

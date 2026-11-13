@@ -33,5 +33,5 @@ test("registering and removing packets stays safe and does not change original c
   assert.match(html,/seedbank-workbench\.js\?v=20261112-registercards1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v44/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v45/);
 });

@@ -37,8 +37,32 @@ function catalogSlots(cardPackets,lots,seedKey){
   row.kind!=="bulk"&&row.status!=="empty").length;
  return Math.max(0,stock-registered);
 }
+// Correct metadata on a stable packet ID. Blank counts mean unknown, never zero.
+function editPacketFields(values){
+ const data=values&&typeof values==="object"?values:{};
+ const trim=(key,max)=>String(data[key]??"").trim().slice(0,max);
+ const countText=trim("count",16),yearText=trim("year",10),obtained=trim("obtained",10);
+ let count=null,year=null;
+ if(countText){
+  if(!/^[1-9][0-9]*$/.test(countText)||!Number.isSafeInteger(Number(countText))||Number(countText)>9999999)
+   throw Error("Enter a positive seed count, or leave the field blank when unknown.");
+  count=Number(countText);
+ }
+ if(yearText){
+  if(!/^[0-9]{4}$/.test(yearText)||Number(yearText)<1900||Number(yearText)>2100)
+   throw Error("Year packed must be between 1900 and 2100, or left blank.");
+  year=Number(yearText);
+ }
+ if(obtained){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(obtained)||!Number.isFinite(Date.parse(obtained))||
+     new Date(obtained).toISOString().slice(0,10)!==obtained)
+   throw Error("Use a valid date obtained, or leave it blank.");
+ }
+ return {lot:trim("lot",90),year,count,place:trim("place",100),
+  supplier:trim("supplier",100),obtained};
+}
 function unassigned(journal,seedKey){
  return (Array.isArray(journal)?journal:[]).filter(e=>e&&e.seedKey===seedKey&&!e.seedLotId);
 }
-root.DKSeedBankPacketTracking=Object.freeze({amountSown,lotUsage,balance,catalogSlots,unassigned});
+root.DKSeedBankPacketTracking=Object.freeze({amountSown,lotUsage,balance,catalogSlots,editPacketFields,unassigned});
 })(window);
