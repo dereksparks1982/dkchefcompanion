@@ -65,10 +65,13 @@ function evaluate(recipe,records){
  const details=ingredients.map(ing=>{
   const stock=matches(ing,records);
   return {ingredient:ing,ready:stock.length>0,stocks:stock,
-   suggestion:stock.length?null:suggestion(ing,records)};
+   quantity:assessQuantity(ing,records),suggestion:stock.length?null:suggestion(ing,records)};
  });
  const ready=details.filter(x=>x.ready).length,missing=details.filter(x=>!x.ready);
  return {recipe,ready,total:details.length,missing,details,
+  measuredEnough:details.filter(x=>x.quantity.status==="enough").length,
+  measuredShort:details.filter(x=>x.quantity.status==="short").length,
+  quantityUnverified:details.filter(x=>x.ready&&["not-specified","unverified"].includes(x.quantity.status)).length,
   complete:details.length>0&&missing.length===0,
   near:missing.length>0&&missing.length<=2&&ready>0,
   coverage:details.length?ready/details.length:0};
@@ -81,5 +84,66 @@ function rank(recipes,records){
     a.missing.length-b.missing.length||b.coverage-a.coverage||
     String(a.recipe.name||"").localeCompare(String(b.recipe.name||"")));
 }
-root.DKChefRecipeMatch=Object.freeze({normalize,alternatives,isEdibleStock,stockKey,matches,suggestion,evaluate,rank});
+
+// Advisory checks only. Explicit amount is TOTAL stock; size is PER PACKAGE.
+// Never infer that mass, volume, or different counted objects are interchangeable.
+const fractions={"½":" 1/2","⅓":" 1/3","⅔":" 2/3","¼":" 1/4","¾":" 3/4",
+ "⅛":" 1/8","⅜":" 3/8","⅝":" 5/8","⅞":" 7/8"};
+const units={
+ g:["g",1],gram:["g",1],grams:["g",1],kg:["g",1000],kilogram:["g",1000],kilograms:["g",1000],
+ mg:["g",0.001],oz:["g",28.349523125],ounce:["g",28.349523125],ounces:["g",28.349523125],
+ lb:["g",453.59237],lbs:["g",453.59237],pound:["g",453.59237],pounds:["g",453.59237],
+ ml:["ml",1],milliliter:["ml",1],milliliters:["ml",1],millilitre:["ml",1],millilitres:["ml",1],
+ l:["ml",1000],liter:["ml",1000],liters:["ml",1000],litre:["ml",1000],litres:["ml",1000],
+ tsp:["ml",4.92892159375],teaspoon:["ml",4.92892159375],teaspoons:["ml",4.92892159375],
+ tbsp:["ml",14.78676478125],tablespoon:["ml",14.78676478125],tablespoons:["ml",14.78676478125],
+ cup:["ml",236.5882365],cups:["ml",236.5882365],
+ "fl oz":["ml",29.5735295625],"fluid ounce":["ml",29.5735295625],
+ "fluid ounces":["ml",29.5735295625],pint:["ml",473.176473],pints:["ml",473.176473],
+ quart:["ml",946.352946],quarts:["ml",946.352946],
+ clove:["clove",1],cloves:["clove",1],egg:["egg",1],eggs:["egg",1],
+ can:["can",1],cans:["can",1],leaf:["leaf",1],leaves:["leaf",1],
+ piece:["piece",1],pieces:["piece",1]
+};
+function parseQuantity(value){
+ let raw=String(value??"").toLowerCase().trim();
+ if(!raw||/\s+or\s+/.test(raw))return null;
+ for(const [symbol,part]of Object.entries(fractions))raw=raw.replaceAll(symbol,part);
+ raw=raw.replace(/^\s*(?:about|approx\.?|approximately|roughly)\s+/,"").trim();
+ const number=raw.match(/^(\d+\/\d+)|^(\d+(?:\.\d+)?)(?:\s+(\d+\/\d+))?/);
+ if(!number)return null;
+ let count=0;
+ if(number[1]){const [a,b]=number[1].split("/").map(Number);count=a/b;}
+ else{
+  count=Number(number[2]);
+  if(number[3]){const [a,b]=number[3].split("/").map(Number);count+=a/b;}
+ }
+ if(!Number.isFinite(count)||count<=0)return null;
+ const rest=raw.slice(number[0].length).trim();
+ if(/^(?:-|–|—|to\b)/.test(rest))return null;
+ const known=Object.keys(units).sort((a,b)=>b.length-a.length).find(u=>
+  rest===u||rest.startsWith(u+" ")||rest.startsWith(u+",")||rest.startsWith(u+";")||rest.startsWith(u+"("));
+ if(!known)return null;
+ const [unit,factor]=units[known];
+ return {amount:count*factor,unit,original:String(value)};
+}
+function assessQuantity(ingredient,records){
+ const stocked=matches(ingredient,records);
+ if(!stocked.length)return {status:"not-on-hand"};
+ const target=parseQuantity(ingredient?.amount);
+ if(!target)return {status:"not-specified"};
+ let measured=0,unknown=0;
+ for(const row of stocked){
+  const explicit=String(row.amount??"").trim();
+  const found=parseQuantity(explicit||row.size);
+  const packages=Number(row.packages??1);
+  if(!found||found.unit!==target.unit||!Number.isSafeInteger(packages)||packages<=0){unknown++;continue;}
+  measured+=found.amount*(explicit?1:packages);
+ }
+ const sufficient=measured+Math.max(0.000001,target.amount*1e-8)>=target.amount;
+ return {status:sufficient?"enough":unknown?"unverified":"short",
+  unit:target.unit,required:target.amount,measured,unknown};
+}
+
+root.DKChefRecipeMatch=Object.freeze({normalize,alternatives,isEdibleStock,stockKey,matches,suggestion,evaluate,rank,parseQuantity,assessQuantity});
 })(window);
