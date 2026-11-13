@@ -136,6 +136,7 @@ function render(){
    lookup==="checking"?t("Checking this account for an existing DK Seed Bank folder…","Проверяем существующую папку DK Seed Bank…"):
    lookup==="multiple"?t("Multiple DK Seed Bank folders found. Choose the correct folder. New folder creation is blocked.","Найдено несколько папок DK Seed Bank. Выберите нужную. Создание новой заблокировано."):
    lookup==="error"?t("Folder check failed. Retry Find existing folder; no new folder will be created.","Не удалось проверить папку. Повторите поиск. Новая папка не будет создана."):
+   lookup==="unavailable"?t("Your account remembers a DK Seed Bank folder, but cannot open it. Reconnect the original; creating another is blocked.","В аккаунте сохранена ссылка на папку DK Seed Bank, но она недоступна. Подключите исходную папку, создание новой заблокировано."):
    lookup==="missing"?t("No DK Seed Bank folder accessible to this app was found in this account.","В этом аккаунте не найдена папка DK Seed Bank, доступная приложению."):
    t("Connect Google Drive to locate your existing folder.","Подключите Google Диск для поиска существующей папки.");
  }
@@ -383,8 +384,15 @@ if(!desktop)$("dkDriveChooseFolder").addEventListener("click",async event=>{
  try{
   const chosen=await visible.choose(token);
   if(!chosen&&Math.abs(window.scrollY-pageY)>20)window.scrollTo(0,pageY);
-  if(chosen){lastStatus=t("Folder selected: ","Выбрана папка: ")+chosen.name+
-   t(". Select Sync now to upload photos and the full backup.",". Нажмите «Синхронизировать сейчас», чтобы загрузить фотографии и копию.");
+  if(chosen){
+   try{
+    // Share only the folder ID across this user's authorized devices.
+    await visible.remember(token,chosen.id);
+    lastStatus=t("Folder selected and linked across devices: ","Папка выбрана и связана с устройствами: ")+chosen.name+
+     t(". Select Sync now to upload photos and the full backup.",". Нажмите «Синхронизировать сейчас», чтобы загрузить фотографии и копию.");
+   }catch(error){
+    lastStatus=t("Folder selected locally, but other-device linking failed: ","Папка выбрана на устройстве, но связать её с другими не удалось: ")+error.message;
+   }
   }
  }catch(error){lastStatus=error.message;}
  render();
