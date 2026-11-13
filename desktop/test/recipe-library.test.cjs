@@ -30,6 +30,10 @@ test("existing four recipes remain in the library",()=>{
  for(const id of ["absinthe","pesto","salsa","pickles"])
   assert.ok(source.includes('id:"'+id+'"'),id);
  const env=environment();
+ assert.match(env.host.innerHTML,/Meals & Kitchen/);
+ assert.doesNotMatch(env.host.innerHTML,/Traditional absinthe/);
+ assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
+ env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"historical"})}});
  assert.match(env.host.innerHTML,/Traditional absinthe/);
 });
 test("four added meals have ingredients, amounts, and complete methods",()=>{
@@ -87,8 +91,32 @@ test("previously saved recipe selections and custom recipes are retained",()=>{
    ingredients:[{id:"ingredient-0",name:"Fresh thyme",type:"garden",aliases:["thyme"]}]}]
  };
  const env=environment({saved:original});
+ assert.doesNotMatch(env.host.innerHTML,/Family soup/);
+ env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"personal"})}});
  assert.match(env.host.innerHTML,/Family soup/);
  const after=JSON.parse(env.values.get("dk-seedbank-recipes-v1")||JSON.stringify(original));
  assert.equal(after.ready["custom-previous/ingredient-0"],true);
  assert.equal(after.custom.length,1);
+});
+
+test("recipe category buttons are initially closed and toggle closed",()=>{
+ const env=environment();
+ assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
+ env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"kitchen"})}});
+ assert.match(env.host.innerHTML,/id="rg-recipe"/);
+ env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"kitchen"})}});
+ assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
+});
+test("Food Preservation is a separate top-level tab immediately below Recipe Guide",()=>{
+ for(const file of ["index.html","docs/index.html"]){
+  const source=fs.readFileSync(path.join(root,file),"utf8");
+  const recipe=source.indexOf('<details id="recipeGuide"');
+  const preservation=source.indexOf('<details id="dkPreservationGuide"');
+  const line=source.indexOf('<div class="result-line">');
+  assert.ok(recipe>=0&&preservation>recipe&&line>preservation,file);
+  assert.ok(source.slice(recipe,preservation).includes('</details>'));
+ }
+ const guide=fs.readFileSync(path.join(root,"assets/seedbank-field-guides.js"),"utf8");
+ assert.ok(guide.includes('preservationPanel=$("#dkPreservationGuide")'));
+ assert.ok(!guide.includes("recipePanel.appendChild(preservationPanel)"));
 });

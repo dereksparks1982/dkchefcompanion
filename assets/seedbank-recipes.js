@@ -62,6 +62,7 @@ const tabs=[
  {id:"historical",en:"Historical",ru:"Исторические"},
  {id:"personal",en:"My Recipes",ru:"Мои рецепты"}
 ];
+let activeCategory=null;
 const ru=()=>document.documentElement.lang==="ru";
 const say=(en,rus)=>ru()?rus:en;
 const localized=(entity,field)=>ru()&&entity[field+"Ru"]?entity[field+"Ru"]:entity[field];
@@ -77,11 +78,20 @@ function matched(ingredient,plants){
  return plants.filter(p=>aliases.some(a=>(" "+p.normalized+" ").includes(" "+a+" "))).map(p=>p.name);
 }
 function isReady(recipe,ingredient){return !!state.ready[recipe.id+"/"+ingredient.id];}
+function recipeTabMarkup(){
+ return '<div class="rg-section-tabs" role="group" aria-label="'+say("Recipe sections","Разделы рецептов")+'">'+
+ tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
+ '<button type="button" class="rg-section-button'+(activeCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(activeCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>';
+}
 function render(){
  const recipes=all();
  if(!recipes.some(r=>r.id===state.selected))state.selected="absinthe";
  const recipe=recipes.find(r=>r.id===state.selected);
  const selectedCategory=category(recipe);
+ if(!activeCategory){
+  root.innerHTML=recipeTabMarkup()+'<p class="rg-note">'+say("Select a category to view recipes. All categories start closed.","Выберите раздел для просмотра рецептов. Все разделы изначально закрыты.")+'</p>';
+  return;
+ }
  const categoryRecipes=recipes.filter(r=>category(r)===selectedCategory);
  const plants=inventory();
  const rows=recipe.ingredients.map(ing=>({ing,found:matched(ing,plants),ready:isReady(recipe,ing)}));
@@ -92,10 +102,7 @@ function render(){
  const newSeed=rows.filter(r=>r.ing.type==="garden"&&!r.found.length&&!r.ready);
  const extras=rows.filter(r=>r.ing.type==="pantry"&&!r.ready);
  const readySummary=ready.length===rows.length?"All ingredients marked on hand. Confirm freshness, identity and safety before use.":"You still need to obtain or prepare "+missing.length+" ingredient"+(missing.length===1?"":"s")+".";
- root.innerHTML=
-  '<div class="rg-section-tabs" role="group" aria-label="'+say("Recipe sections","Разделы рецептов")+'">'+
-    tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
-     '<button type="button" class="rg-section-button'+(selectedCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(selectedCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>'+
+ root.innerHTML=recipeTabMarkup()+
   '<div class="rg-controls"><label for="rg-recipe">'+say("Choose a recipe","Выберите рецепт")+'<select id="rg-recipe">'+categoryRecipes.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===recipe.id?" selected":"")+'>'+esc(localized(r,"name"))+'</option>').join("")+'</select></label>'+
   (recipe.id.startsWith("custom-")?'<button class="rg-button rg-danger" type="button" id="rg-remove">Delete this recipe</button>':"")+'</div>'+
   '<p class="rg-note">'+esc(recipe.family||"Personal recipe")+'</p>'+
@@ -138,8 +145,14 @@ root.addEventListener("change",event=>{
 root.addEventListener("click",event=>{
  const section=event.target.closest?.("[data-rg-section]");
  if(section){
-  const next=all().find(r=>category(r)===section.getAttribute("data-rg-section"));
-  if(next){state.selected=next.id;persist();render();}
+  const group=section.getAttribute("data-rg-section");
+  if(activeCategory===group){activeCategory=null;render();return;}
+  const recipes=all(),next=recipes.find(r=>category(r)===group);
+  if(next){
+   const current=recipes.find(r=>r.id===state.selected);
+   if(!current||category(current)!==group)state.selected=next.id;
+   activeCategory=group;persist();render();
+  }
   return;
  }
  if(event.target.id!=="rg-remove")return;
@@ -147,7 +160,7 @@ root.addEventListener("click",event=>{
  if(!r||!r.id.startsWith("custom-")||!confirm('Delete "'+r.name+'" and its on-hand marks?'))return;
  state.custom=state.custom.filter(x=>x.id!==r.id);
  for(const id of Object.keys(state.ready))if(id.startsWith(r.id+"/"))delete state.ready[id];
- state.selected="absinthe";persist();render();
+ state.selected="absinthe";activeCategory=null;persist();render();
 });
 root.addEventListener("submit",event=>{
  if(event.target.id!=="rg-form")return;
@@ -165,11 +178,15 @@ root.addEventListener("submit",event=>{
  if(!ingredients.length)return;
  const id="custom-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);
  state.custom.push({id,name,ingredients,family:"My recipe",intro:"Custom ingredient checklist."});
- state.selected=id;
+ state.selected=id;activeCategory="personal";
  if(!persist())alert("Local storage is unavailable. Export your Seed Bank backup when possible.");
  render();
 });
 document.getElementById("dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(render));
+const recipePanel=document.getElementById("recipeGuide");
+recipePanel?.addEventListener("toggle",()=>{
+ if(recipePanel.open){activeCategory=null;render();}
+});
 window.DKSeedBankRecipes=Object.freeze({
  exportData:()=>JSON.parse(JSON.stringify(state)),
  importData:data=>{

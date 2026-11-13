@@ -65,3 +65,7 @@ The calendar includes optional planting-stage check-ins, not invented ripening d
 The seed-saving reference cites [University of Georgia Cooperative Extension](https://extension.uga.edu/publications/detail.html?number=C1242) and [Iowa State Extension](https://yardandgarden.extension.iastate.edu/how-to/how-harvest-and-store-seeds). Species-specific isolation distances, viability, stratification and food safety must still be checked against the crop and a tested source. All tracking is optional. Both web entry points and the offline shell include the new assets; desktop bundling copies the assets folder as usual.
 
 Local checks: `node desktop/prepare.cjs && node --test desktop/test/*.test.cjs`. The desktop and real Google Drive/iPhone flows still require device-specific verification; source checks do not certify live synchronization.
+
+### Food Preservation and recipe navigation
+
+Food Preservation is a standalone main tab directly **under Recipe Guide**, before Monastic Garden and Seed Suppliers. Its safety references remain bilingual. Recipe Guide opens with all inner recipe sections closed. Clicking Meals & Kitchen, Spice Blends, Historical or My Recipes reveals the chosen section; clicking the same section closes it again. Reopening the main Recipe Guide resets visibility without deleting saved recipes, selections, custom recipes or ingredient checkboxes. The collapsed Recipe Guide heading no longer carries a descriptive subtitle. Both web entries and the offline shell are included.

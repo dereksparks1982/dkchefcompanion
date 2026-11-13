@@ -76,14 +76,11 @@ const $=selector=>document.querySelector(selector);
 const ru=()=>document.documentElement.lang==="ru";
 const say=(en,russian)=>ru()?russian:en;
 const esc=value=>String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-const seedPanel=$("#wb-saved .wb-panel-body"),calendar=$("#wbMonthResults"),recipePanel=$("#recipeGuide .rg-inner");
-if(!seedPanel||!calendar||!recipePanel)return;
+const seedPanel=$("#wb-saved .wb-panel-body"),calendar=$("#wbMonthResults"),preservationPanel=$("#dkPreservationGuide");
+if(!seedPanel||!calendar||!preservationPanel)return;
 const seed=document.createElement("details");seed.className="dk-field-guide";seed.id="dkSeedSavingGuide";
 seed.innerHTML='<summary></summary><div class="dk-field-body"><p class="dk-field-intro"></p><label class="dk-field-select"><span></span><select id="dkSavingCrop"></select></label><div id="dkSavingDetails"></div></div>';
 seedPanel.insertBefore(seed,seedPanel.firstChild);
-const preservationPanel=document.createElement("details");preservationPanel.className="dk-field-guide dk-preservation";preservationPanel.id="dkPreservationGuide";
-preservationPanel.innerHTML='<summary></summary><div class="dk-field-body"><p class="dk-field-intro"></p><label class="dk-field-select"><span></span><select id="dkPreservationMethod"></select></label><div id="dkPreservationDetails"></div></div>';
-recipePanel.appendChild(preservationPanel);
 const season=document.createElement("section");season.className="dk-season-checklist";season.id="dkSeasonChecklist";
 calendar.parentNode.insertBefore(season,calendar.nextSibling);
 const savingSelect=$("#dkSavingCrop"),preservationSelect=$("#dkPreservationMethod");
@@ -118,7 +115,7 @@ function renderSeed(){
    "Перед хранением: обычные семена полностью дозревают, очищают и высушивают; держат в прохладном, сухом и тёмном месте с этикеткой и годом. Некоторым видам, особенно тропическим и древесным, нужны другие условия. Семена гибридов F1 могут не сохранять признаки.")+'</p>';
 }
 function renderPreservation(){
- preservationPanel.querySelector("summary").textContent=say("🥫 Food Preservation Guide","🥫 Руководство по сохранению продуктов");
+ preservationPanel.querySelector("summary").textContent=say("🥫 Food Preservation","🥫 Сохранение продуктов");
  preservationPanel.querySelector(".dk-field-intro").textContent=say(
   "Practical method overview, not a replacement for a tested preservation recipe. Your existing recipes remain unchanged.",
   "Краткий обзор методов, не заменяющий проверенный рецепт консервирования. Существующие рецепты не изменяются.");
