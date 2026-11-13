@@ -10,7 +10,7 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
   "chefScanCount","chefScanLookup","chefScanAdd","chefScanProductName","chefScanProductSource","chefScanProductDetails"];
  const more=["chefScanTitle","chefScanIntro","chefScanOne","chefScanMuteText","chefScanCameraLabel",
   "chefScanAutomatic","chefScanBarcodeLabel","chefScanNameLabel","chefScanBrandLabel",
-  "chefScanSizeLabel","chefScanDestinationLabel","chefScanCountLabel","chefScanIngredientLabel","chefScanSaveHelp"];
+  "chefScanSizeLabel","chefScanDestinationLabel","chefScanCountLabel","chefScanIngredientLabel","chefScanSaveHelp","chefScanSources"];
  const map=new Map();
  for(const id of ids.concat(more))map.set(id,{
   id,value:"",textContent:"",innerHTML:"",hidden:false,checked:false,listeners:{},
