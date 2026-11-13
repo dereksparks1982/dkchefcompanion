@@ -118,7 +118,7 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
  for(const page of ["index.html","docs/index.html"]){
   const html=read(page);
   const quagga=html.indexOf("assets/vendor/quagga2.min.js");
-  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-station1");
+  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-lookup1");
   const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-station1");
   const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-station1");
   const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-station1");
