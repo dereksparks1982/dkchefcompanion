@@ -1,6 +1,6 @@
-# DK Seed Bank
+# DK Chef Companion
 
-**DK Seed Bank** is a local-first seed collection and gardening recordkeeping app by **DK Softworks**, available in English and Russian. It works in a web browser and as a portable Linux desktop application.
+**DK Chef Companion** is a local-first seed collection and gardening recordkeeping app by **DK Softworks**, available in English and Russian. It works in a web browser and as a portable Linux desktop application.
 
 **Web app:** https://dereksparks1982.github.io/seedrepo/
 
