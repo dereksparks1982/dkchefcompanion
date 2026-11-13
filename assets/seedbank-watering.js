@@ -177,9 +177,24 @@ function history(){
  if(records.length>200)target.insertAdjacentHTML("beforeend",'<p class="wm-empty">Showing 200 newest records; '+(records.length-200)+' older records remain saved in the backup.</p>');
 }
 function renderAll(){refreshOptions();renderDue();history();}
+// Watering is nested inside Garden Planner. Open its parent accordions too.
+function revealWateringPanel(){
+ let current=panel;
+ while(current){
+  if(current.tagName==="DETAILS")current.open=true;
+  current=current.parentElement;
+ }
+}
 function openFor(id){
- panel.open=true;refreshOptions(String(id||""));panel.scrollIntoView({behavior:"smooth",block:"start"});
- if(sel.value)form.elements.namedItem("action").focus();
+ revealWateringPanel();
+ refreshOptions(String(id||""));
+ // Wait for the parent to expand before scrolling to the actual manager.
+ requestAnimationFrame(()=>{
+  if(!panel.isConnected)return;
+  const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  panel.scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});
+  if(sel.value)form.elements.namedItem("action").focus({preventScroll:true});
+ });
 }
 function endEdit(){editing="";$("#wmCancel",panel).hidden=true;$("#wmSave",panel).textContent="Save watering record";form.reset();form.elements.namedItem("date").value=today();$("#wmDate",panel).max=today();showSelected();}
 sel.addEventListener("change",()=>{editing="";showSelected();});
@@ -238,7 +253,7 @@ document.addEventListener("click",event=>{
  if(btn.dataset.wmJournal){openFor(btn.dataset.wmJournal);return;}
  const available=journal().filter(e=>e.seedKey===btn.dataset.wmSeed);
  if(available.length){openFor(available[0].id);feed.textContent=available.length>1?"Choose the correct planting from the dropdown if needed.":"";}
- else{panel.open=true;panel.scrollIntoView({behavior:"smooth",block:"start"});feed.textContent="No exact linked planting yet. Record a planting in the journal, then log its watering here.";}
+ else{openFor("");feed.textContent="No exact linked planting yet. Record a planting in the journal, then log its watering here.";}
 });
 function enhanceJournal(){
  const journalRecords=journal().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.plant).localeCompare(String(b.plant)));
@@ -253,7 +268,7 @@ document.addEventListener("dkseedbank:journal-rendered",()=>{refreshOptions();re
 document.addEventListener("dkseedbank:inventorychange",()=>{insertGuides();refreshOptions();renderDue();});
 if(workbench){
  const quick=workbench.querySelector(".wb-quick");
- if(quick){const button=document.createElement("button");button.type="button";button.textContent="💧 Watering manager";button.addEventListener("click",()=>{panel.open=true;panel.scrollIntoView({behavior:"smooth",block:"start"});});quick.appendChild(button);}
+ if(quick){const button=document.createElement("button");button.type="button";button.textContent="💧 Watering manager";button.addEventListener("click",()=>openFor(""));quick.appendChild(button);}
 }
 function importData(value){
  if(!value||typeof value!=="object"||Array.isArray(value))return false;

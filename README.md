@@ -12,7 +12,7 @@
 - **Planting Journal:** dated plantings, photos, notes, measurements, watering observations, and growth charts. Tracking and reminders remain optional.
 - **Sync & Backup:** full JSON backups with verification, restore controls, local/offline storage tools, and opt-in Google Drive synchronization.
 - **Recipe Guide:** personal ingredient checklists and culinary references, separate from the actual seed inventory.
-- **Monastic Garden:** a standalone historical reference section immediately below Recipe Guide, with its explanatory material inside the section. Garden Planner remains near the top.
+- **Monastic Garden:** a standalone historical reference section below Food Preservation, following Recipe Guide. Garden Planner remains near the top.
 - **Seed Suppliers:** a standalone section directly below Monastic Garden, with website links to established seed suppliers plus user-added favorite links. No shopping checkout or global seed-variety catalog is built into the app.
 
 ## Your data and Google Drive
@@ -75,3 +75,7 @@ Food Preservation is a standalone main tab directly **under Recipe Guide**, befo
 A seed card retains its short caution preview while **Planting guide & details** is closed. When that same card's guide is opened, the short preview is hidden and the complete species-specific caution, including who is at risk and source links, is displayed in its place. Closing the guide restores the preview. The rule applies independently to every caution-tagged plant, including newly added or edited entries, in English and Russian. The Caution purpose/filter chip remains visible as a category label. Other plant guidance, photos, watering, seed records and saved data are unchanged. The offline cache and both web entry points are updated.
 
 Other warning generation was checked: inventory re-rendering replaces existing caution blocks rather than stacking them; the workbench does not add its own safety block when the plant has a detailed caution; the Russian safety copy is language-specific rather than a separate additional warning. An automated regression test protects the one-visible-warning rule.
+
+### Watering button navigation
+
+**Watering** on a Planting Journal entry opens any closed parent Garden Planner accordion as well as the Watering Manager, selects the recorded planting, and scrolls to the expanded manager after layout. The Garden Planner shortcut and seed-card watering shortcut use the same path. If a seed card has no linked planting, the manager still opens with explanatory feedback. Opening a manager does not modify watering history.
