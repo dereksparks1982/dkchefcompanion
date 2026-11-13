@@ -67,3 +67,9 @@
  .rg-cook-open{width:100%}
  .rg-cook-filters .rg-button{flex-basis:100%}
 }
+
+/* Quantity-aware recipe hints. The comparison never consumes inventory. */
+.rg-cook-quantity{font-size:.76rem;line-height:1.5;color:#42634b;margin:0}
+.rg-cook-short,.rg-quantity-short{color:#89462d}
+.rg-cook-short{font-size:.78rem;line-height:1.5;margin:0}
+.rg-quantity-note{font-size:.75rem;line-height:1.5;margin:5px 0 0;color:#52715b}
