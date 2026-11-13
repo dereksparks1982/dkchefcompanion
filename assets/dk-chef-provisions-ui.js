@@ -116,7 +116,7 @@ async function identify(location){
   status(location,t("Product found. Verify the name and package size, then add it.","Продукт найден. Проверьте название и размер упаковки, затем добавьте."));
  }catch(error){status(location,t("Product lookup unavailable. You can still enter it manually.","Поиск недоступен. Продукт можно добавить вручную."));}
 }
-// One scanner at a time; the decoder and camera tracks are released on exit.
+// Quagga2 owns the live camera. Stop only after a valid barcode or an explicit exit.
 let scanGeneration=0;
 function stopScan(){
  ++scanGeneration;
@@ -181,13 +181,10 @@ async function startScan(location,deviceId=""){
    onProgress:stage=>{
     if(scanner?.token!==token)return;
     const messages={
-     live:t("Camera is live. Point at a UPC or EAN barcode.","Камера работает. Наведите на штрихкод UPC или EAN."),
+     live:t("Quagga2 is reading the camera. Point at a UPC/EAN barcode.","Quagga2 считывает изображение с камеры. Наведите на штрихкод UPC/EAN."),
      waiting:t("Waiting for camera picture… Check camera permissions and device selection.","Ожидание видео с камеры… Проверьте разрешения и выбранную камеру."),
      searching:t("Reading barcode… Hold the lines steady in good light.","Считывание штрихкода… Держите его ровно при хорошем освещении."),
      hint:t("Still scanning. Move closer, improve the light, and keep the barcode steady.","Сканирование продолжается. Поднесите штрихкод ближе, улучшите освещение и держите ровно."),
-     "decoder-error":t("Barcode decoding is having trouble. Hold it sharp and well lit.","Сканеру сложно распознать изображение. Проверьте чёткость и освещение."),
-     "frame-error":t("Camera frames are unavailable. Try another camera.","Изображение с камеры недоступно. Выберите другую камеру."),
-     "play-error":t("Camera video could not play. Check browser permissions.","Не удалось воспроизвести видео. Проверьте разрешение камеры."),
      disconnected:t("Camera disconnected. Choose another camera.","Камера отключена. Выберите другую камеру.")
     };
     status(location,messages[stage]||messages.searching);
@@ -196,7 +193,7 @@ async function startScan(location,deviceId=""){
     if(scanner?.token===token)showCameraChoices(location,cameras);
    }
   });
-  // The live callback confirms that actual camera frames are arriving.
+  // The upstream Quagga2 onProcessed callback confirms live decoding.
  }catch(error){
   if(token!==scanGeneration)return;
   await stopScan();
@@ -243,8 +240,11 @@ for(const store of stores){
   if(!api.saveProvision(value)){status(location,t("Check the name, quantity and barcode; the record was not saved.","Проверьте название, количество и штрихкод; запись не сохранена."));return;}
   edits[location]="";messages[location]=t("Food inventory saved.","Запасы сохранены.");renderAll();
  });
- document.getElementById(store.id==="pantry"?"dkPantry":"dkRootCellar")?.addEventListener("toggle",event=>{
-  if(!event.target.open&&scanner?.location===store.id)stopScan();
+ const section=document.getElementById(store.id==="pantry"?"dkPantry":"dkRootCellar");
+ section?.addEventListener("toggle",event=>{
+  // Ignore toggle events from any child disclosures.
+  if(event.target!==section)return;
+  if(!section.open&&scanner?.location===store.id)void stopScan();
  });
 }
 document.addEventListener("dkchef:provisions-changed",renderAll);
