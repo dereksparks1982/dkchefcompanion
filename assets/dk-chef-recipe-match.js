@@ -109,7 +109,7 @@ function parseQuantity(value){
  let raw=String(value??"").toLowerCase().trim();
  if(!raw||/\s+or\s+/.test(raw))return null;
  for(const [symbol,part]of Object.entries(fractions))raw=raw.replaceAll(symbol,part);
- raw=raw.replace(/^\s*(?:about|approx\.?|approximately|roughly)\s+/,"").trim();
+ if(/^(?:about\b|approx(?:\.|\b)|approximately\b|roughly\b)/.test(raw))return null;
  const number=raw.match(/^(\d+\/\d+)|^(\d+(?:\.\d+)?)(?:\s+(\d+\/\d+))?/);
  if(!number)return null;
  let count=0;
