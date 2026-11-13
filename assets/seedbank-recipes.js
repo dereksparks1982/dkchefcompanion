@@ -121,7 +121,7 @@ function checkProvisions(){
 const provisions=()=>state.provisions.items;
 function isReady(recipe,ingredient){
  const id=provisionKey(ingredient.name);
- return !!id&&provisions().some(row=>row.key===id&&row.available!==false);
+ return !!id&&provisions().some(row=>(row.location==="pantry"||row.location==="cellar")&&row.key===id&&row.available!==false);
 }
 function provisionNotify(){
  if(typeof Event==="function")document.dispatchEvent?.(new Event("dkchef:provisions-changed"));
@@ -129,7 +129,7 @@ function provisionNotify(){
 function persistKitchen(){if(!persist())return false;provisionNotify();render();return true;}
 function setIngredientReady(recipe,ingredient,available){
  const key=provisionKey(ingredient.name);if(!key)return false;
- const existing=provisions().filter(row=>row.key===key);
+ const existing=provisions().filter(row=>(row.location==="pantry"||row.location==="cellar")&&row.key===key);
  const prev=JSON.stringify(state.provisions),now=new Date().toISOString();
  if(existing.length)for(const row of existing){row.available=!!available;row.updatedAt=now;}
  else if(available&&provisions().length<3000)provisions().push({
@@ -145,7 +145,7 @@ function setIngredientReady(recipe,ingredient,available){
 function saveProvision(value){
  if(!value||typeof value!=="object")return false;
  const name=String(value.name||"").trim().slice(0,140),ingredient=String(value.ingredient||"").trim().slice(0,140),key=provisionKey(ingredient||name);
- const location=value.location==="cellar"?"cellar":"pantry",barcode=String(value.barcode||"").replace(/\s+/g,"");
+ const location=["pantry","cellar","medicine","household"].includes(value.location)?value.location:"pantry",barcode=String(value.barcode||"").replace(/\s+/g,"");
  const packages=Number(value.packages||1);
  if(!name||!key||key.length>140||barcode&&!/^\d{8,14}$/.test(barcode)||
   !Number.isSafeInteger(packages)||packages<1||packages>999999)return false;

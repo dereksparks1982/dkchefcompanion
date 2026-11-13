@@ -1,0 +1,59 @@
+/* DK Chef Companion: central scanner + minimized seed catalog.
+   One camera panel; storage sections have no separate scan controls. */
+.chef-scan-station{background:#fff;border:1px solid #b9d3bd;border-radius:16px;box-shadow:0 7px 22px #173e2a12;padding:18px;display:grid;gap:14px;margin:0 0 16px}
+.chef-station-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.chef-station-header h2{color:#1d5539;font-size:1.35rem;line-height:1.3;margin:0 0 4px}
+.chef-station-header p{color:#526b58;font-size:.86rem;line-height:1.55;margin:0;max-width:680px}
+.chef-station-label{color:#39694d;background:#edf6ed;border:1px solid #d5e7d4;border-radius:999px;font-size:.7rem;font-weight:750;padding:7px 11px;white-space:nowrap}
+.chef-station-actions,.chef-station-inputs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chef-scan-station button{border:1px solid #b8cfba;border-radius:9px;background:#f0f6ee;color:#21553a;font-size:.88rem;font-weight:720;padding:11px 15px;min-height:43px;cursor:pointer}
+.chef-scan-station button.chef-station-primary{color:#fff;border-color:#275d42;background:#286a4a}
+.chef-scan-station button:hover{filter:brightness(.96)}
+.chef-scan-station button:focus-visible,.chef-scan-station select:focus-visible,.chef-scan-station input:focus-visible{outline:3px solid #d7ab49;outline-offset:2px}
+.chef-station-mute{display:flex!important;align-items:center;gap:7px;margin:0 0 0 auto;font-size:.83rem;font-weight:630;color:#426351}
+.chef-station-mute input{accent-color:#2a674a;width:18px;height:18px}
+.chef-station-camera-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chef-station-camera-row label,.chef-station-manual label,.chef-station-fields label{color:#365f47;font-weight:700;font-size:.81rem;margin:0}
+.chef-station-camera-row select,.chef-station-inputs input,.chef-station-fields input,.chef-station-fields select{min-width:0;max-width:100%;border:1px solid #b4c8b7;background:#fff;color:#254533;border-radius:9px;padding:10px 11px;font:inherit;min-height:44px}
+.chef-station-camera-row select{flex:1;max-width:360px}
+.chef-station-preview{width:100%;min-height:230px;border-radius:12px;overflow:hidden;background:#10261b;border:2px solid #355f43;position:relative;display:flex;justify-content:center;align-items:center}
+.chef-station-preview[hidden]{display:none}
+.chef-station-preview video{display:block;width:100%!important;max-height:400px;min-height:190px;object-fit:contain;background:#10261b}
+.chef-station-preview canvas{display:none}
+.chef-station-manual{display:grid;gap:7px}
+.chef-station-inputs input{flex:1;min-width:160px;font-variant-numeric:tabular-nums}
+.chef-station-status{font-size:.84rem;line-height:1.55;color:#295f42;background:#f0f6ee;border-radius:8px;padding:10px 12px;min-height:37px;margin:0;overflow-wrap:anywhere}
+.chef-station-result{border:1px solid #a7c9ae;background:#f1f8f1;border-radius:11px;padding:14px;display:grid;gap:7px}
+.chef-station-result[hidden]{display:none}
+.chef-station-result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.chef-station-result-head strong{font-size:1.03rem;color:#174a32;overflow-wrap:anywhere}
+.chef-station-result-head small{color:#53745c;font-weight:650;font-size:.75rem}
+.chef-station-result p{margin:0;color:#516b56;font-size:.84rem}
+.chef-station-save{display:grid;gap:13px;background:#fafcf8;border:1px solid #d4e0d3;border-radius:12px;padding:13px}
+.chef-station-save[hidden]{display:none}
+.chef-station-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.chef-station-fields label{display:grid;gap:5px}
+.chef-station-help{margin:0;font-size:.76rem;line-height:1.55;color:#607164}
+.chef-seed-panel{border:1px solid #d5e3d1;background:#fff;border-radius:13px;margin:14px 0 18px;overflow:hidden}
+.chef-seed-panel>summary{cursor:pointer;padding:14px 18px;color:#225b3d;background:#eff6e9;font-size:1rem;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.chef-seed-panel>summary::-webkit-details-marker{display:none}
+.chef-seed-panel>summary:after{content:"⌄";font-size:1.25rem;margin-left:auto}
+.chef-seed-panel[open]>summary:after{content:"⌃"}
+.chef-seed-panel .chef-seed-count{font-size:.74rem;color:#50745b;font-weight:600}
+.chef-seed-inner{display:grid;gap:15px;padding:16px}
+.chef-seed-inner .stats{margin:0;display:flex}
+.chef-seed-inner .stat{background:#eef6ee;border-color:#d7e6d6;color:#2b583d}
+.chef-seed-inner .stat span{color:#597760}
+.chef-seed-inner .controls{box-shadow:none}
+@media(max-width:650px){
+ .chef-scan-station{padding:14px}
+ .chef-station-label{white-space:normal}
+ .chef-station-fields{grid-template-columns:1fr}
+ .chef-station-actions button{flex:1}
+ .chef-station-mute{flex-basis:100%;margin:3px 0}
+ .chef-station-inputs input{flex-basis:100%}
+ .chef-station-inputs button{width:100%}
+ .chef-seed-panel>summary{flex-wrap:wrap}
+ .chef-seed-panel .chef-seed-count{width:100%}
+ .chef-seed-inner{padding:10px}
+}

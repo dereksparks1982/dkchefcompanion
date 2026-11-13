@@ -28,6 +28,8 @@ test("Pepcid-like UPC is found in general product database even when absent from
  assert.equal(result.source,"UPCitemdb");
  assert.equal(urls[0].includes("world.openfoodfacts.org/api/v2/product/"),true);
  assert.equal(urls.some(url=>url.includes("world.openproductsfacts.org")),true);
+ assert.equal(urls.some(url=>url.includes("world.openbeautyfacts.org")),true);
+ assert.equal(urls.some(url=>url.includes("world.openpetfoodfacts.org")),true);
  assert.equal(urls.at(-1).includes("api.upcitemdb.com/prod/trial/lookup"),true);
  assert.equal((await api.lookup("716837855507")).found,true);
  assert.equal(urls.filter(url=>url.includes("upcitemdb.com")).length,1,"Successful lookups are cached in memory");
@@ -40,7 +42,8 @@ test("food facts lookup populates food without accessing fallback",async()=>{
  assert.equal(result.name,"Extra Virgin Olive Oil");
  assert.equal(result.size,"500 ml");
  assert.equal(result.category,"food");
- assert.equal(urls.length,1);
+ assert.ok(urls.some(url=>url.includes("world.openfoodfacts.org")));
+ assert.ok(urls.every(url=>!url.includes("upcitemdb")),"No general UPC lookup needed for food");
 });
 test("404 and other provider errors are distinguished",async()=>{
  const missing=harness(()=>null);

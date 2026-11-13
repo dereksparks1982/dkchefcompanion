@@ -116,7 +116,7 @@ function validate(data){
    if(!isObject(row)||typeof row.id!=="string"||!row.id||row.id.length>180||
     ids.has(row.id)||typeof row.key!=="string"||!row.key||row.key.length>140||
     typeof row.name!=="string"||!row.name||row.name.length>140||
-    !["pantry","cellar"].includes(row.location)||
+    !["pantry","cellar","medicine","household"].includes(row.location)||
     row.available!=null&&typeof row.available!=="boolean"||
     row.packages!=null&&(!Number.isSafeInteger(row.packages)||row.packages<1||row.packages>999999)||
     row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||

@@ -67,6 +67,7 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <link rel="stylesheet" href="../assets/seedbank-watering.css?v=20261112-journalwater1">
 <link rel="stylesheet" href="../assets/seedbank-i18n.css?v=20261112-ru-black1">
 <link rel="stylesheet" href="../assets/dk-chef-provisions.css?v=20261113-lookup1">
+<link rel="stylesheet" href="../assets/dk-chef-universal-scanner.css?v=20261113-station1">
 <link rel="stylesheet" href="../assets/seedbank-recipes.css?v=20261112-recipes2">
 <link rel="stylesheet" href="../assets/seedbank-resilience.css?v=20261112-syncbackup1">
 <link rel="stylesheet" href="../assets/seedbank-chevrons.css?v=20261112-chevron2">
@@ -80,14 +81,51 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <header><div class="header-inner"><div class="dk-language-bar"><label for="dkLanguageSelect">Language</label><select id="dkLanguageSelect" aria-label="Select language"><option value="en">English</option><option value="ru">Русский</option></select></div>
 <h1 class="dk-app-title"><img class="dk-logo-en" src="../assets/dk-seedbank-green-96.webp" alt="" width="68" height="68" aria-hidden="true"><img class="dk-logo-ru" src="../assets/dk-seedbank-red-96.webp" alt="" width="68" height="68" aria-hidden="true"><span class="dk-title-en" data-dk-no-translate>DK Chef Companion</span><span class="dk-title-ru" data-dk-no-translate>ДК Компаньон шеф-повара</span></h1>
 <p>From seed to table: plan your garden, track harvests, store and preserve food, and cook with recipes and traditional know-how.</p>
+</div></header>
+<main>
+<section id="dkProductStation" class="chef-scan-station" aria-label="Product scanner" data-dk-no-translate><h2>Product Scanner</h2><p>Loading the barcode scanner…</p></section>
+
+<details id="dkPantry" class="chef-store">
+ <summary>🫙 Pantry</summary>
+ <div class="chef-store-inner" id="chefPantryApp"></div>
+</details>
+<details id="dkRootCellar" class="chef-store">
+ <summary>🥔 Root Cellar</summary>
+ <div class="chef-store-inner" id="chefCellarApp"></div>
+</details>
+<details id="dkMedicine" class="chef-store">
+ <summary>💊 Medicine Cabinet</summary>
+ <div class="chef-store-inner" id="chefMedicineApp"></div>
+</details>
+<details id="dkHousehold" class="chef-store">
+ <summary>🧴 Household Supplies</summary>
+ <div class="chef-store-inner" id="chefHouseholdApp"></div>
+</details>
+<details id="recipeGuide" class="recipe-guide">
+ <summary>📖 Recipe Guide</summary>
+ <div class="rg-inner">
+  <p class="rg-intro">Recipes now use the same available ingredients recorded in your Pantry and Root Cellar. Mark On hand once for every recipe. Owning seeds does not mean you have an edible ingredient ready to cook.</p>
+  <div id="recipeApp" aria-live="polite">Loading your recipe collection…</div>
+ </div>
+</details>
+<details id="dkPreservationGuide" class="recipe-guide dk-preservation-tab">
+ <summary>🥫 Food Preservation</summary>
+ <div class="rg-inner dk-field-body">
+  <p class="dk-field-intro"></p>
+  <label class="dk-field-select"><span></span><select id="dkPreservationMethod"></select></label>
+  <div id="dkPreservationDetails"></div>
+ </div>
+</details>
+<details id="dkSeedCollection" class="chef-seed-panel">
+<summary><span>🌱 Seed Collection &amp; Catalog</span><span class="chef-seed-count">319 varieties · 19 categories</span></summary>
+<div class="chef-seed-inner">
 <div class="stats" aria-label="Inventory summary">
  <div class="stat"><strong>319</strong><span>Varieties in collection</span></div>
  <div class="stat"><strong>412</strong><span>Commercial packets</span></div>
  <div class="stat"><strong>7</strong><span>Bags of beans/lentils</span></div>
  <div class="stat"><strong>9</strong><span>Saved seed lots</span></div>
  <div class="stat"><strong>19</strong><span>Plant categories</span></div>
-</div></div></header>
-<main>
+</div>
 <section class="controls" aria-label="Find seeds">
  <label for="search">Search your seeds</label>
  <div class="search-row"><div class="search-wrap"><input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Try tomato, tomatoe, Peredovik, pollinator…"></div></div>
@@ -107,29 +145,6 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
  </div>
  <details class="jumpbox"><summary>Jump to a category</summary><div class="jump-list"><button class="jump" type="button" style="--accent:#9951a0" data-jump="Wildflower mixes">Wildflower mixes</button><button class="jump" type="button" style="--accent:#b17812" data-jump="Sunflowers">Sunflowers</button><button class="jump" type="button" style="--accent:#cf6d23" data-jump="Carrots">Carrots</button><button class="jump" type="button" style="--accent:#c14340" data-jump="Tomatoes">Tomatoes</button><button class="jump" type="button" style="--accent:#8061a8" data-jump="Eggplant">Eggplant</button><button class="jump" type="button" style="--accent:#c84638" data-jump="Peppers">Peppers</button><button class="jump" type="button" style="--accent:#387852" data-jump="Leafy greens">Leafy greens</button><button class="jump" type="button" style="--accent:#ad6551" data-jump="Other vegetables">Other vegetables</button><button class="jump" type="button" style="--accent:#896c33" data-jump="Roots and brassicas">Roots and brassicas</button><button class="jump" type="button" style="--accent:#786c42" data-jump="Beans and legumes">Beans and legumes</button><button class="jump" type="button" style="--accent:#bc751a" data-jump="Pumpkins and melons">Pumpkins and melons</button><button class="jump" type="button" style="--accent:#639246" data-jump="Gourds and squash">Gourds and squash</button><button class="jump" type="button" style="--accent:#347a58" data-jump="Trees and woody plants">Trees and woody plants</button><button class="jump" type="button" style="--accent:#a14e67" data-jump="Berries and fruit">Berries and fruit</button><button class="jump" type="button" style="--accent:#b65f90" data-jump="Flowers and ornamentals">Flowers and ornamentals</button><button class="jump" type="button" style="--accent:#258678" data-jump="Herbs and medicinal plants">Herbs and medicinal plants</button><button class="jump" type="button" style="--accent:#65843b" data-jump="Alliums: chives, onions and leeks">Alliums: chives, onions and leeks</button><button class="jump" type="button" style="--accent:#797f32" data-jump="Grains and grasses">Grains and grasses</button><button class="jump" type="button" style="--accent:#596ea8" data-jump="Fiber and historical crops">Fiber and historical crops</button></div></details>
 </section>
-<details id="dkPantry" class="chef-store">
- <summary>🫙 Pantry</summary>
- <div class="chef-store-inner" id="chefPantryApp"></div>
-</details>
-<details id="dkRootCellar" class="chef-store">
- <summary>🥔 Root Cellar</summary>
- <div class="chef-store-inner" id="chefCellarApp"></div>
-</details>
-<details id="recipeGuide" class="recipe-guide">
- <summary>📖 Recipe Guide</summary>
- <div class="rg-inner">
-  <p class="rg-intro">Recipes now use the same available ingredients recorded in your Pantry and Root Cellar. Mark On hand once for every recipe. Owning seeds does not mean you have an edible ingredient ready to cook.</p>
-  <div id="recipeApp" aria-live="polite">Loading your recipe collection…</div>
- </div>
-</details>
-<details id="dkPreservationGuide" class="recipe-guide dk-preservation-tab">
- <summary>🥫 Food Preservation</summary>
- <div class="rg-inner dk-field-body">
-  <p class="dk-field-intro"></p>
-  <label class="dk-field-select"><span></span><select id="dkPreservationMethod"></select></label>
-  <div id="dkPreservationDetails"></div>
- </div>
-</details>
 <div class="result-line"><p id="count" role="status" aria-live="polite">Showing 319 of 319 seed entries · 412 packets · 7 bags · 9 saved seed lots · 19 categories</p><p class="help">Tap a category heading to expand or collapse it.</p></div>
 <div class="legend" aria-label="Color key"><span class="legend-label">What the colors mean</span><button type="button" class="tag tag-food purpose-tag" data-purpose-tag="Food crop" aria-pressed="false" title="Filter by Food crop">Food crop</button><button type="button" class="tag tag-culinary purpose-tag" data-purpose-tag="Culinary herb" aria-pressed="false" title="Filter by Culinary herb">Culinary herb</button><button type="button" class="tag tag-pollinator purpose-tag" data-purpose-tag="Pollinator" aria-pressed="false" title="Filter by Pollinator">Pollinator</button><button type="button" class="tag tag-ornamental purpose-tag" data-purpose-tag="Ornamental" aria-pressed="false" title="Filter by Ornamental">Ornamental</button><button type="button" class="tag tag-tree purpose-tag" data-purpose-tag="Tree / woody" aria-pressed="false" title="Filter by Tree / woody">Tree / woody</button><button type="button" class="tag tag-grain purpose-tag" data-purpose-tag="Grain" aria-pressed="false" title="Filter by Grain">Grain</button><button type="button" class="tag tag-fiber purpose-tag" data-purpose-tag="Fiber / heritage" aria-pressed="false" title="Filter by Fiber / heritage">Fiber / heritage</button><button type="button" class="tag tag-botanical purpose-tag" data-purpose-tag="Botanical / traditional" aria-pressed="false" title="Filter by Botanical / traditional">Botanical / traditional</button><button type="button" class="tag tag-caution purpose-tag" data-purpose-tag="Caution" aria-pressed="false" title="Filter by Caution">Caution</button></div>
 <div id="collection"><details class="category" data-category="Wildflower mixes" style="--accent:#9951a0"><summary><span class="category-icon" aria-hidden="true">💐</span><span class="category-name">Wildflower mixes</span><span class="category-count"><span class="visible-num">2</span> / 2 entries · 5 units</span><span class="chevron" aria-hidden="true">⌄</span></summary><div class="entries"><article class="seed" data-name="Wildflower Mix" data-category="Wildflower mixes" data-tags="Pollinator|Ornamental" data-source="packet" data-amount="3"><div class="seed-top"><strong class="seed-name">Wildflower Mix</strong><span class="stock-badge">3 packets</span></div><div class="tagline"><button type="button" class="tag tag-pollinator purpose-tag" data-purpose-tag="Pollinator" aria-pressed="false" title="Filter by Pollinator">Pollinator</button><button type="button" class="tag tag-ornamental purpose-tag" data-purpose-tag="Ornamental" aria-pressed="false" title="Filter by Ornamental">Ornamental</button></div></article>
@@ -461,6 +476,9 @@ footer{border-top:1px solid var(--line);text-align:center;color:#697a6d;padding:
 <article class="seed" data-name="Gold Heirloom Cotton" data-category="Fiber and historical crops" data-tags="Fiber / heritage" data-source="packet" data-amount="5"><div class="seed-top"><strong class="seed-name">Gold Heirloom Cotton</strong><span class="stock-badge">5 packets</span></div><div class="tagline"><button type="button" class="tag tag-fiber purpose-tag" data-purpose-tag="Fiber / heritage" aria-pressed="false" title="Filter by Fiber / heritage">Fiber / heritage</button></div></article>
 <article class="seed" data-name="Virginia Gold Tobacco (Nicotiana tabacum)" data-category="Fiber and historical crops" data-tags="Fiber / heritage|Caution" data-source="packet" data-amount="1"><div class="seed-top"><strong class="seed-name">Virginia Gold Tobacco (Nicotiana tabacum)</strong><span class="stock-badge">1 packet</span></div><div class="tagline"><button type="button" class="tag tag-fiber purpose-tag" data-purpose-tag="Fiber / heritage" aria-pressed="false" title="Filter by Fiber / heritage">Fiber / heritage</button><button type="button" class="tag tag-caution purpose-tag" data-purpose-tag="Caution" aria-pressed="false" title="Filter by Caution">Caution</button></div></article></div></details></div>
 <section class="empty" id="empty" hidden role="status" aria-live="polite"><h2 id="missing-name">No matching records</h2><p id="missing-description">Try another name or clear filters.</p></section>
+</div>
+</details>
+
 </main>
 <footer>DK Chef Companion · From Seed to Table · DK Softworks. Plant names and historical references are for identification and learning, not a guarantee of food or handling safety.<p id="dkOfflineStatus" class="dk-offline-status" role="status" aria-live="polite" data-dk-no-translate>Preparing offline access…</p></footer>
 <script>
@@ -573,8 +591,9 @@ update();
 <script defer src="../assets/seedbank-recipes.js?v=20261112-kitchen1"></script>
 <script defer src="../assets/vendor/quagga2.min.js?v=20261113"></script>
 <script defer src="../assets/dk-chef-barcode-scanner.js?v=20261113-lookup1"></script>
-<script defer src="../assets/dk-chef-product-lookup.js?v=20261113-lookup1"></script>
-<script defer src="../assets/dk-chef-provisions-ui.js?v=20261113-lookup1"></script>
+<script defer src="../assets/dk-chef-product-lookup.js?v=20261113-station1"></script>
+<script defer src="../assets/dk-chef-provisions-ui.js?v=20261113-station1"></script>
+<script defer src="../assets/dk-chef-universal-scanner.js?v=20261113-station1"></script>
 <script defer src="../assets/seedbank-watering.js?v=20261112-journalwater1"></script>
 <script defer src="../assets/seedbank-monastery.js?v=20261112-preservationtab1"></script>
 <script defer src="../assets/seedbank-i18n.js?v=20261112-kitchen1"></script>

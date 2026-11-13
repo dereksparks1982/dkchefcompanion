@@ -103,26 +103,29 @@ test("Surface front-facing camera wins over rear camera",async()=>{
  await decoder.stop();
 });
 test("no barcode photos; live UI guards against accidental rerender shutdown",()=>{
- const ui=read("assets/dk-chef-provisions-ui.js");
+ const ui=read("assets/dk-chef-universal-scanner.js");
  assert.doesNotMatch(ui,/data-chef-photo|scanPhoto|Scan a barcode photo/);
- assert.match(ui,/if\(scanner\?\.location===location\)return/);
+ assert.match(ui,/one product scanner|one scanner/i);
  assert.match(ui,/Quagga2/);
- assert.match(ui,/data-chef-cameras/);
- assert.match(ui,/DKChefProductLookup\.lookup/);
- assert.match(ui,/data-chef-product/);
- assert.match(ui,/event\.target!==section/);
+ assert.match(ui,/chefScanCamera/);
+ assert.match(ui,/products\.lookup/);
+ assert.match(ui,/chefScanProductName/);
+ assert.match(ui,/chefScanMute/);
  assert.doesNotThrow(()=>new Function(ui));
+ assert.doesNotMatch(read("assets/dk-chef-provisions-ui.js"),/startScan|data-chef-scan/);
 });
 test("both deployed routes use the direct Quagga2 integration",()=>{
  for(const page of ["index.html","docs/index.html"]){
   const html=read(page);
   const quagga=html.indexOf("assets/vendor/quagga2.min.js");
-  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-lookup1");
-  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-lookup1");
-  const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-lookup1");
-  assert.ok(quagga>0&&bridge>quagga&&product>bridge&&app>product,page);
+  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-station1");
+  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-station1");
+  const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-station1");
+  const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-station1");
+  assert.ok(quagga>0&&bridge>quagga&&product>bridge&&app>product&&station>app,page);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v55/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v56/);
  assert.match(read("README.md"),/Quagga2 direct live-camera integration/);
  assert.match(read("sw.js"),/"assets\/dk-chef-product-lookup.js"/);
+ assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
 });

@@ -23,22 +23,22 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
   assert.match(html,/id="dkRootCellar"/);
   assert.ok(html.indexOf('id="dkPantry"')<html.indexOf('id="recipeGuide"'));
   assert.ok(html.indexOf('id="dkRootCellar"')<html.indexOf('id="recipeGuide"'));
-  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-lookup1/);
-  assert.match(html,/dk-chef-provisions\.css\?v=20261113-live2/);
+  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-station1/);
+  assert.match(html,/dk-chef-provisions\.css\?v=20261113-lookup1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
  assert.match(read("assets/dk-chef-barcode-scanner.js"),/getUserMedia/);
- assert.match(script,/window\.DKChefBarcodeScanner/);
- assert.match(script,/startScan/);
+ assert.doesNotMatch(script,/window\.DKChefBarcodeScanner/);
+ assert.doesNotMatch(script,/startScan|data-chef-scan|data-chef-camera/);
  assert.doesNotMatch(script,/scanPhoto|data-chef-photo/);
  assert.match(read("index.html"),/quagga2\.min\.js\?v=20261113/);
- assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-lookup1/);
+ assert.match(read("index.html"),/dk-chef-product-lookup\.js\?v=20261113-station1/);
  assert.match(read("assets/dk-chef-product-lookup.js"),/world\.openfoodfacts\.org/);
- assert.match(script,/Open Food Facts/);
+ assert.match(read("assets/dk-chef-universal-scanner.js"),/DKChefProductLookup/);
  assert.match(script,/sourceHarvestId/);
  assert.match(script,/harvestChoices/);
- assert.match(read("sw.js"),/dk-seedbank-app-v55/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v56/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
@@ -90,6 +90,19 @@ test("Root Cellar records are available to recipes but never counted as seed pac
  assert.equal(api.removeProvision(row.id),true);
  assert.equal(api.isIngredientReady({name:"Garlic"}),false);
  assert.ok(api.provisions().deleted.some(x=>x.id===row.id));
+});
+test("Medicine Cabinet and Household Supplies share backups but do not satisfy recipes",()=>{
+ const {api}=harness();
+ assert.equal(api.saveProvision({name:"Pepcid",barcode:"036000291452",location:"medicine",packages:1}),true);
+ assert.equal(api.saveProvision({name:"Salt",location:"household",packages:2}),true);
+ assert.equal(api.isIngredientReady({name:"Salt"}),false);
+ assert.equal(api.provisions().items.length,2);
+ assert.equal(api.provisions().items.find(x=>x.name==="Pepcid").location,"medicine");
+ assert.equal(api.saveProvision({name:"Salt",location:"pantry",packages:1}),true);
+ assert.equal(api.isIngredientReady({name:"Salt"}),true);
+ const win={};vm.runInNewContext(read("assets/seedbank-backup-utils.js"),{window:win,Date,Map,Set,URL});
+ const backup={format:"dk-seedbank-v1",journal:[],recipeGuide:api.exportData()};
+ assert.doesNotThrow(()=>win.DKSeedBankBackup.validate(backup));
 });
 test("per-item cloud changes and deletion markers converge without changing Drive API configuration",()=>{
  const w={};vm.runInNewContext(read("assets/seedbank-drive-merge.js"),{window:w,Date,Map,Set});
