@@ -80,7 +80,7 @@ test("only one scanner, correct asset load order, offline module and updated REA
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const sw=fs.readFileSync(path.join(base,"sw.js"),"utf8");
- assert.match(sw,/dk-seedbank-app-v59/);
+ assert.match(sw,/dk-seedbank-app-v60/);
  assert.match(sw,/"assets\/dk-chef-medicine-lookup.js"/);
  assert.match(fs.readFileSync(path.join(base,"README.md"),"utf8"),/Exact UPC/);
  assert.doesNotThrow(()=>new Function(code));

@@ -7,9 +7,11 @@ const path=require("node:path");
 const root=path.resolve(__dirname,"../..");
 const librarySource=fs.readFileSync(path.join(root,"assets/seedbank-recipe-library.js"),"utf8");
 const recipeSource=fs.readFileSync(path.join(root,"assets/seedbank-recipes.js"),"utf8");
+const matcherSource=fs.readFileSync(path.join(root,"assets/dk-chef-recipe-match.js"),"utf8");
 function environment({lang="en",saved}={}){
  const win={DKSeedBankCore:{plants:()=>new Map()}};
  vm.runInNewContext(librarySource,{window:win},{filename:"seedbank-recipe-library.js"});
+ vm.runInNewContext(matcherSource,{window:win},{filename:"dk-chef-recipe-match.js"});
  const host={innerHTML:"",listeners:{},addEventListener(type,cb){this.listeners[type]=cb;}};
  const language={listeners:{},addEventListener(type,cb){this.listeners[type]=cb;}};
  const document={
@@ -33,7 +35,7 @@ test("existing four recipes remain in the library",()=>{
  assert.match(env.host.innerHTML,/Meals & Kitchen/);
  assert.doesNotMatch(env.host.innerHTML,/Traditional absinthe/);
  assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"historical"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"historical"}):null}});
  assert.match(env.host.innerHTML,/Traditional absinthe/);
 });
 test("four added meals have ingredients, amounts, and complete methods",()=>{
@@ -61,7 +63,7 @@ test("spice section contains only multi-ingredient mixtures, never single spices
 test("Spice Blends tab switches recipes and preserves ingredient checks",()=>{
  const env=environment();
  env.host.listeners.click({target:{
-  id:"",closest:()=>({getAttribute:()=>"spices"})
+  id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"spices"}):null
  }});
  assert.match(env.host.innerHTML,/Homemade curry powder/);
  assert.match(env.host.innerHTML,/class="rg-method"/);
@@ -75,7 +77,7 @@ test("Spice Blends tab switches recipes and preserves ingredient checks",()=>{
 });
 test("Russian headings, directions, and amounts render without losing selected recipe",()=>{
  const env=environment();
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"spices"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"spices"}):null}});
  env.host.listeners.change({target:{id:"rg-recipe",value:"five-spice"}});
  env.document.documentElement.lang="ru";
  env.language.listeners.change();
@@ -92,7 +94,7 @@ test("previously saved recipe selections and custom recipes are retained",()=>{
  };
  const env=environment({saved:original});
  assert.doesNotMatch(env.host.innerHTML,/Family soup/);
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"personal"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"personal"}):null}});
  assert.match(env.host.innerHTML,/Family soup/);
  const after=JSON.parse(env.values.get("dk-seedbank-recipes-v1")||JSON.stringify(original));
  assert.equal(after.ready["custom-previous/ingredient-0"],true);
@@ -102,9 +104,9 @@ test("previously saved recipe selections and custom recipes are retained",()=>{
 test("recipe category buttons are initially closed and toggle closed",()=>{
  const env=environment();
  assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"kitchen"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"kitchen"}):null}});
  assert.match(env.host.innerHTML,/id="rg-recipe"/);
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"kitchen"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"kitchen"}):null}});
  assert.doesNotMatch(env.host.innerHTML,/id="rg-recipe"/);
 });
 test("Food Preservation is a separate top-level tab immediately below Recipe Guide",()=>{
@@ -147,7 +149,7 @@ test("two new classic sauces have measured ingredients and Russian instructions"
 });
 test("sauce recipes appear in the kitchen picker in English and Russian",()=>{
  const en=environment();
- en.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"kitchen"})}});
+ en.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"kitchen"}):null}});
  assert.match(en.host.innerHTML,/Homemade spaghetti sauce/);
  assert.match(en.host.innerHTML,/Classic Hollandaise sauce/);
  en.host.listeners.change({target:{id:"rg-recipe",value:"classic-hollandaise"}});
@@ -161,7 +163,7 @@ test("sauce recipes appear in the kitchen picker in English and Russian",()=>{
   assert.match(html,/seedbank-recipe-library\\.js\\?v=20261112-breads1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v59/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v60/);
 });
 
 test("Bread & Baking includes ten complete bilingual breads, with naan for tikka masala",()=>{
@@ -177,7 +179,7 @@ test("Bread & Baking includes ten complete bilingual breads, with naan for tikka
   assert.ok(bread.steps.length>=4,bread.id);
   assert.equal(bread.steps.length,bread.stepsRu.length,bread.id);
  }
- env.host.listeners.click({target:{id:"",closest:()=>({getAttribute:()=>"bread"})}});
+ env.host.listeners.click({target:{id:"",closest:selector=>selector==="[data-rg-section]"?({getAttribute:()=>"bread"}):null}});
  assert.match(env.host.innerHTML,/Garlic and cilantro naan/);
  env.document.documentElement.lang="ru";env.language.listeners.change();
  assert.match(env.host.innerHTML,/Хлеб и выпечка/);

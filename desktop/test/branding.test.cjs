@@ -48,5 +48,5 @@ test("All legacy local profile, Drive folder and backup schema names remain unch
  assert.match(workflow,/workflow_dispatch:/);
  assert.doesNotMatch(workflow,/  push:/);
  assert.match(workflow,/DK-Chef-Companion-0\.9\.9-Linux-x86_64\.tar\.gz/);
- assert.match(read("sw.js"),/dk-seedbank-app-v59/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v60/);
 });

@@ -2,10 +2,11 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),vm=require("node:vm");
 const root=path.resolve(__dirname,"../..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
-const library=read("assets/seedbank-recipe-library.js"),recipes=read("assets/seedbank-recipes.js");
+const library=read("assets/seedbank-recipe-library.js"),matcher=read("assets/dk-chef-recipe-match.js"),recipes=read("assets/seedbank-recipes.js");
 function harness(saved){
  const win={DKSeedBankCore:{plants:()=>new Map()}};
  vm.runInNewContext(library,{window:win});
+ vm.runInNewContext(matcher,{window:win});
  const listeners={};
  const app={innerHTML:"",addEventListener:(name,fn)=>listeners[name]=fn};
  const select={addEventListener(){}};
@@ -44,7 +45,7 @@ test("one combined Pantry & Root Cellar section holds the original shared invent
  assert.doesNotMatch(script,/name="barcode"|Barcode \(optional\)/);
  assert.match(script,/lowStockAt/);
  assert.match(script,/expiryNotice/);
- assert.match(read("sw.js"),/dk-seedbank-app-v59/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v60/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{

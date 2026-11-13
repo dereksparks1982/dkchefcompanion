@@ -64,7 +64,7 @@ const tabs=[
  {id:"historical",en:"Historical",ru:"Исторические"},
  {id:"personal",en:"My Recipes",ru:"Мои рецепты"}
 ];
-let activeCategory=null;
+let activeCategory=null,cookFilter="all";
 const ru=()=>document.documentElement.lang==="ru";
 const say=(en,rus)=>ru()?rus:en;
 const localized=(entity,field)=>ru()&&entity[field+"Ru"]?entity[field+"Ru"]:entity[field];
@@ -120,8 +120,11 @@ function checkProvisions(){
 }
 const provisions=()=>state.provisions.items;
 function isReady(recipe,ingredient){
+ const matcher=window.DKChefRecipeMatch;
+ if(matcher)return matcher.matches(ingredient,provisions()).length>0;
  const id=provisionKey(ingredient.name);
- return !!id&&provisions().some(row=>(row.location==="pantry"||row.location==="cellar")&&row.key===id&&row.available!==false);
+ return !!id&&provisions().some(row=>(row.location==="pantry"||row.location==="cellar")&&
+  row.key===id&&row.available!==false&&(row.packages==null||Number(row.packages)>0));
 }
 function provisionNotify(){
  if(typeof Event==="function")document.dispatchEvent?.(new Event("dkchef:provisions-changed"));
@@ -129,7 +132,9 @@ function provisionNotify(){
 function persistKitchen(){if(!persist())return false;provisionNotify();render();return true;}
 function setIngredientReady(recipe,ingredient,available){
  const key=provisionKey(ingredient.name);if(!key)return false;
- const existing=provisions().filter(row=>(row.location==="pantry"||row.location==="cellar")&&row.key===key);
+ const matching=window.DKChefRecipeMatch?.matches(ingredient,provisions())||[];
+ const existing=provisions().filter(row=>(row.location==="pantry"||row.location==="cellar")&&
+  (row.key===key||matching.some(hit=>hit.id===row.id)));
  const prev=JSON.stringify(state.provisions),now=new Date().toISOString();
  if(existing.length)for(const row of existing){row.available=!!available;row.updatedAt=now;}
  else if(available&&provisions().length<3000)provisions().push({
@@ -203,8 +208,63 @@ function removeProvision(id){
 
 function recipeTabMarkup(){
  return '<div class="rg-section-tabs" role="group" aria-label="'+say("Recipe sections","Разделы рецептов")+'">'+
+ '<button type="button" class="rg-section-button rg-cook-tab'+(activeCategory==="cook"?' is-selected':'')+
+ '" data-rg-section="cook" aria-pressed="'+(activeCategory==="cook")+'">'+
+ say("🍳 Cook from Pantry","🍳 Что приготовить из запасов")+'</button>'+
  tabs.filter(tab=>tab.id!=="personal"||state.custom.length).map(tab=>
  '<button type="button" class="rg-section-button'+(activeCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(activeCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>';
+}
+function cookPlanner(recipes){
+ const matcher=window.DKChefRecipeMatch;
+ if(!matcher)return '<p class="rg-note">'+say("Recipe matching is unavailable. Reload the app.","Не удалось сопоставить рецепты. Обновите приложение.")+'</p>';
+ const ranked=matcher.rank(recipes,provisions());
+ const ready=ranked.filter(x=>x.complete).length;
+ const near=ranked.filter(x=>x.near).length;
+ const stocked=provisions().filter(matcher.isEdibleStock).length;
+ const selected=ranked.filter(x=>cookFilter==="ready"?x.complete:cookFilter==="near"?x.near:true);
+ const labels={kitchen:say("Meals & Kitchen","Блюда и кухня"),bread:say("Bread & Baking","Хлеб и выпечка"),
+  spices:say("Spice Blends","Смеси специй"),personal:say("My Recipes","Мои рецепты")};
+ return '<section class="rg-cook-guide">'+
+  '<h3>'+say("Cook from what you have","Что приготовить из ваших запасов")+'</h3>'+
+  '<p class="rg-note">'+say(
+   "Matches use your Pantry & Root Cellar only. Seeds, medicine and household goods are not cooking ingredients.",
+   "Учитываются только продукты кладовой и погреба. Семена, лекарства и бытовые товары не считаются ингредиентами.")+'</p>'+
+  '<div class="rg-cook-stats"><span><strong>'+ready+'</strong> '+
+   say("fully matched recipes","рецептов со всеми ингредиентами")+'</span><span><strong>'+near+'</strong> '+
+   say("nearly ready","почти готово")+'</span><span><strong>'+stocked+'</strong> '+
+   say("available food records","доступных записей продуктов")+'</span></div>'+
+  '<p class="rg-cook-caution">'+say(
+   "Ingredient-name matching does not verify quantities, freshness or suitability. Opening a recipe never deducts stock. Optional substitutions are not automatically counted.",
+   "Совпадения названий не подтверждают количество, свежесть или пригодность продуктов. Просмотр рецептов не списывает запасы. Возможные замены не считаются имеющимися ингредиентами.")+'</p>'+
+  '<div class="rg-cook-filters" role="group" aria-label="'+say("Recipe filter","Фильтр рецептов")+'">'+
+  [["all",say("All recipes","Все рецепты")],["ready",say("All ingredients on hand","Все ингредиенты есть")],
+   ["near",say("Missing 1–2","Не хватает 1–2")]].map(([id,label])=>
+  '<button type="button" class="rg-button'+(cookFilter===id?" rg-selected":"")+
+  '" data-rg-cook-filter="'+id+'" aria-pressed="'+(cookFilter===id)+'">'+esc(label)+'</button>').join("")+'</div>'+
+  (selected.length?'<div class="rg-cook-results">'+selected.map(score=>{
+   const recipe=score.recipe,missing=score.missing;
+   const status=score.complete?say("All listed ingredients on hand","Все ингредиенты в наличии"):
+    score.near?say("Almost ready","Почти готово"):say("Missing ingredients","Не хватает ингредиентов");
+   const swapIdeas=missing.filter(x=>x.suggestion).slice(0,2).map(x=>
+    '<li>'+esc(localized(x.ingredient,"name"))+' → '+esc(x.suggestion.item)+'</li>');
+   return '<article class="rg-cook-card'+(score.complete?" is-complete":"")+'">'+
+    '<div class="rg-cook-card-top"><div><h4>'+esc(localized(recipe,"name"))+'</h4>'+
+    '<small>'+esc(labels[category(recipe)]||labels.kitchen)+'</small></div>'+
+    '<strong class="rg-cook-score">'+score.ready+' / '+score.total+'</strong></div>'+
+    '<p class="rg-cook-state">'+status+'</p>'+
+    (missing.length?'<p class="rg-cook-missing"><strong>'+say("Missing: ","Не хватает: ")+'</strong>'+
+     missing.map(x=>esc(localized(x.ingredient,"name"))).join(", ")+'</p>':
+    '<p class="rg-cook-missing">'+say("No tracked ingredients missing.","По вашим записям все ингредиенты есть.")+'</p>')+
+    (swapIdeas.length?'<div class="rg-cook-swaps"><strong>'+
+     say("Optional swap ideas (check the recipe):","Возможные замены (проверьте рецепт):")+
+     '</strong><ul>'+swapIdeas.join("")+'</ul></div>':"")+
+    '<button type="button" class="rg-button rg-cook-open" data-rg-open-recipe="'+esc(recipe.id)+'">'+
+     say("View recipe","Открыть рецепт")+'</button></article>';
+  }).join("")+'</div>':
+  '<p class="rg-note">'+say(
+   "Nothing matches this filter yet. Add ingredients to Pantry & Root Cellar, or show all recipes.",
+   "Пока нет подходящих рецептов. Добавьте продукты в кладовую и погреб или выберите все рецепты.")+'</p>')+
+ '</section>';
 }
 function render(){
  const recipes=all();
@@ -213,6 +273,10 @@ function render(){
  const selectedCategory=category(recipe);
  if(!activeCategory){
   root.innerHTML=recipeTabMarkup()+'<p class="rg-note">'+say("Select a category to view recipes. All categories start closed.","Выберите раздел для просмотра рецептов. Все разделы изначально закрыты.")+'</p>';
+  return;
+ }
+ if(activeCategory==="cook"){
+  root.innerHTML=recipeTabMarkup()+cookPlanner(recipes);
   return;
  }
  const categoryRecipes=recipes.filter(r=>category(r)===selectedCategory);
@@ -224,19 +288,25 @@ function render(){
  const missing=rows.filter(r=>!r.ready);
  const newSeed=rows.filter(r=>r.ing.type==="garden"&&!r.found.length&&!r.ready);
  const extras=rows.filter(r=>r.ing.type==="pantry"&&!r.ready);
- const readySummary=ready.length===rows.length?"All ingredients marked on hand. Confirm freshness, identity and safety before use.":"You still need to obtain or prepare "+missing.length+" ingredient"+(missing.length===1?"":"s")+".";
+ const readySummary=ready.length===rows.length?
+  say("All listed ingredients on hand. Confirm quantities, freshness and suitability before cooking.",
+   "Все перечисленные ингредиенты есть. Перед приготовлением проверьте количество, свежесть и пригодность продуктов."):
+  say("Missing ingredients: ","Не хватает ингредиентов: ")+missing.length+".";
  root.innerHTML=recipeTabMarkup()+
   '<div class="rg-controls"><label for="rg-recipe">'+say("Choose a recipe","Выберите рецепт")+'<select id="rg-recipe">'+categoryRecipes.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===recipe.id?" selected":"")+'>'+esc(localized(r,"name"))+'</option>').join("")+'</select></label>'+
   (recipe.id.startsWith("custom-")?'<button class="rg-button rg-danger" type="button" id="rg-remove">Delete this recipe</button>':"")+'</div>'+
   '<p class="rg-note">'+esc(recipe.family||"Personal recipe")+'</p>'+
   '<h3 class="rg-title">'+esc(localized(recipe,"name"))+'</h3><p class="rg-subtitle">'+esc(localized(recipe,"intro")||"Compare each ingredient with your seed inventory and pantry.")+'</p>'+
   (recipe.serves?'<p class="rg-yield"><strong>'+say("Yield: ","Выход: ")+'</strong>'+esc(localized(recipe,"serves"))+'</p>':"")+
-  '<div class="rg-metrics"><div class="rg-metric"><strong>'+available.length+" / "+botanical.length+'</strong>Growable ingredients with seeds</div>'+
-  '<div class="rg-metric"><strong>'+ready.length+" / "+rows.length+'</strong>Ingredients marked on hand</div>'+
-  '<div class="rg-metric"><strong>'+missing.length+'</strong>Still not ready</div></div>'+
+  '<div class="rg-metrics"><div class="rg-metric"><strong>'+available.length+" / "+botanical.length+'</strong>'+say("Seed packets recorded (not food)","Есть семена (не пищевые продукты)")+'</div>'+
+  '<div class="rg-metric"><strong>'+ready.length+" / "+rows.length+'</strong>'+say("Ingredients on hand","Ингредиенты в наличии")+'</div>'+
+  '<div class="rg-metric"><strong>'+missing.length+'</strong>'+say("Still missing","Не хватает")+'</div></div>'+
   '<div class="rg-list">'+rows.map(({ing,found,ready})=>
-   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(localized(ing,"name"))+(ing.amount?'<small class="rg-amount">'+esc(localized(ing,"amount"))+'</small>':"")+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> On hand</label></div>'+
-   '<div class="rg-state '+(ready||found.length?"found":"missing")+'">'+(ready?"✓ Ingredient on hand":ing.type==="pantry"?"Not tracked as a seed":found.length?"✓ Seeds recorded; ingredient not confirmed ready":"✕ No matching seed recorded")+'</div>'+
+   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(localized(ing,"name"))+(ing.amount?'<small class="rg-amount">'+esc(localized(ing,"amount"))+'</small>':"")+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> '+say("On hand","В наличии")+'</label></div>'+
+   '<div class="rg-state '+(ready||found.length?"found":"missing")+'">'+(ready?say("✓ Ingredient on hand","✓ Ингредиент в наличии"):
+  ing.type==="pantry"?say("Not marked on hand","Не отмечено в запасах"):
+  found.length?say("Seeds recorded; edible ingredient not confirmed","Семена есть; пищевой ингредиент не подтверждён"):
+  say("No matching seed recorded","Нет подходящих семян"))+'</div>'+
    (found.length?'<p class="rg-matches">Your seed records: '+esc(found.join(", "))+'</p>':"")+
    (ing.note?'<p class="rg-detail">'+esc(ing.note)+'</p>':"")+'</div>'
   ).join("")+'</div>'+
@@ -266,10 +336,23 @@ root.addEventListener("change",event=>{
  }
 });
 root.addEventListener("click",event=>{
+ const open=event.target.closest?.("[data-rg-open-recipe]");
+ if(open){
+  const recipe=all().find(r=>r.id===open.getAttribute("data-rg-open-recipe"));
+  if(recipe){state.selected=recipe.id;activeCategory=category(recipe);persist();render();}
+  return;
+ }
+ const filter=event.target.closest?.("[data-rg-cook-filter]");
+ if(filter){
+  const value=filter.getAttribute("data-rg-cook-filter");
+  cookFilter=["all","ready","near"].includes(value)?value:"all";
+  render();return;
+ }
  const section=event.target.closest?.("[data-rg-section]");
  if(section){
   const group=section.getAttribute("data-rg-section");
   if(activeCategory===group){activeCategory=null;render();return;}
+  if(group==="cook"){activeCategory="cook";cookFilter="all";render();return;}
   const recipes=all(),next=recipes.find(r=>category(r)===group);
   if(next){
    const current=recipes.find(r=>r.id===state.selected);

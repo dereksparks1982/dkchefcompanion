@@ -158,7 +158,7 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
   const medicine=html.indexOf("assets/dk-chef-medicine-lookup.js?v=20261113-medicine1");
   assert.ok(quagga>0&&bridge>quagga&&medicine>bridge&&product>medicine&&app>product&&station>app,page);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v59/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v60/);
  assert.match(read("README.md"),/Quagga2 direct live-camera integration/);
  assert.match(read("sw.js"),/"assets\/dk-chef-product-lookup.js"/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);

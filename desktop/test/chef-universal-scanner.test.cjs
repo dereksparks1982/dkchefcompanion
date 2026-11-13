@@ -134,7 +134,7 @@ test("scanner audio and lookup remain independent of Quagga2's built-in live eng
  assert.match(universal,/camera\.start\(/);
  assert.match(universal,/products\.lookup\(/);
  assert.doesNotMatch(universal,/decodeSingle|toDataURL|drawImage|getUserMedia\(/);
- assert.match(read("sw.js"),/dk-seedbank-app-v59/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v60/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
  assert.doesNotThrow(()=>new Function(universal));
 });
