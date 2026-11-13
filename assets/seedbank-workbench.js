@@ -158,7 +158,8 @@ host.innerHTML=
  '<label>Supplier<input name="supplier" maxlength="100"></label>'+
  '<label>Date obtained (optional)<input name="obtained" type="date"></label>'+
  '<label>Record type<select name="kind"><option value="packet">Individual seed packet</option><option value="bulk">Loose seeds / bulk lot</option></select></label>'+
- '<p class="wb-note wb-span">For separate packet histories, record each physical packet as its own entry.</p>'+
+ '<label class="wb-check wb-span"><input type="checkbox" name="alreadyCounted" value="yes"> This packet is already included in the variety card count</label>'+
+ '<p class="wb-note wb-span">Check this for a packet you already own and counted in DK Seed Bank. Registration adds a history without increasing the card total. Leave unchecked for a separately recorded lot. Record each physical packet only once.</p>'+
  '<button type="submit">Add seed lot</button></form><div id="wbLotList"></div>'+
  '<h3>Finish a packet already in your collection</h3>'+
  '<p class="wb-note">For packets counted on an existing seed card, mark one empty without deleting the variety or its other packets.</p>'+
@@ -307,24 +308,39 @@ $("#wbEditSeed").addEventListener("submit",event=>{
 $("#wbLotForm").addEventListener("submit",event=>{
  event.preventDefault();const form=event.currentTarget,v=new FormData(form),seedKey=String(v.get("seedKey")||"");
  if(!item(seedKey))return;
+ const kind=v.get("kind")==="bulk"?"bulk":"packet",alreadyCounted=v.get("alreadyCounted")==="yes";
+ const plant=item(seedKey);
+ if(alreadyCounted&&kind!=="packet"){
+  notice("A card counts packets, not loose seed lots. Choose Individual seed packet.");return;
+ }
+ const slots=window.DKSeedBankPacketTracking?.catalogSlots(
+  plant?.card.dataset.source==="packet"?plant.card.dataset.amount:-1,state.lots,seedKey)||0;
+ if(alreadyCounted&&slots<1){
+  notice("No unregistered packet remains on this variety card. Check its packet count first.");return;
+ }
+ const existing=state.lots.filter(row=>row.seedKey===seedKey&&row.origin==="catalog"&&row.status!=="empty").length;
+ const lot=String(v.get("lot")||"").trim().slice(0,90)||
+  (alreadyCounted?"Existing packet "+(existing+1):"");
  const entry={id:id(),updatedAt:changed(),seedKey,
-  lot:String(v.get("lot")||"").slice(0,90),year:number(v.get("year"))||null,
+  lot,year:number(v.get("year"))||null,
   count:number(v.get("count")),place:String(v.get("place")||"").slice(0,100),
   supplier:String(v.get("supplier")||"").slice(0,100),obtained:String(v.get("obtained")||""),
-  kind:v.get("kind")==="bulk"?"bulk":"packet",status:"active",archivedAt:"",history:[]};
+  kind,origin:alreadyCounted?"catalog":"new",status:"active",archivedAt:"",history:[]};
  if(state.lots.length>=3000){notice("Seed lot limit reached. Export a backup before adding more.");return;}
  state.lots.push(entry);
  if(!persist()){state.lots.pop();return;}
- form.reset();renderAll();notice("Seed lot recorded.");
+ form.reset();renderAll();
+ document.dispatchEvent(new Event("dkseedbank:packet-inventory-changed"));
+ notice(alreadyCounted?"Existing packet registered without changing the variety's packet count.":"Seed lot recorded.");
 });
 function usedSeeds(key){
  const tracker=window.DKSeedBankPacketTracking;
- return state.lots.filter(row=>row.seedKey===key&&row.status!=="empty"&&row.origin!=="catalog")
+ return state.lots.filter(row=>row.seedKey===key&&row.status!=="empty")
   .reduce((n,row)=>n+(tracker?.lotUsage(core.journal(),row.id).maximum||0),0);
 }
 // Earlier lot records have no status and must remain active after an upgrade.
 function activeRecordedSeeds(lots,key){
- return lots.filter(row=>row.seedKey===key&&row.status!=="empty"&&row.origin!=="catalog")
+ return lots.filter(row=>row.seedKey===key&&row.status!=="empty")
   .reduce((sum,row)=>sum+(Number.isFinite(Number(row.count))?Math.max(0,Number(row.count)):0),0);
 }
 function transitionPacket(row,status,at){
@@ -357,7 +373,7 @@ function packetPlantingHistory(row){
 }
 function renderLots(){
  const tracker=window.DKSeedBankPacketTracking,ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
- const active=state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog");
+ const active=state.lots.filter(row=>row.status!=="empty");
  const grouped=new Map();
  active.forEach(row=>{if(!grouped.has(row.seedKey))grouped.set(row.seedKey,[]);grouped.get(row.seedKey).push(row);});
  state.savedSeeds.forEach(row=>{if(!grouped.has(row.seedKey))grouped.set(row.seedKey,[]);});
@@ -398,6 +414,7 @@ function renderLots(){
     return '<li><strong>'+esc(row.lot||l("Unlabeled lot","Партия без названия"))+'</strong>'+
      (row.year?' · '+row.year:"")+(row.obtained?' · '+esc(row.obtained):"")+
      (row.supplier?' · '+esc(row.supplier):"")+
+     (row.origin==="catalog"?' · '+l("Already counted on variety card","Уже учтён в карточке сорта"):"")+
      '<p>'+esc(accounting)+'</p>'+packetPlantingHistory(row)+
      ' <button type="button" class="wb-small" data-wb-packet-status="empty" data-id="'+esc(row.id)+'">'+l("Mark empty","Отметить пустым")+'</button>'+
      ' <button type="button" class="wb-small" data-wb-delete="lots" data-id="'+esc(row.id)+'">'+l("Remove","Удалить")+'</button></li>';
@@ -462,6 +479,7 @@ function updatePacket(row,status,archiveDate=""){
   persist();return false;
  }
  renderAll();
+ document.dispatchEvent(new Event("dkseedbank:packet-inventory-changed"));
  notice(status==="empty"?
   (document.documentElement.lang==="ru"?"Пакет архивирован. История сохранена.":"Packet archived. Its history is retained."):
   (document.documentElement.lang==="ru"?"Пакет восстановлен.":"Packet restored."));
@@ -601,7 +619,7 @@ function renderViability(){
   count:countSeeds(key),used:usedSeeds(key)
  }));
  const assessment=window.DKSeedBankAlerts?.assess({
-  plants,lots:state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog"),tests:state.tests,lowStock:state.lowStock,
+  plants,lots:state.lots.filter(row=>row.status!=="empty"),tests:state.tests,lowStock:state.lowStock,
   lastFrost:core.settings().lastFrost,today:today(),locale:ru?"ru":"en"
  });
  const types={
@@ -758,10 +776,14 @@ document.addEventListener("click",event=>{
  const btn=event.target.closest("[data-wb-delete]");if(!btn)return;
  const list=btn.dataset.wbDelete,record=state[list]?.find(x=>x.id===btn.dataset.id);
  if(!record||!["lots","beds","harvests","savedSeeds","tests","succession"].includes(list))return;
+ if(list==="lots"&&core.journal().some(entry=>entry.seedLotId===record.id)){
+  notice("This packet is linked to a planting. Archive the packet instead so its history stays intact.");return;
+ }
  if(!window.confirm("Remove this "+list+" record?"))return;
  state[list]=state[list].filter(x=>x.id!==btn.dataset.id);
   recordDeletion(list,btn.dataset.id);
  persist();renderAll();
+ if(list==="lots")document.dispatchEvent(new Event("dkseedbank:packet-inventory-changed"));
 });
 // Species-level journal illustrations are REFERENCES, never proof of the planted cultivar.
 // Commons file sources are linked beside each image, and no image is copied into the repo.
@@ -952,7 +974,7 @@ function renderSummary(){
  const packets=[...core.plants().values()].filter(p=>p.card.dataset.archived!=="yes");
  const catalogPackets=packets.filter(p=>p.card.dataset.source==="packet")
   .reduce((n,p)=>n+number(p.card.dataset.amount),0);
- const trackedPackets=state.lots.filter(row=>row.status!=="empty"&&row.origin!=="catalog"&&row.kind!=="bulk").length;
+ const trackedPackets=state.lots.filter(row=>row.status!=="empty"&&row.kind!=="bulk").length;
  $("#wbSummary").innerHTML='<span><strong>'+packets.length+'</strong> active varieties</span>'+
   '<span><strong>'+catalogPackets+'</strong> packets on cards</span>'+
   '<span><strong>'+trackedPackets+'</strong> individually tracked packets (may overlap)</span>'+

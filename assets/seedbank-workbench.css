@@ -161,3 +161,8 @@ html[lang="ru"] #wbPacketArchive>summary{color:#863c50;background:#faf0f1}
 .wb-record li .wb-small{margin:3px}
 @media(max-width:580px){.wb-packet-plantings{padding:9px}.wb-packet-plantings .wb-small{min-height:40px}.wb-record{word-break:normal}}
 html[lang="ru"] .wb-packet-plantings>summary{color:#8f304b}
+
+/* Register already-owned packets with no duplicate card stock. */
+#wbLotForm .wb-check{grid-column:1/-1;background:#f4f9f0;border:1px solid #d0e3d2;border-radius:8px;padding:11px 12px;line-height:1.4}
+#wbLotForm .wb-check input{accent-color:#276141;flex:0 0 auto}
+html[lang="ru"] #wbLotForm .wb-check{background:#fff6f7;border-color:#edd7dc}

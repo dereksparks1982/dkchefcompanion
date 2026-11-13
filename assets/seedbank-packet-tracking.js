@@ -28,8 +28,17 @@ function balance(lot,journal){
  return {...usage,count,lower,upper,
   possibleOverdraw:count!==null&&(usage.minimum>count||(usage.maximum!==null&&usage.maximum>count))};
 }
+// Registering a packet from the catalog consumes an existing packet slot.
+function catalogSlots(cardPackets,lots,seedKey){
+ const stock=Number(cardPackets);
+ if(!Number.isSafeInteger(stock)||stock<0)return 0;
+ const registered=(Array.isArray(lots)?lots:[]).filter(row=>
+  row&&row.seedKey===seedKey&&row.origin==="catalog"&&
+  row.kind!=="bulk"&&row.status!=="empty").length;
+ return Math.max(0,stock-registered);
+}
 function unassigned(journal,seedKey){
  return (Array.isArray(journal)?journal:[]).filter(e=>e&&e.seedKey===seedKey&&!e.seedLotId);
 }
-root.DKSeedBankPacketTracking=Object.freeze({amountSown,lotUsage,balance,unassigned});
+root.DKSeedBankPacketTracking=Object.freeze({amountSown,lotUsage,balance,catalogSlots,unassigned});
 })(window);

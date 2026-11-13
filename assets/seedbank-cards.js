@@ -766,6 +766,13 @@ function updateJournalPacketOptions(preferred=""){
  }
 }
 journalForm.elements.namedItem("seedKey").addEventListener("change",()=>updateJournalPacketOptions());
+document.addEventListener("dkseedbank:packet-inventory-changed",()=>{
+ if(!journalForm.hidden){
+  const selected=journalForm.elements.namedItem("seedLotId").value;
+  updateJournalPacketOptions(selected);
+ }
+ renderJournal();
+});
 function openForm(entry){
  section.open=true;journalForm.hidden=false;editId=entry?entry.id:null;journalForm.dataset.seedKey=entry&&entry.seedKey?entry.seedKey:"";
  const select=journalForm.elements.namedItem("seedKey");

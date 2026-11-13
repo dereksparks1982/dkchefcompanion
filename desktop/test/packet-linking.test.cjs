@@ -43,6 +43,6 @@ test("packet form and histories belong to existing garden tools in both language
   assert.ok(html.indexOf("seedbank-packet-tracking.js")<html.indexOf("seedbank-cards.js"));
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v43/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v44/);
  assert.match(read("sw.js"),/seedbank-packet-tracking\.js/);
 });
