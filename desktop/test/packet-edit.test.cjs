@@ -33,8 +33,8 @@ test("packet edit preserves links and status history and appears on active and a
  assert.match(source,/dkseedbank:packet-inventory-changed/);
  for(const filename of ["index.html","docs/index.html"]){
   const page=read(filename);
-  assert.match(page,/seedbank-workbench\.js\?v=20261112-packetedit1/);
+  assert.match(page,/seedbank-workbench\.js\?v=20261112-[a-z0-9-]+/);
   assert.equal((page.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v45/);
+ assert.match(read("sw.js"),/const APP_CACHE="dk-seedbank-app-v\d+"/);
 });

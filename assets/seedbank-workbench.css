@@ -177,3 +177,23 @@ html[lang="ru"] #wbLotForm .wb-check{background:#fff6f7;border-color:#edd7dc}
 .wb-packet-count-history ul{margin:4px 0 9px;padding-left:20px}
 html[lang="ru"] #wbLotEditForm{background:#fff6f8;border-color:#dcbec5}
 html[lang="ru"] .wb-packet-count-history>summary{color:#89334b}
+
+/* Direct, lazy packet history on every botanical seed card. */
+.seed > .wb-card-packets{border-top:1px solid #dce9db;margin-top:6px;min-width:0}
+.seed > .wb-card-packets > summary{cursor:pointer;list-style:none;color:#245c40;font-size:.81rem;font-weight:750;padding:10px 3px;display:flex;align-items:center;justify-content:space-between;gap:9px}
+.seed > .wb-card-packets > summary::-webkit-details-marker{display:none}
+.seed > .wb-card-packets > summary .wb-card-packet-count{font-size:.69rem;color:#65796b;font-weight:550;text-align:right}
+.seed .wb-card-packet-content{padding:6px 0 12px;min-width:0;font-size:.8rem}
+.seed .wb-card-packet-list{display:grid;gap:9px;margin:9px 0}
+.seed .wb-card-packet-row{background:#f9fcf6;border:1px solid #dce9db;border-radius:9px;padding:10px;overflow-wrap:anywhere}
+.seed .wb-card-packet-row strong{color:#2d563a}
+.seed .wb-card-packet-row>p{font-size:.77rem;margin:6px 0}
+.seed .wb-card-packet-state{font-weight:650;color:#4a7254;font-size:.72rem}
+.seed .wb-card-packet-row .wb-packet-plantings{margin:8px 0}
+.seed .wb-card-packet-row .wb-packet-plantings ul{padding-left:16px}
+.seed .wb-card-packet-content .wb-small{background:#f0f7ed;border:1px solid #b5cfb7;color:#254f37;font-size:.75rem;font-weight:700;min-height:35px;padding:7px 10px;border-radius:8px;cursor:pointer}
+.seed .wb-card-packet-content .wb-card-manage{width:100%;margin-top:3px}
+.seed .wb-card-packets:focus-within>summary,.seed .wb-card-packet-content button:focus-visible{outline:2px solid #2a7750;outline-offset:2px}
+html[lang="ru"] .seed > .wb-card-packets > summary{color:#8c3450}
+html[lang="ru"] .seed .wb-card-packet-row{background:#fff8f8;border-color:#ebd2d9}
+@media(max-width:580px){.seed > .wb-card-packets > summary{align-items:flex-start;flex-wrap:wrap}.seed > .wb-card-packets > summary .wb-card-packet-count{text-align:left}.seed .wb-card-packet-content .wb-small{min-height:40px}}

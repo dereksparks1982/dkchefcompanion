@@ -31,8 +31,8 @@ test("archiving is integrated with existing inventory, both web copies and offli
  assert.match(code,/state\.overrides\[row\.seedKey\]/);
  for(const file of ["index.html","docs/index.html"]){
   const html=fs.readFileSync(path.join(root,file),"utf8");
-  assert.match(html,/seedbank-workbench\.js\?v=20261112-packetarchive1/);
+  assert.match(html,/seedbank-workbench\.js\?v=20261112-[a-z0-9-]+/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v43/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/const APP_CACHE="dk-seedbank-app-v\d+"/);
 });

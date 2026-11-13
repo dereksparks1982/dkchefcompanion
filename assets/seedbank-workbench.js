@@ -407,7 +407,7 @@ function renderLots(){
   const savedCount=saved.reduce((sum,row)=>sum+(Number(row.count)>0?number(row.count):0),0);
   const unassigned=tracker?.unassigned(core.journal(),key)||[];
   const cardPackets=p.card.dataset.source==="packet"?number(p.card.dataset.amount):0;
-  return '<div class="wb-record"><strong>'+esc(p.name)+'</strong>'+
+  return '<div class="wb-record" data-wb-lot-key="'+esc(key)+'"><strong>'+esc(p.name)+'</strong>'+
    '<p>'+l("Packets on variety card: ","Пакетов в карточке сорта: ")+cardPackets+
    ' · '+l("Individually tracked active lots: ","Отдельно учтённых активных партий: ")+lots.length+
    ' · '+l("Known seeds in tracked lots: ","Известное количество семян в партиях: ")+counted+
@@ -451,7 +451,7 @@ function renderLots(){
  $("#wbArchivedCount").textContent="("+history.length+")";
  $("#wbArchivedPackets").innerHTML=history.length?history.map(row=>{
   const plant=item(row.seedKey),isEmpty=row.status==="empty",events=Array.isArray(row.history)?row.history:[];
-  return '<div class="wb-record wb-archived-packet"><strong>'+esc(plant?.name||row.seedKey)+'</strong>'+
+  return '<div class="wb-record wb-archived-packet" data-wb-archive-key="'+esc(row.seedKey)+'"><strong>'+esc(plant?.name||row.seedKey)+'</strong>'+
    ' · '+esc(row.lot||l("Unlabeled packet","Пакет без названия"))+
    '<p>'+l("Status: ","Состояние: ")+(isEmpty?l("Empty / archived","Пустой / в архиве"):l("Restored to active catalog","Возвращён в коллекцию"))+
    (row.archivedAt?' · '+l("Emptied ","Опустел ")+esc(row.archivedAt):"")+'</p>'+
@@ -486,6 +486,7 @@ document.addEventListener("click",event=>{
  fields.namedItem("count").value=Number(row.count)>0?row.count:"";
  fields.namedItem("year").value=Number(row.year)>0?row.year:"";
  const plant=item(row.seedKey);
+ revealPacketManager(row.seedKey,false);
  $("#wbLotEditTitle").textContent=(plant?.name||row.seedKey)+" · "+(row.lot||"Unlabeled packet")+
   (row.status==="empty"?" · archived":"");
  form.hidden=false;
@@ -732,7 +733,7 @@ function renderViability(){
    "Counts refer only to recorded seed lots. Sowing windows use your entered frost date and are estimates, not a weather forecast.",
    "Учитываются только записанные партии семян. Сроки посева основаны на указанной дате последних заморозков и являются ориентировочными.")+'</p>';
 }
-$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(()=>{renderViability();renderLots();renderHarvests();renderSavedSeeds();refreshPlantingLinks();refreshSelects();}));
+$("#dkLanguageSelect")?.addEventListener("change",()=>queueMicrotask(()=>{renderViability();renderLots();renderHarvests();renderSavedSeeds();refreshPlantingLinks();refreshSelects();syncCardPacketHistory();}));
 $("#wbBedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
  state.beds.push({id:id(),updatedAt:changed(),name:String(v.get("name")).slice(0,90),type:String(v.get("type")),previous:String(v.get("previous")),seedKeys:v.get("seedKey")?[String(v.get("seedKey"))]:[],notes:String(v.get("notes")||"").slice(0,220)});
@@ -1043,7 +1044,7 @@ document.addEventListener("change",event=>{
  if(key&&!item(key))return;
  core.setJournalSeedKey(id,key);
 });
-document.addEventListener("dkseedbank:journal-rendered",()=>{journalEnhance();renderSummary();renderLots();renderViability();refreshPlantingLinks();});
+document.addEventListener("dkseedbank:journal-rendered",()=>{journalEnhance();renderSummary();renderLots();renderViability();refreshPlantingLinks();syncCardPacketHistory();});
 document.addEventListener("dkseedbank:inventorychange",()=>{refreshSelects();renderAll();});
 document.addEventListener("click",event=>{
  const btn=event.target.closest("[data-wb-guide]");if(!btn)return;
@@ -1076,8 +1077,125 @@ function renderPlantWarnings(){
   if(onion){const el=document.createElement("p");el.className="wb-note";el.textContent="Daylength guidance: "+onion;box.appendChild(el);}
  });
 }
+// A compact, read-only packet history on each original seed card.
+// Only expanded panels render packet lists; the botanical catalog is unchanged.
+function cardPacketSummary(key){
+ const rows=state.lots.filter(row=>row&&row.seedKey===key&&typeof row.id==="string");
+ const ids=new Set(rows.map(row=>row.id));
+ return {rows,active:rows.filter(row=>row.status!=="empty").length,
+  archived:rows.filter(row=>row.status==="empty").length,
+  linked:core.journal().filter(entry=>entry&&ids.has(entry.seedLotId)).length};
+}
+function renderCardPacketHistory(panel,key){
+ const plant=item(key);
+ if(!plant||!panel?.isConnected)return;
+ const ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+ const summary=cardPacketSummary(key),journal=core.journal(),tracker=window.DKSeedBankPacketTracking;
+ const cardCount=plant.card.dataset.source==="packet"?Number(plant.card.dataset.amount):null;
+ const countLabel=cardCount===null?
+  l("Variety card is not a commercial packet count.","Карточка сорта не содержит количества покупных пакетов."):
+  l("Packets on variety card: ","Пакетов в карточке сорта: ")+cardCount;
+ const records=summary.rows.slice().sort((a,b)=>
+  (a.status==="empty"?1:0)-(b.status==="empty"?1:0)||
+  String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+ const list=records.length?records.map(row=>{
+  const archived=row.status==="empty",usage=tracker?.balance(row,journal);
+  const known=usage?.count,linked=usage?.linked.length||0;
+  const initial=known===null?l("Seed count unknown","Количество семян неизвестно"):
+   l("Initially counted: ","Изначально подсчитано: ")+known;
+  let remaining="";
+  if(!archived&&linked&&known!==null){
+   remaining=usage.maximum===null?l("Remaining count uncertain","Остаток семян не определён"):
+    l("Estimated remaining: ","Примерно осталось: ")+
+    (usage.lower===usage.upper?usage.lower:usage.lower+"–"+usage.upper);
+  }
+  return '<section class="wb-card-packet-row"><strong>'+esc(row.lot||
+   l("Unlabeled packet or lot","Пакет или партия без названия"))+'</strong>'+
+   ' <span class="wb-card-packet-state">'+(archived?l("Empty / archived","Пустой / в архиве"):
+    l("Active","Активный"))+'</span>'+
+   (row.kind==="bulk"?' · '+l("Loose lot","Партия россыпью"):"")+
+   (row.origin==="catalog"?' · '+l("Already on variety card","Уже учтён в карточке"):"")+
+   '<p>'+esc(initial)+(remaining?' · '+esc(remaining):"")+'</p>'+
+   (row.supplier?'<p>'+l("Supplier: ","Поставщик: ")+esc(row.supplier)+'</p>':"")+
+   (row.obtained?'<p>'+l("Obtained: ","Получен: ")+esc(row.obtained)+'</p>':"")+
+   (row.place?'<p>'+l("Stored at: ","Место хранения: ")+esc(row.place)+'</p>':"")+
+   '<p>'+linked+' '+l("linked planting(s)","связанных посадок")+'</p>'+
+   packetPlantingHistory(row)+packetCountHistory(row)+
+   '<button type="button" class="wb-small" data-wb-edit-packet="'+esc(row.id)+'">'+
+   l("Edit packet","Изменить пакет")+'</button></section>';
+ }).join(""):'<p class="wb-note">'+l(
+  "No individual packet records yet. Register an already-owned packet to link its plantings without increasing the variety card count.",
+  "Отдельные пакеты пока не учтены. Зарегистрируйте уже имеющийся пакет, чтобы связывать с ним посадки, не увеличивая число пакетов в карточке.")+'</p>';
+ const target=panel.querySelector(".wb-card-packet-content");
+ if(!target)return;
+ // Remember which nested histories were open across routine journal updates.
+ const openIds=new Set($$("details[open][data-wb-card-nested]",target).map(node=>node.dataset.wbCardNested));
+ target.innerHTML='<p class="wb-note">'+esc(countLabel)+
+  ' · '+summary.rows.length+' '+l("tracked record(s)","учтённых записей")+
+  ' · '+summary.linked+' '+l("linked planting(s)","связанных посадок")+'</p>'+
+  '<div class="wb-card-packet-list">'+list+'</div>'+
+  '<button class="wb-small wb-card-manage" type="button" data-wb-manage-variety="'+esc(key)+'">'+
+  l("Manage packets for this variety","Управлять пакетами этого сорта")+'</button>';
+ // Preserve open planting/count histories for an expanded card during rerenders.
+ $$(".wb-card-packet-row",target).forEach((row,index)=>{
+  const id=records[index]?.id;if(!id)return;
+  const children=$$("details",row);
+  for(const detail of children){
+   const kind=detail.classList.contains("wb-packet-plantings")?"plantings":
+    detail.classList.contains("wb-packet-count-history")?"counts":"";
+   if(!kind)continue;
+   detail.dataset.wbCardNested=id+"|"+kind;
+   if(openIds.has(detail.dataset.wbCardNested))detail.open=true;
+  }
+ });
+}
+function syncCardPacketHistory(){
+ const ru=document.documentElement.lang==="ru",l=(en,russian)=>ru?russian:en;
+ for(const plant of core.plants().values()){
+  let detail=plant.card.querySelector(":scope > .wb-card-packets");
+  if(!detail){
+   detail=document.createElement("details");
+   detail.className="wb-card-packets";
+   detail.innerHTML='<summary><span class="wb-card-packet-heading"></span> '+
+    '<small class="wb-card-packet-count"></small></summary>'+
+    '<div class="wb-card-packet-content"></div>';
+   plant.card.appendChild(detail);
+   detail.addEventListener("toggle",()=>{if(detail.open)renderCardPacketHistory(detail,plant.key);});
+  }
+  const stats=cardPacketSummary(plant.key);
+  $(".wb-card-packet-heading",detail).textContent=l("📦 Packets & history","📦 Пакеты и история");
+  $(".wb-card-packet-count",detail).textContent=stats.rows.length?
+   stats.active+" "+l("active","активных")+" · "+stats.archived+" "+l("archived","в архиве"):
+   l("No individual records","Без отдельных записей");
+  if(detail.open)renderCardPacketHistory(detail,plant.key);
+ }
+}
+function revealPacketManager(key,scroll=true){
+ const plant=item(key);if(!plant)return false;
+ const inventory=$("#wb-inventory");
+ planner.open=true;inventory.open=true;
+ const form=$("#wbLotForm");
+ form.elements.namedItem("seedKey").value=key;
+ const catalog=$("#wbArchiveCatalog [name=seedKey]");
+ if(catalog)catalog.value=key;
+ if(scroll){
+  const active=$$("[data-wb-lot-key]",$("#wbLotList")).find(node=>node.dataset.wbLotKey===key);
+  const archived=$$("[data-wb-archive-key]",$("#wbArchivedPackets")).find(node=>node.dataset.wbArchiveKey===key);
+  if(!active&&archived)$("#wbPacketArchive").open=true;
+  const target=active||archived||form;
+  requestAnimationFrame(()=>{
+   if(!target.isConnected)return;
+   target.scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"auto":"smooth",block:"center"});
+  });
+ }
+ return true;
+}
+document.addEventListener("click",event=>{
+ const button=event.target.closest?.("[data-wb-manage-variety]");
+ if(button)revealPacketManager(button.dataset.wbManageVariety);
+});
 function renderAll(){
- renderPlantWarnings();renderSummary();renderLots();renderSuccession();renderViability();renderBeds();renderHarvests();renderSavedSeeds();renderLabels();showMonth();refreshPlantingLinks();journalEnhance();updateBackToTop();
+ renderPlantWarnings();renderSummary();renderLots();renderSuccession();renderViability();renderBeds();renderHarvests();renderSavedSeeds();renderLabels();showMonth();refreshPlantingLinks();journalEnhance();syncCardPacketHistory();updateBackToTop();
 }
 function importData(data,options={}){
  if(!data||typeof data!=="object"||Array.isArray(data))return false;

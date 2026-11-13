@@ -95,6 +95,8 @@ const pairs=[
 ["Changing a packet does not change its variety, archive status, or linked plantings. Seed-count corrections are kept in its history.","Редактирование не меняет сорт, статус архива и связанные посадки. Исправления количества семян сохраняются в истории."],
 ["Save packet changes","Сохранить изменения пакета"],["Cancel editing","Отменить редактирование"],
 ["Edit packet","Изменить пакет"],["Seed-count corrections","Исправления количества семян"],
+["📦 Packets & history","📦 Пакеты и история"],["No individual records","Без отдельных записей"],
+["Manage packets for this variety","Управлять пакетами этого сорта"],["No individual packet records yet. Register an already-owned packet to link its plantings without increasing the variety card count.","Отдельные пакеты пока не учтены. Зарегистрируйте уже имеющийся пакет, чтобы связывать с ним посадки, не увеличивая число пакетов в карточке."],
 ["This packet is already included in the variety card count","Этот пакет уже учтён в количестве на карточке сорта"],
 ["Check this for a packet you already own and counted in DK Seed Bank. Registration adds a history without increasing the card total. Leave unchecked for a separately recorded lot. Record each physical packet only once.","Отметьте поле, если пакет уже учтён в коллекции. Он получит отдельную историю без увеличения числа пакетов в карточке. Для отдельной партии снимите отметку. Каждый пакет учитывайте только один раз."],
 ["Already counted on variety card","Уже учтён в карточке сорта"],

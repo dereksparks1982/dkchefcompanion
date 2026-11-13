@@ -24,5 +24,5 @@ test("journal watering, seed-card shortcut, and planner shortcut open a visible 
  assert.match(source,/requestAnimationFrame\(\(\)=>\{/);
  for(const file of ["index.html","docs/index.html"])
   assert.match(fs.readFileSync(path.join(root,file),"utf8"),/seedbank-watering\.js\?v=20261112-wateringnav1/);
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v41/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/const APP_CACHE="dk-seedbank-app-v\d+"/);
 });

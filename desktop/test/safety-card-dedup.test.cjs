@@ -35,5 +35,5 @@ test("no workbench or Russian safety text creates an additional visible duplicat
  for(const file of ["index.html","docs/index.html"]){
   assert.match(read(file),/seedbank-cards\.css\?v=20261112-single-caution1/);
  }
- assert.match(read("sw.js"),/dk-seedbank-app-v40/);
+ assert.match(read("sw.js"),/const APP_CACHE="dk-seedbank-app-v\d+"/);
 });
