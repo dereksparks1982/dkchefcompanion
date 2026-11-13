@@ -41,3 +41,9 @@
 .chef-camera-picker[hidden]{display:none}
 .chef-camera-picker select{width:100%;max-width:480px;min-height:42px;border:1px solid #a9bdad;border-radius:8px;padding:7px;background:#fff;color:#21422e}
 .chef-camera-help{font-size:.8rem;color:#536d59;line-height:1.5;margin:0}
+
+/* Identified barcode information, shown below the editable inventory fields. */
+.chef-product-result{display:grid;gap:5px;border:1px solid #b2ceb9;border-radius:9px;background:#f1f8f0;padding:12px;color:#214a33;font-size:.88rem}
+.chef-product-result[hidden]{display:none}
+.chef-product-result strong{font-size:.98rem;overflow-wrap:anywhere}
+.chef-product-result small{font-size:.76rem;color:#557564}

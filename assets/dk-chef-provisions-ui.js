@@ -53,7 +53,8 @@ function createForm(location,editing){
  '<label class="chef-check"><input type="checkbox" name="available"'+(row.available===false?"":" checked")+'>'+t("I have this food available","Этот продукт есть в наличии")+'</label>'+
  '<div class="chef-store-buttons"><button class="chef-primary" type="submit">'+t(editing?"Save changes":"Add to inventory",editing?"Сохранить изменения":"Добавить в запасы")+'</button>'+
  (editing?'<button type="button" data-chef-cancel="'+location+'">'+t("Cancel edit","Отменить")+'</button>':"")+'</div>'+
- '<p class="chef-form-status" data-chef-status="'+location+'" role="status"></p></form>';
+ '<p class="chef-form-status" data-chef-status="'+location+'" role="status"></p>'+
+ '<div class="chef-product-result" data-chef-product="'+location+'" hidden role="status"></div></form>';
 }
 function render(location){
  const host=$("#"+stores.find(x=>x.id===location)?.host);if(!host)return;
@@ -74,7 +75,7 @@ function render(location){
  }).join(""):'<p class="chef-empty">'+t("Nothing recorded yet. Add foods manually or scan a product barcode.","Пока нет записей. Добавьте продукты вручную или отсканируйте штрихкод.")+'</p>')+'</div>'+
  '<h3 class="chef-store-heading">'+t(editing?"Edit food":"Add food",editing?"Изменить продукт":"Добавить продукт")+'</h3>'+
  createForm(location,editing)+
- '<p class="chef-source-note">'+t("Barcode lookup needs internet and uses Open Food Facts. Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Live camera scanning uses Quagga2 on this device. Point at a grocery barcode for automatic reading. Scanning works offline; product lookup needs internet. Camera permission and a connected webcam are required.","Поиск штрихкода требует интернета и использует Open Food Facts. Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера использует локальный сканер Quagga2. Просто наведите её на штрихкод продукта. Считывание работает без интернета; поиск товара требует интернет. Для камеры нужны разрешение и подключённая веб-камера.")+
+ '<p class="chef-source-note">'+t("Barcode lookup needs internet and checks Open Food Facts, Open Products Facts and UPCitemdb (rate-limited). Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Live camera scanning uses Quagga2 on this device. Point at a grocery barcode for automatic reading. Scanning works offline; product lookup needs internet. Camera permission and a connected webcam are required.","Поиск штрихкода требует интернета и использует Open Food Facts, Open Products Facts и UPCitemdb (с ограничением запросов). Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера использует локальный сканер Quagga2. Просто наведите её на штрихкод продукта. Считывание работает без интернета; поиск товара требует интернет. Для камеры нужны разрешение и подключённая веб-камера.")+
  ' <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a> (ODbL).</p>';
  if(messages[location])host.querySelector("[data-chef-status]").textContent=messages[location];
 }
@@ -83,38 +84,62 @@ function status(location,message){
  messages[location]=message;
  const node=$('[data-chef-status="'+location+'"]');if(node)node.textContent=message;
 }
+function productResult(location,product){
+ const node=$('[data-chef-product="'+location+'"]');
+ if(!node)return;
+ if(!product){node.hidden=true;node.innerHTML="";return;}
+ const kind=product.category==="food"?t("Food","Продукты"):t("General product","Другой товар");
+ node.hidden=false;
+ node.innerHTML='<strong>'+esc(product.name)+'</strong>'+
+  '<div>'+[product.brand,product.size].filter(Boolean).map(esc).join(" · ")+'</div>'+
+  '<small>'+esc(kind)+' · '+esc(t("Source: ","Источник: ")+product.source)+'</small>';
+}
 async function identify(location){
  const form=$('[data-chef-form="'+location+'"]');if(!form)return;
  const code=String(form.elements.barcode.value||"").trim();
- if(!/^\d{8,14}$/.test(code)){status(location,t("Enter an 8–14 digit product barcode.","Введите штрихкод из 8–14 цифр."));return;}
- const previous=api.provisions().items.find(row=>row.barcode===code);
- if(previous){
-  for(const name of ["name","brand","size"])if(!form.elements[name].value)form.elements[name].value=previous[name]||"";
-  if(!form.elements.ingredient.value)form.elements.ingredient.value=previous.ingredient||"";
-  status(location,t("Previously scanned product found in your records. Confirm details and save.","Продукт найден в ваших записях. Проверьте данные и сохраните."));
+ productResult(location,null);
+ if(!/^\d{8,14}$/.test(code)){
+  status(location,t("Enter an 8–14 digit product barcode.","Введите штрихкод из 8–14 цифр."));
   return;
  }
- status(location,t("Looking up the barcode…","Поиск по штрихкоду…"));
+ const previous=api.provisions().items.find(row=>row.barcode===code);
+ if(previous){
+  for(const field of ["name","brand","size"])
+   if(!form.elements[field].value)form.elements[field].value=previous[field]||"";
+  if(!form.elements.ingredient.value)form.elements.ingredient.value=previous.ingredient||"";
+  productResult(location,{name:previous.name,brand:previous.brand,size:previous.size,
+   category:"general",source:t("Your inventory","Ваши запасы")});
+  status(location,t("Product found in your inventory. Confirm and save.","Товар найден в ваших запасах. Проверьте и сохраните."));
+  return;
+ }
+ if(!window.DKChefProductLookup){
+  status(location,t("Product lookup module did not load. Reload the app.","Модуль поиска товаров не загрузился. Обновите приложение."));
+  return;
+ }
+ status(location,t("Barcode scanned: ","Штрихкод считан: ")+code+" · "+
+  t("Searching product databases…","Поиск по базам товаров…"));
  try{
-  const endpoint="https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+"?fields=code,product_name,brands,quantity,categories_tags";
-  const response=await fetch(endpoint,{headers:{Accept:"application/json"}});
-  if(!response.ok)throw Error("Lookup unavailable");
-  const data=await response.json(),p=data?.product;
-  if(!p||!(p.product_name||p.product_name_en||p.generic_name)){
-   status(location,t("Not found. Enter the product manually and save it.","Не найдено. Введите сведения о продукте вручную и сохраните."));return;
+  const found=await window.DKChefProductLookup.lookup(code);
+  if(form.elements.barcode.value.trim()!==code)return;
+  if(!found.found){
+   const unavailable=found.reason==="unavailable";
+   const limited=found.reason==="rate-limited";
+   status(location,limited?
+    t("Product database rate limit reached. Barcode was saved in the field; enter product details manually.","Превышен лимит запросов. Штрихкод сохранён; введите данные товара вручную."):
+    unavailable?
+    t("Product databases could not be reached. Check internet connection or enter product details manually.","Базы товаров недоступны. Проверьте интернет или введите сведения вручную."):
+    t("Barcode read, but this item isn't listed in the available databases. Enter details manually.","Штрихкод считан, но товар не найден в доступных базах. Введите данные вручную."));
+   return;
   }
-  form.elements.name.value=String(p.product_name||p.product_name_en||p.generic_name).slice(0,140);
-  form.elements.brand.value=String(p.brands||"").slice(0,100);
-  form.elements.size.value=String(p.quantity||"").slice(0,80);
-  // A barcode identifies a branded product. Let users correct the generic ingredient
-  // so recipe matching never guesses from brand names alone.
-  const tags=Array.isArray(p.categories_tags)?p.categories_tags:[];
-  const known=[["en:olive-oils","Olive oil"],["en:table-salts","Salt"],["en:salt","Salt"],
-   ["en:flours","All-purpose flour"],["en:pastas","Pasta"],["en:rice","Rice"]];
-  const guess=known.find(x=>tags.includes(x[0]));
-  if(guess&&!form.elements.ingredient.value)form.elements.ingredient.value=guess[1];
-  status(location,t("Product found. Verify the name and package size, then add it.","Продукт найден. Проверьте название и размер упаковки, затем добавьте."));
- }catch(error){status(location,t("Product lookup unavailable. You can still enter it manually.","Поиск недоступен. Продукт можно добавить вручную."));}
+  form.elements.name.value=found.name;
+  form.elements.brand.value=found.brand||"";
+  form.elements.size.value=found.size||"";
+  // General products, including medicines, are not guessed to be recipe ingredients.
+  productResult(location,found);
+  status(location,t("Product identified. Check the details, then add it to your inventory.","Товар найден. Проверьте сведения и добавьте в запасы."));
+ }catch(error){
+  status(location,t("Product lookup failed. The scanned barcode remains available for manual entry.","Не удалось найти товар. Штрихкод сохранён для ручного ввода."));
+ }
 }
 // Quagga2 owns the live camera. Stop only after a valid barcode or an explicit exit.
 let scanGeneration=0;
@@ -141,16 +166,16 @@ function describeCameraError(error){
   return t("This browser cannot access the camera. Enter the barcode manually.","Этот браузер не поддерживает доступ к камере. Введите штрихкод вручную.");
  return t("Could not start barcode camera: ","Не удалось включить сканер: ")+String(error?.message||error||"Unknown error").slice(0,160);
 }
-function showCameraChoices(location,cameras){
+function showCameraChoices(location,cameras,defaultDeviceId=""){
  const picker=$('[data-chef-cameras="'+location+'"]');
  if(!picker)return;
  const selected=picker.value;
  picker.innerHTML='<option value="">'+t("Automatic","Автоматически")+'</option>'+
   cameras.map(x=>'<option value="'+esc(x.deviceId)+'">'+esc(x.label)+'</option>').join("");
  picker.parentElement.hidden=cameras.length===0;
- if(cameras.some(x=>x.deviceId===selected))picker.value=selected;
+ if(cameras.some(x=>x.deviceId===(selected||defaultDeviceId)))picker.value=selected||defaultDeviceId;
 }
-async function startScan(location,deviceId=""){
+async function startScan(location,deviceId="",recovery=0){
  const decoder=window.DKChefBarcodeScanner;
  if(!decoder){
   status(location,t("Barcode decoder is not loaded. Reload this page or enter the number manually.","Сканер не загружен. Обновите страницу или введите номер вручную."));return;
@@ -188,9 +213,14 @@ async function startScan(location,deviceId=""){
      disconnected:t("Camera disconnected. Choose another camera.","Камера отключена. Выберите другую камеру.")
     };
     status(location,messages[stage]||messages.searching);
+    if(stage==="disconnected"&&recovery===0){
+     // Recover once if Firefox or a Surface camera track ends unexpectedly.
+     status(location,t("Camera connection dropped. Retrying the same camera once…","Камера отключилась. Повторное подключение…"));
+     void startScan(location,deviceId,1);
+    }
    },
-   onCameras:cameras=>{
-    if(scanner?.token===token)showCameraChoices(location,cameras);
+   onCameras:(cameras,chosen)=>{
+    if(scanner?.token===token)showCameraChoices(location,cameras,chosen);
    }
   });
   // The upstream Quagga2 onProcessed callback confirms live decoding.

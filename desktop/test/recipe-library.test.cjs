@@ -161,7 +161,7 @@ test("sauce recipes appear in the kitchen picker in English and Russian",()=>{
   assert.match(html,/seedbank-recipe-library\\.js\\?v=20261112-breads1/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
- assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v54/);
+ assert.match(fs.readFileSync(path.join(root,"sw.js"),"utf8"),/dk-seedbank-app-v55/);
 });
 
 test("Bread & Baking includes ten complete bilingual breads, with naan for tikka masala",()=>{

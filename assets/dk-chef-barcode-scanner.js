@@ -33,7 +33,7 @@ function normalize(raw,format){
 function configuration(target,deviceId="",agent=""){
  const constraints={width:{ideal:1280},height:{ideal:720}};
  if(deviceId)constraints.deviceId={exact:deviceId};
- else if(/iPhone|iPad|iPod|Android/i.test(String(agent)))constraints.facingMode="environment";
+ else constraints.facingMode=/iPhone|iPad|iPod|Android/i.test(String(agent))?"environment":"user";
  return {
   inputStream:{type:"LiveStream",target,constraints,size:960},
   locate:true,
@@ -78,9 +78,19 @@ async function start(options){
  if(root.isSecureContext===false)
   throw Object.assign(new Error("Camera requires HTTPS"),{name:"SecurityError"});
  if(!options?.target)throw Error("Camera preview element missing");
+ // Prefer the self-facing camera on desktops/Surface Pro; rear camera on phones.
+ // A known Front Camera deviceId is more reliable than facingMode on Linux.
+ let chosen=options.deviceId||"";
+ if(!chosen&&!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+  try{
+   const list=await devices();
+   const front=list.find(x=>/\b(front|user.?facing|selfie)\b/i.test(x.label));
+   if(front)chosen=front.deviceId;
+  }catch(error){/* Fall back to facingMode:user. */}
+ }
  const session={options,detected:null,processed:null,frames:0,recognized:false};
  current=session;
- const config=configuration(options.target,options.deviceId||"",navigator.userAgent);
+ const config=configuration(options.target,chosen,navigator.userAgent);
  try{
   await new Promise((resolve,reject)=>{
    try{quagga.init(config,error=>error?reject(error):resolve());}
@@ -104,7 +114,7 @@ async function start(options){
   quagga.onDetected(session.detected);
   quagga.onProcessed?.(session.processed);
   quagga.start();
-  devices().then(list=>{if(current===session)options.onCameras?.(list);}).catch(()=>{});
+  devices().then(list=>{if(current===session)options.onCameras?.(list,chosen);}).catch(()=>{});
   const track=quagga.CameraAccess?.getActiveTrack?.();
   track?.addEventListener?.("ended",()=>{
    if(current===session)options.onProgress?.("disconnected");
