@@ -8,7 +8,7 @@ test("unit parser handles mixed fractions, metric and imperial; ambiguous amount
  assert.ok(Math.abs(m.parseQuantity("1½ lb").amount-680.388555)<0.01);
  assert.ok(Math.abs(m.parseQuantity("⅓ cup").amount-78.8627455)<0.01);
  assert.ok(Math.abs(m.parseQuantity("1/2 tsp").amount-2.4644608)<0.01);
- for(const x of ["¼–½ tsp","1 tsp dried or 2 tbsp fresh","to taste","1 large"])assert.equal(m.parseQuantity(x),null);
+ for(const x of ["¼–½ tsp","1 tsp dried or 2 tbsp fresh","about 500 g","to taste","1 large"])assert.equal(m.parseQuantity(x),null);
  assert.equal(m.parseQuantity("2 eggs").unit,"egg");
 });
 test("explicit stock total is not multiplied; per-package size is",()=>{
