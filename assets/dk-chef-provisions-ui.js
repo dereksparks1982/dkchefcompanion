@@ -35,8 +35,7 @@ function createForm(location,editing){
  '<label>'+t("Barcode (optional)","Штрихкод (необязательно)")+'<input name="barcode" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{8,14}" value="'+show("barcode")+'" placeholder="UPC / EAN"></label>'+
  '</div>'+
  '<div class="chef-barcode-actions"><button type="button" data-chef-lookup="'+location+'">'+t("Identify barcode","Найти по штрихкоду")+'</button> '+
- '<button type="button" data-chef-scan="'+location+'">'+t("Scan with camera","Сканировать камерой")+'</button> '+
- '<label class="chef-photo-trigger">'+t("Scan a barcode photo","Сканировать штрихкод с фото")+'<input type="file" accept="image/*" capture="environment" data-chef-photo="'+location+'"></label></div>'+
+ '<button type="button" data-chef-scan="'+location+'">'+t("Scan with camera","Сканировать камерой")+'</button></div>'+
  '<div class="chef-camera" data-chef-camera="'+location+'" hidden><div class="chef-scan-reader" id="chef-scan-reader-'+location+'"></div><label class="chef-camera-picker" hidden>'+t("Camera","Камера")+'<select data-chef-cameras="'+location+'"><option value="">'+t("Automatic","Автоматически")+'</option></select></label><p class="chef-camera-help">'+t("Keep the entire barcode in view, with bright light and sharp focus.","Держите весь штрихкод в кадре при хорошем освещении и чёткой фокусировке.")+'</p><button type="button" data-chef-stop="'+location+'">'+t("Stop camera","Остановить камеру")+'</button></div>'+
  '<div class="chef-store-grid">'+
  '<label>'+t("Recognize as ingredient (optional)","Ингредиент для рецептов (необязательно)")+'<input name="ingredient" maxlength="140" value="'+show("ingredient")+'" placeholder="'+t("Olive oil, salt, flour…","Оливковое масло, соль, мука…")+'"></label>'+
@@ -58,7 +57,8 @@ function createForm(location,editing){
 }
 function render(location){
  const host=$("#"+stores.find(x=>x.id===location)?.host);if(!host)return;
- if(scanner?.location===location)stopScan();
+ // A background stock update must not destroy the live video element.
+ if(scanner?.location===location)return;
  const rows=items(location),editing=rows.find(row=>row.id===edits[location]);
  host.innerHTML='<div class="chef-store-intro">'+
  (location==="pantry"?t("Track flour, spices, oils, pasta, canned goods and other kitchen supplies. One available ingredient is recognized by every recipe.","Учитывайте муку, специи, масло, макароны, консервы и другие кухонные продукты. Доступный ингредиент распознаётся во всех рецептах."):
@@ -74,7 +74,7 @@ function render(location){
  }).join(""):'<p class="chef-empty">'+t("Nothing recorded yet. Add foods manually or scan a product barcode.","Пока нет записей. Добавьте продукты вручную или отсканируйте штрихкод.")+'</p>')+'</div>'+
  '<h3 class="chef-store-heading">'+t(editing?"Edit food":"Add food",editing?"Изменить продукт":"Добавить продукт")+'</h3>'+
  createForm(location,editing)+
- '<p class="chef-source-note">'+t("Barcode lookup needs internet and uses Open Food Facts. Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Live camera and barcode-photo scanning use Quagga2 on this device. Scanning works offline; product lookup needs internet. Camera permission and a connected webcam are required.","Поиск штрихкода требует интернета и использует Open Food Facts. Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера и фото используют локальный сканер Quagga2. Считывание работает без интернета; поиск товара требует интернет. Для камеры нужны разрешение и подключённая веб-камера.")+
+ '<p class="chef-source-note">'+t("Barcode lookup needs internet and uses Open Food Facts. Only the barcode is sent for identification; your inventory stays local and in your own backups. Results may be incomplete or wrong. Live camera scanning uses Quagga2 on this device. Point at a grocery barcode for automatic reading. Scanning works offline; product lookup needs internet. Camera permission and a connected webcam are required.","Поиск штрихкода требует интернета и использует Open Food Facts. Передаётся только штрихкод; ваши запасы остаются локальными и в ваших резервных копиях. Результаты могут быть неполными или ошибочными. Камера использует локальный сканер Quagga2. Просто наведите её на штрихкод продукта. Считывание работает без интернета; поиск товара требует интернет. Для камеры нужны разрешение и подключённая веб-камера.")+
  ' <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a> (ODbL).</p>';
  if(messages[location])host.querySelector("[data-chef-status]").textContent=messages[location];
 }
@@ -132,13 +132,13 @@ function describeCameraError(error){
  if(/NotAllowed|PermissionDenied|Security/.test(name))
   return t("Camera permission blocked. Allow access in your browser's site permissions.","Доступ к камере заблокирован. Разрешите его в настройках сайта.");
  if(/NotFound|DevicesNotFound/.test(name))
-  return t("No webcam was found. Connect a camera, or scan a barcode photo.","Камера не найдена. Подключите её или отсканируйте фотографию штрихкода.");
+  return t("No webcam was found. Connect a camera or enter the barcode manually.","Камера не найдена. Подключите её или введите штрихкод вручную.");
  if(/NotReadable|TrackStart/.test(name))
   return t("Camera is unavailable or already used by another app. Close the other app and retry.","Камера недоступна или занята другим приложением. Закройте его и повторите попытку.");
  if(/Overconstrained/.test(name))
   return t("That camera cannot use the requested settings. Select Automatic or another camera.","Эта камера не поддерживает выбранные параметры. Выберите автоматический режим или другую камеру.");
  if(/NotSupported/.test(name))
-  return t("This browser cannot access the camera. Use barcode photo or manual entry.","Этот браузер не поддерживает доступ к камере. Используйте фото или ручной ввод.");
+  return t("This browser cannot access the camera. Enter the barcode manually.","Этот браузер не поддерживает доступ к камере. Введите штрихкод вручную.");
  return t("Could not start barcode camera: ","Не удалось включить сканер: ")+String(error?.message||error||"Unknown error").slice(0,160);
 }
 function showCameraChoices(location,cameras){
@@ -180,42 +180,27 @@ async function startScan(location,deviceId=""){
    },
    onProgress:stage=>{
     if(scanner?.token!==token)return;
-    status(location,stage==="searching"?
-     t("Looking for barcode… Move closer, hold steady, and fill the view with the lines.","Поиск штрихкода… Поднесите ближе и держите ровно."):
-     t("Still scanning. Try brighter light, more distance for focus, or Scan a barcode photo.","Сканирование продолжается. Улучшите освещение или попробуйте фотографию."));
+    const messages={
+     live:t("Camera is live. Point at a UPC or EAN barcode.","Камера работает. Наведите на штрихкод UPC или EAN."),
+     waiting:t("Waiting for camera picture… Check camera permissions and device selection.","Ожидание видео с камеры… Проверьте разрешения и выбранную камеру."),
+     searching:t("Reading barcode… Hold the lines steady in good light.","Считывание штрихкода… Держите его ровно при хорошем освещении."),
+     hint:t("Still scanning. Move closer, improve the light, and keep the barcode steady.","Сканирование продолжается. Поднесите штрихкод ближе, улучшите освещение и держите ровно."),
+     "decoder-error":t("Barcode decoding is having trouble. Hold it sharp and well lit.","Сканеру сложно распознать изображение. Проверьте чёткость и освещение."),
+     "frame-error":t("Camera frames are unavailable. Try another camera.","Изображение с камеры недоступно. Выберите другую камеру."),
+     "play-error":t("Camera video could not play. Check browser permissions.","Не удалось воспроизвести видео. Проверьте разрешение камеры."),
+     disconnected:t("Camera disconnected. Choose another camera.","Камера отключена. Выберите другую камеру.")
+    };
+    status(location,messages[stage]||messages.searching);
    },
    onCameras:cameras=>{
     if(scanner?.token===token)showCameraChoices(location,cameras);
    }
   });
-  if(scanner?.token===token)status(location,t("Camera ready. Point at a UPC/EAN barcode and hold steady.","Камера готова. Наведите на штрихкод UPC/EAN и держите ровно."));
+  // The live callback confirms that actual camera frames are arriving.
  }catch(error){
   if(token!==scanGeneration)return;
   await stopScan();
   status(location,describeCameraError(error));
- }
-}
-async function scanPhoto(location,file){
- if(!file)return;
- const decoder=window.DKChefBarcodeScanner;
- if(!decoder){status(location,t("Barcode decoder did not load.","Сканер не загрузился."));return;}
- const token=++scanGeneration;
- const previous=scanner;scanner=null;
- if(previous){const area=$('[data-chef-camera="'+previous.location+'"]');if(area)area.hidden=true;}
- status(location,t("Reading barcode photo on this device…","Чтение штрихкода с фотографии…"));
- try{
-  const code=await decoder.scanFile(file);
-  if(token!==scanGeneration)return;
-  if(!code){
-   status(location,t("No valid grocery barcode found. Try a sharper, well-lit photo or enter the number.","Штрихкод продукта не распознан. Попробуйте чёткое фото при хорошем освещении."));
-   return;
-  }
-  const form=$('[data-chef-form="'+location+'"]');
-  if(form)form.elements.barcode.value=code;
-  await identify(location);
- }catch(error){
-  if(token!==scanGeneration)return;
-  status(location,t("Photo scanning failed: ","Ошибка сканирования фото: ")+String(error?.message||error).slice(0,140));
  }
 }
 for(const store of stores){
@@ -237,12 +222,6 @@ for(const store of stores){
  host.addEventListener("change",event=>{
   if(event.target.matches?.("[data-chef-cameras]")){
    void startScan(store.id,event.target.value);return;
-  }
-  if(event.target.matches?.("[data-chef-photo]")){
-   const file=event.target.files?.[0];
-   event.target.value="";
-   if(file)void scanPhoto(store.id,file);
-   return;
   }
   if(event.target.name!=="harvestChoice")return;
   const h=harvestChoices().find(x=>x.id===event.target.value);

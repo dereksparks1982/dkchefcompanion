@@ -23,8 +23,8 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
   assert.match(html,/id="dkRootCellar"/);
   assert.ok(html.indexOf('id="dkPantry"')<html.indexOf('id="recipeGuide"'));
   assert.ok(html.indexOf('id="dkRootCellar"')<html.indexOf('id="recipeGuide"'));
-  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-quagga1/);
-  assert.match(html,/dk-chef-provisions\.css\?v=20261113-quagga1/);
+  assert.match(html,/dk-chef-provisions-ui\.js\?v=20261113-live2/);
+  assert.match(html,/dk-chef-provisions\.css\?v=20261113-live2/);
   assert.equal((html.match(/<article class="seed"/g)||[]).length,319);
  }
  const script=read("assets/dk-chef-provisions-ui.js");
@@ -37,7 +37,7 @@ test("Pantry and Root Cellar exist as independent sections with one shared inven
  assert.match(script,/Open Food Facts/);
  assert.match(script,/sourceHarvestId/);
  assert.match(script,/harvestChoices/);
- assert.match(read("sw.js"),/dk-seedbank-app-v52/);
+ assert.match(read("sw.js"),/dk-seedbank-app-v53/);
  assert.match(read("sw.js"),/"assets\/dk-chef-provisions-ui\.js"/);
 });
 test("legacy recipe checks migrate once to shared stock without losing custom recipes",()=>{
