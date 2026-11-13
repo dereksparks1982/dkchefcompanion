@@ -478,7 +478,7 @@ function refreshPlantingLinks(){
   const key=form.elements.seedKey.value,previous=select.value;
   const matches=core.journal().filter(p=>p&&typeof p.id==="string"&&matchesName(p)===key)
    .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
-  select.innerHTML='<option value="">No linked planting</option>'+matches.map(p=>
+  select.innerHTML='<option value="">'+(document.documentElement.lang==="ru"?"Без связи с посадкой":"No linked planting")+'</option>'+matches.map(p=>
    '<option value="'+esc(p.id)+'">'+esc((p.date||"date unknown")+" · "+(p.plant||"Plant")+(p.variety?" · "+p.variety:""))+'</option>').join("");
   if(matches.some(p=>p.id===previous))select.value=previous;
  }
@@ -489,8 +489,21 @@ function linkedPlantingId(form){
 }
 function linkedPlantingLabel(plantingId){
  const planted=core.journal().find(p=>p&&p.id===plantingId);
- return planted?'<p>Journal planting: '+esc(planted.date||"date unknown")+' · '+esc(planted.plant||"plant")+'</p>':"";
+ if(!planted)return "";
+ const ru=document.documentElement.lang==="ru";
+ return '<p>'+(ru?"Посадка в журнале: ":"Journal planting: ")+esc(planted.date||(ru?"дата неизвестна":"date unknown"))+' · '+esc(planted.plant||(ru?"растение":"plant"))+
+  ' <button type="button" class="wb-small" data-wb-journal="'+esc(planted.id)+'">'+(ru?"Открыть посадку":"View planting")+'</button></p>';
 }
+document.addEventListener("click",event=>{
+ const button=event.target.closest?.("[data-wb-journal]");if(!button)return;
+ const section=document.getElementById("seedJournal");if(!section)return;
+ section.open=true;
+ const card=$$("#journalEntries .journal-entry").find(el=>el.dataset.journalEntryId===button.dataset.wbJournal);
+ if(card){
+  const details=$(".wb-journal-details",card);if(details)details.open=true;
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+ }else section.scrollIntoView({behavior:"smooth",block:"start"});
+});
 $("#wbHarvestForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
 $("#wbSavedForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
 function renderHarvests(){
@@ -511,8 +524,8 @@ function renderSavedSeeds(){
  $("#wbSavedList").innerHTML=state.savedSeeds.length?state.savedSeeds.slice().reverse().map(r=>{
   const p=item(r.seedKey);
   return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.count)+' collected seeds · '+esc(r.place||"storage unrecorded")+
-  (r.batch?'<p>Batch: '+esc(r.batch)+'</p>':'')+linkedPlantingLabel(r.plantingId)+
-  '<p>Parent: '+esc(r.parentType||'unknown')+' · Isolation: '+esc(r.isolation||'unknown')+' · Cleaning: '+esc(r.method||'unknown')+'</p>'+ 
+  (r.batch?'<p>'+(document.documentElement.lang==="ru"?"Партия: ":"Batch: ")+esc(r.batch)+'</p>':'')+linkedPlantingLabel(r.plantingId)+
+  '<p>'+(document.documentElement.lang==="ru"?"Исходные семена: ":"Parent: ")+esc(r.parentType||'unknown')+' · '+(document.documentElement.lang==="ru"?"Изоляция: ":"Isolation: ")+esc(r.isolation||'unknown')+' · '+(document.documentElement.lang==="ru"?"Очистка: ":"Cleaning: ")+esc(r.method||'unknown')+'</p>'+ 
   (r.notes?'<p>'+esc(r.notes)+'</p>':'')+' <button type="button" class="wb-small" data-wb-delete="savedSeeds" data-id="'+esc(r.id)+'">Remove</button></div>';
  }).join(""):'<p class="wb-empty">No saved seed harvests recorded yet.</p>';
 }
@@ -664,6 +677,7 @@ function journalEnhance(){
  const cards=$$(".journal-entry",$("#journalEntries"));
  cards.forEach((card,i)=>{
   const entry=entries[i];if(!entry)return;
+  card.dataset.journalEntryId=entry.id;
   const key=matchesName(entry),linked=key?item(key):null,candidates=journalCandidates(entry);
   const guide=journalGuide(entry,linked,candidates);
   const roleList=journalRoles(entry,linked,candidates);
