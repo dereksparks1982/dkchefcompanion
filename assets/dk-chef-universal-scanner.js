@@ -24,6 +24,8 @@ host.innerHTML='<div class="chef-station-header"><div><h2 id="chefScanTitle"></h
  '<div class="chef-station-inputs"><input id="chefScanBarcode" inputmode="numeric" autocomplete="off" maxlength="14" pattern="[0-9]{8,14}" placeholder="UPC / EAN">'+
  '<button type="button" id="chefScanLookup"></button></div></div>'+
  '<p id="chefScanStatus" class="chef-station-status" role="status" aria-live="polite"></p>'+
+ '<details id="chefScanDiagnostics" class="chef-station-diagnostics" hidden><summary id="chefScanDiagnosticsLabel"></summary>'+
+ '<pre id="chefScanDiagnosticsText"></pre></details>'+
  '<div id="chefScanResult" class="chef-station-result" hidden><div class="chef-station-result-head"><strong id="chefScanProductName"></strong>'+
  '<small id="chefScanProductSource"></small></div><p id="chefScanProductDetails"></p></div>'+
  '<div class="chef-medicine-verify" id="chefFDABox" hidden>'+
@@ -47,6 +49,7 @@ const statusNode=$("chefScanStatus"),result=$("chefScanResult"),saveArea=$("chef
 const barcode=$("chefScanBarcode"),name=$("chefScanName"),brand=$("chefScanBrand"),size=$("chefScanSize");
 const destination=$("chefScanDestination"),ingredient=$("chefScanIngredient"),count=$("chefScanCount");
 const cameraSelect=$("chefScanCamera"),cameraRow=$("chefScanCameraRow");
+const diagnostics=$("chefScanDiagnostics"),diagnosticsText=$("chefScanDiagnosticsText");
 const fdaBox=$("chefFDABox"),fdaStatus=$("chefFDAStatus"),fdaDetails=$("chefFDADetails"),fdaLabel=$("chefFDALabel");
 let muted=false;
 try{muted=localStorage.getItem(STORAGE)==="1";}catch(error){}
@@ -64,6 +67,7 @@ function localized(){
   chefScanMuteText:t("Mute ding","Без звука"),
   chefScanCameraLabel:t("Camera","Камера"),
   chefScanAutomatic:t("Automatic camera","Автоматический выбор"),
+  chefScanDiagnosticsLabel:t("Camera details (local, not uploaded)","Сведения о камере (локально, не отправляются)"),
   chefScanBarcodeLabel:t("Barcode number","Номер штрихкода"),
   chefScanLookup:t("Look up barcode","Найти по штрихкоду"),
   chefScanNameLabel:t("Product name","Название товара"),
@@ -226,6 +230,24 @@ async function find(code){
   if(token===lookupNumber)feedback(t("Product lookup failed. Barcode retained; enter the product name manually.","Ошибка поиска. Штрихкод сохранён; введите название вручную."));
  }
 }
+
+function showCameraDiagnostics(error,attempts=[],selected=""){
+ diagnostics.hidden=false;
+ const failures=Array.isArray(error?.failures)?error.failures:[];
+ const kind=String(error?.name||"Error");
+ const lines=[t("Camera startup details","Сведения о запуске камеры"),
+  t("Selected: ","Выбрано: ")+(selected||t("Automatic","Автоматически")),
+  t("Last error: ","Последняя ошибка: ")+kind+" · "+String(error?.message||"").slice(0,180)];
+ for(const failure of failures.slice(-8)){
+  lines.push("• "+String(failure.profile||"").slice(0,72)+" → "+
+   String(failure.name||"Error").slice(0,50)+
+   (failure.message?" · "+String(failure.message).slice(0,130):""));
+ }
+ if(!failures.length)for(const label of attempts.slice(-6))lines.push("• "+label);
+ lines.push(t("If every camera profile fails, check the Linux Surface camera driver, PipeWire, and whether another app owns the camera.",
+  "Если все режимы камеры не работают, проверьте драйвер Surface в Linux, PipeWire и использование камеры другой программой."));
+ diagnosticsText.textContent=lines.join("\n");
+}
 function cameraError(error){
  const kind=String(error?.name||"");
  if(/NotAllowed|PermissionDenied|Security/.test(kind))return t("Camera permission blocked. Check browser site permissions.","Доступ к камере заблокирован. Проверьте разрешения браузера.");
@@ -267,18 +289,24 @@ async function openCamera(chosen="",recovery=0){
  if(token!==sessionNumber)return;
  preview.hidden=false;stopBtn.hidden=false;nextBtn.hidden=true;start.hidden=true;active=true;
  feedback(t("Opening camera…","Открытие камеры…"));
+ diagnostics.hidden=true;
+ const attempts=[];
+ let attemptedProfile=0,totalProfiles=0;
  // List cameras even when Quagga2 cannot open the video stream. Do not ask for
  // another getUserMedia permission just to enumerate already-authorized cameras.
  Promise.resolve(camera.devices?.()).then(items=>{
   if(token===sessionNumber)updateCameras(items,chosen);
  }).catch(()=>{});
  try{
-  await camera.start({target:preview,deviceId:chosen,
+  await camera.start({target:preview,deviceId:chosen,profileStartIndex:recovery,
    onAttempt:(label,number,total)=>{
+    attemptedProfile=number;totalProfiles=total;attempts.push(label);
     if(token===sessionNumber)feedback(t("Opening camera: ","Открытие камеры: ")+label+
      " ("+number+"/"+total+")");
    },
+   onFailure:details=>{if(token===sessionNumber)diagnosticsText.textContent=String(details?.name||"CameraError");},
    onActiveCamera:(label,settings)=>{
+    if(token===sessionNumber){diagnostics.hidden=true;}
     if(token===sessionNumber&&label)feedback(t("Camera ready: ","Камера готова: ")+label+
       (settings?.width?" · "+settings.width+"×"+settings.height:""));
    },
@@ -300,8 +328,18 @@ async function openCamera(chosen="",recovery=0){
     };
     feedback(progress[event]||progress.searching);
     if(event==="disconnected"){
-     if(recovery===0){void openCamera(chosen,1);}
-     else{void closeCamera();feedback(t("Camera disconnected again. Try selecting a different camera.","Камера снова отключилась. Выберите другую камеру."));}
+     if(attemptedProfile<totalProfiles){
+      // Skip the failed profile when Surface/Firefox drops its stream.
+      void openCamera(chosen,attemptedProfile);
+     }else{
+      const failure=Object.assign(new Error(t(
+       "Video stream ended after startup. Try another camera or check the driver.",
+       "Видеопоток завершился после запуска. Выберите другую камеру или проверьте драйвер.")),
+       {name:"NotReadableError"});
+      showCameraDiagnostics(failure,attempts,chosen);
+      void closeCamera();
+      feedback(cameraError(failure));
+     }
     }
    },
    onCameras:(items,selected)=>{
@@ -310,6 +348,7 @@ async function openCamera(chosen="",recovery=0){
   });
  }catch(error){
   if(token!==sessionNumber)return;
+  showCameraDiagnostics(error,attempts,chosen);
   await closeCamera();
   // The camera picker must still work after Firefox reports NotReadableError.
   // Enumeration needs no new capture request; permission was already granted.
