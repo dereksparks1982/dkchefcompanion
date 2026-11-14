@@ -152,7 +152,7 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
   const html=read(page);
   const quagga=html.indexOf("assets/vendor/quagga2.min.js");
   const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-surface3");
-  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-medicine1");
+  const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-storage1");
   const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-medicine1");
   const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-surface3");
   const medicine=html.indexOf("assets/dk-chef-medicine-lookup.js?v=20261113-medicine1");
@@ -187,12 +187,12 @@ test("Surface driver offers 320px and automatic browser defaults if init keeps f
  const configs=[];
  quagga.init=(config,callback)=>{
   configs.push({...config.inputStream.constraints});
-  if(configs.length<=3)return callback(Object.assign(new Error("Unavailable"),{name:"NotReadableError"}));
+  if(configs.length<=4)return callback(Object.assign(new Error("Unavailable"),{name:"NotReadableError"}));
   callback(null);
  };
  await decoder.start({target});
- assert.equal(configs.length,4,"Automatic Surface capture should reach browser defaults");
- assert.equal(Object.keys(configs[3]).length,0);
+ assert.equal(configs.length,5,"Automatic Surface capture should reach browser defaults");
+ assert.equal(Object.keys(configs[4]).length,0);
  await decoder.stop();
 });
 test("startup with profileStartIndex skips previously disconnected camera profiles",async()=>{
