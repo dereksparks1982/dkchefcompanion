@@ -126,7 +126,7 @@ function isReady(recipe,ingredient){
  if(matcher)return matcher.matches(ingredient,provisions()).length>0;
  const id=provisionKey(ingredient.name);
  return !!id&&provisions().some(row=>(row.location==="pantry"||row.location==="cellar")&&
-  row.key===id&&row.available!==false&&(row.packages==null||Number(row.packages)>0));
+  row.key===id&&row.available!==false&&row.storageCondition!=="needs-review"&&(row.packages==null||Number(row.packages)>0));
 }
 function provisionNotify(){
  if(typeof Event==="function")document.dispatchEvent?.(new Event("dkchef:provisions-changed"));
@@ -165,6 +165,10 @@ function saveProvision(value){
    x.sourceHarvestId===linkedHarvest&&x.location===location&&x.id!==id))return false;
  let row=id?provisions().find(x=>x.id===id):null;
  if(row?.sourceHarvestAllocation===true&&location!==row.location)return false;
+ const storageMeta=(location==="pantry"||location==="cellar")?
+  window.DKChefStorageChecks?.normalize(value,row||{})||{ok:true,fields:{}}:
+  {ok:true,fields:{}};
+ if(!storageMeta.ok)return false;
  // Legacy inventory edits do not contain barcode fields. Preserve existing UPCs.
  const barcode=String(value.barcode??row?.barcode??"").replace(/\s+/g,"");
  if(barcode&&!/^\d{8,14}$/.test(barcode))return false;
@@ -200,7 +204,7 @@ function saveProvision(value){
   size:String(value.size||"").trim().slice(0,80),amount:String(value.amount||"").trim().slice(0,80),
   expiry:String(value.expiry||"").slice(0,10),obtained:String(value.obtained||"").slice(0,10),
   notes:String(value.notes||"").trim().slice(0,300),sourceHarvestId:String(value.sourceHarvestId||"").slice(0,150),
-  available:packages>0&&value.available!==false,updatedAt:now});
+  available:packages>0&&value.available!==false,updatedAt:now,...storageMeta.fields});
  if(!persistKitchen()){state.provisions=JSON.parse(old);return false;}return true;
 }
 

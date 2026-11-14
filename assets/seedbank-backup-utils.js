@@ -123,6 +123,19 @@ function validate(data){
     row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||
     typeof row.updatedAt!=="string"||Number.isNaN(Date.parse(row.updatedAt)))
     throw Error("Invalid food inventory item.");
+   // Optional storage observations; never treat a reading as food-safety proof.
+   for(const field of ["storageSpot","storageCondition","storageTemp","storageTempUnit",
+    "storageHumidity","storageChecked","storageCheckBy"]){
+    if(row[field]!=null&&(typeof row[field]!=="string"||row[field].length>120))
+     throw Error("Invalid storage observation.");
+   }
+   if(row.storageCondition!=null&&!["unrecorded","looks-okay","needs-review"].includes(row.storageCondition))
+    throw Error("Invalid storage condition.");
+   if(row.storageTempUnit!=null&&!["C","F"].includes(row.storageTempUnit))
+    throw Error("Invalid storage temperature unit.");
+   const meta=typeof root.DKChefStorageChecks?.normalize==="function"?
+    root.DKChefStorageChecks.normalize({},row):null;
+   if(meta&&!meta.ok)throw Error("Invalid storage observation.");
    if(row.sourceHarvestAllocation!=null){
     const validId=typeof row.sourceHarvestId==="string"&&
      /^[a-zA-Z0-9-]{1,100}$/.test(row.sourceHarvestId);

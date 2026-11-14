@@ -38,6 +38,7 @@ function alternatives(name){
 }
 function isEdibleStock(row){
  return row&&["pantry","cellar"].includes(row.location)&&row.available!==false&&
+  row.storageCondition!=="needs-review"&&
   (row.packages==null||Number(row.packages)>0);
 }
 function stockKey(row){
