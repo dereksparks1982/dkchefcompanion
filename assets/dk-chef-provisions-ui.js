@@ -22,7 +22,7 @@ const items=id=>api.provisions().items.filter(row=>group(row.location)===id)
 function harvestChoices(){
  const workbench=window.DKSeedBankWorkbench?.exportData?.()||{};
  const plants=window.DKSeedBankCore?.plants?.();
- return (workbench.harvests||[]).filter(h=>h?.id&&h.seedKey).slice(-100).reverse().map(h=>({
+ return (workbench.harvests||[]).filter(h=>h?.id&&h.seedKey&&!h.allocations).slice(-100).reverse().map(h=>({
   id:h.id,name:plants?.get(h.seedKey)?.name||String(h.seedKey).split("|").pop(),
   date:h.date||"",amount:h.amount||"",unit:h.unit||""
  }));
@@ -80,6 +80,9 @@ function rowHtml(row,id){
  const flags=(isLow(row)?'<span class="chef-stock-warning">'+t("Low stock","Мало запасов")+'</span>':"")+
   (expiryNotice(row.expiry)?'<span class="chef-expiry-warning">'+esc(expiryNotice(row.expiry))+'</span>':"");
  const description=[row.brand,row.size,row.amount,row.expiry?t("Best by","Срок")+": "+row.expiry:"",row.notes].filter(Boolean).map(esc).join(" · ");
+ const allocatedNote=row.sourceHarvestAllocation===true?
+  '<p class="chef-source-note">'+t("Linked garden harvest allocation. Edit the allocation in Garden Planner; manually changing quantities here prevents automatic reposting.", 
+  "Связанное распределение урожая. Измените распределение в планировщике; ручная правка количества здесь блокирует повторный перенос.")+'</p>':"";
  const medicineInfo=id==="medicine"&&row.medicineInfo?.source==="openFDA NDC Directory"?row.medicineInfo:null;
  const officialUrl=String(medicineInfo?.labelUrl||"");
  const safeLink=/^https:\/\/dailymed\.nlm\.nih\.gov\/dailymed\/drugInfo\.cfm\?setid=[a-f0-9-]{36}$/i.test(officialUrl);
@@ -92,7 +95,7 @@ function rowHtml(row,id){
  return '<article class="chef-store-item'+(row.available===false?" chef-unavailable":"")+'" data-chef-stock-item data-search="'+esc([row.name,row.brand,row.notes].join(" ").toLowerCase())+'">'+
  '<div><strong>'+esc(row.name)+'</strong><small>'+(id==="kitchen"?storageName(row.location)+" · ":"")+
  t("Packages","Упаковки")+': '+esc(row.packages??1)+' · '+(row.available!==false?t("On hand","В наличии"):t("Unavailable","Нет в наличии"))+'</small>'+
- (description?'<p>'+description+'</p>':"")+drugNote+flags+'</div>'+
+ (description?'<p>'+description+'</p>':"")+allocatedNote+drugNote+flags+'</div>'+
  '<div class="chef-item-buttons"><button type="button" data-chef-qty="add" data-chef-id="'+esc(row.id)+'" aria-label="'+t("Add one package","Добавить одну упаковку")+'">+1</button>'+
  '<button type="button" data-chef-qty="use" data-chef-id="'+esc(row.id)+'"'+(Number(row.packages)<=0?' disabled':'')+' aria-label="'+t("Use one package","Израсходовать одну упаковку")+'">−1</button>'+
  '<button type="button" data-chef-edit="'+esc(row.id)+'">'+t("Edit","Изменить")+'</button>'+

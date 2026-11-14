@@ -197,3 +197,20 @@ html[lang="ru"] .wb-packet-count-history>summary{color:#89334b}
 html[lang="ru"] .seed > .wb-card-packets > summary{color:#8c3450}
 html[lang="ru"] .seed .wb-card-packet-row{background:#fff8f8;border-color:#ebd2d9}
 @media(max-width:580px){.seed > .wb-card-packets > summary{align-items:flex-start;flex-wrap:wrap}.seed > .wb-card-packets > summary .wb-card-packet-count{text-align:left}.seed .wb-card-packet-content .wb-small{min-height:40px}}
+
+/* Harvest allocation ledger. All quantities share the harvest's recorded unit. */
+.wb-harvest-allocation{margin:12px 0;padding:12px;background:#f6faf3;border:1px solid #c5d9c2;border-radius:10px;display:grid;gap:10px}
+.wb-harvest-allocation form{display:grid;gap:10px;margin:0}
+.wb-harvest-allocation form>strong{color:#285940;font-size:.92rem}
+.wb-harvest-allocation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px}
+.wb-harvest-allocation-grid label{display:grid;gap:4px;font-size:.78rem;font-weight:700;color:#3e5e47}
+.wb-harvest-allocation-grid input{width:100%;box-sizing:border-box;padding:8px;border-radius:7px;border:1px solid #a9c4aa;min-height:40px;background:#fff;color:#234b32;font:inherit}
+.wb-harvest-balance{color:#2e6a45;font-size:.82rem;margin:0;line-height:1.5}
+.wb-harvest-error{color:#a13c2f;font-weight:750}
+.wb-harvest-stock-links{display:grid;gap:7px}
+.wb-harvest-stock-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;font-size:.79rem;border:1px solid #d3dfcd;border-radius:8px;padding:8px;background:#fff}
+.wb-harvest-stock-row>span{flex:1;min-width:160px}
+.wb-harvest-stock-row button{flex-shrink:0}
+.wb-harvest-allocation .wb-note{font-size:.76rem;line-height:1.55;margin:0}
+html[lang="ru"] .wb-harvest-allocation{background:#fff8f7;border-color:#e9cfd4}
+@media(max-width:580px){.wb-harvest-allocation{padding:10px}.wb-harvest-stock-row button{width:100%}}
