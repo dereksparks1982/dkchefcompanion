@@ -199,6 +199,63 @@ function saveProvision(value){
   available:packages>0&&value.available!==false,updatedAt:now});
  if(!persistKitchen()){state.provisions=JSON.parse(old);return false;}return true;
 }
+
+// Explicit, idempotent harvest-to-storage posting. Each harvest/location owns
+// one stable food inventory ID, so repeated clicks cannot add another package.
+// Planner allocations alone are NOT stock until explicitly posted here.
+function postHarvestAllocation(harvestId,location){
+ const ledger=window.DKChefHarvestAllocation;
+ const safeId=ledger?.stockId(harvestId,location);
+ if(!safeId)return {ok:false,reason:"invalid-link"};
+ const harvest=window.DKSeedBankWorkbench?.exportData?.()?.harvests?.find(h=>h.id===harvestId);
+ if(!harvest)return {ok:false,reason:"missing-harvest"};
+ const plan=ledger.inspect(harvest);
+ if(!plan.ok)return {ok:false,reason:plan.reason};
+ const raw=plan.allocations[location],amount=ledger.amountText(raw,harvest.unit);
+ const rows=provisions(),existing=rows.find(row=>row.id===safeId);
+ // An older, manually copied harvest entry may already represent this stock.
+ // Require manual reconciliation rather than silently creating two food lots.
+ if(rows.some(row=>row.id!==safeId&&row.location===location&&
+   row.sourceHarvestId===harvestId))
+  return {ok:false,reason:"already-linked"};
+ if(existing){
+  if(existing.sourceHarvestAllocation!==true||existing.sourceHarvestId!==harvestId||
+    existing.location!==location||existing.packages!==1||
+    existing.amount!==ledger.amountText(Number(existing.harvestAllocationPosted),existing.harvestAllocationUnit)||
+    existing.available!==true)
+   return {ok:false,reason:"stock-edited"};
+ }
+ if(raw===0){
+  if(!existing)return {ok:true,action:"unchanged",amount:"0 "+harvest.unit};
+  return removeProvision(safeId)?{ok:true,action:"removed",amount:"0 "+harvest.unit}:
+    {ok:false,reason:"save-failed"};
+ }
+ if(existing&&existing.amount===amount)return {ok:true,action:"unchanged",amount};
+ if(!existing&&rows.length>=3000)return {ok:false,reason:"inventory-full"};
+ const p=window.DKSeedBankCore?.plants?.().get(harvest.seedKey);
+ const name=String(p?.name||String(harvest.seedKey||"").split("|").pop()||"Garden harvest").trim().slice(0,140);
+ const key=provisionKey(name);
+ if(!key||key.length>140)return {ok:false,reason:"invalid-product"};
+ const before=JSON.stringify(state.provisions),now=new Date().toISOString();
+ const row=existing||{id:safeId,brand:"",barcode:"",size:"",expiry:"",lowStockAt:0,
+  notes:"",sourceHarvestId:harvestId};
+ if(!existing)rows.push(row);
+ Object.assign(row,{
+  key:existing?.key||key,name:existing?.name||name,ingredient:existing?.ingredient||name,
+  location,packages:1,available:true,amount,
+  sourceHarvestId:harvestId,sourceHarvestAllocation:true,
+  harvestAllocationPosted:raw,harvestAllocationUnit:harvest.unit,
+  obtained:String(harvest.date||"").slice(0,10),updatedAt:now
+ });
+ // Reposting a previously deleted deterministic record supersedes its tombstone.
+ state.provisions.deleted=state.provisions.deleted.filter(x=>x.id!==safeId);
+ if(!persistKitchen()){
+  state.provisions=JSON.parse(before);
+  return {ok:false,reason:"save-failed"};
+ }
+ return {ok:true,action:existing?"updated":"added",amount,id:safeId};
+}
+
 function removeProvision(id){
  const old=JSON.stringify(state.provisions);
  const row=provisions().find(x=>x.id===id);if(!row)return false;
@@ -501,7 +558,7 @@ recipePanel?.addEventListener("toggle",()=>{
 checkProvisions();persist();
 window.DKSeedBankRecipes=Object.freeze({
  provisionKey,provisions:()=>JSON.parse(JSON.stringify(state.provisions)),isIngredientReady:ingredient=>isReady(null,ingredient),
- saveProvision,removeProvision,setIngredientReady,
+ saveProvision,removeProvision,setIngredientReady,postHarvestAllocation,
  exportData:()=>JSON.parse(JSON.stringify(state)),
  importData:data=>{
   if(!data||typeof data!=="object"||!Array.isArray(data.custom)||!data.ready||typeof data.ready!=="object")return false;
