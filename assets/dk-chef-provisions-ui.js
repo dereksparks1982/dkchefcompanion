@@ -12,6 +12,7 @@ const stores=[
 const editing={kitchen:"",medicine:"",household:""};
 const messages={kitchen:"",medicine:"",household:""};
 const searches={kitchen:"",medicine:"",household:""};
+const storageFilter={kitchen:"all"};
 const $=(s,root=document)=>root.querySelector(s);
 const ru=()=>document.documentElement.lang==="ru";
 const t=(en,rus)=>ru()?rus:en;
@@ -47,6 +48,59 @@ function isLow(row){return Number(row.lowStockAt)>0&&Number(row.packages)<=Numbe
 function labeledInput(label,key,val,attrs=""){
  return '<label>'+label+'<input name="'+key+'" value="'+esc(val??"")+'" '+attrs+'></label>';
 }
+
+function statusFor(row){
+ return window.DKChefStorageChecks?.summary(row)||{due:false,soon:false,review:false};
+}
+function storageFields(row){
+ const value=field=>String(row[field]??"");
+ const chosen=(field,option)=>(value(field)||"unrecorded")===option?" selected":"";
+ return '<fieldset class="chef-storage-fields"><legend>'+
+  t("Storage conditions & checks (optional)","Условия хранения и осмотр (необязательно)")+'</legend>'+
+  '<div class="chef-store-grid">'+
+  labeledInput(t("Shelf, bin or container","Полка, ящик или ёмкость"),"storageSpot",value("storageSpot"),'maxlength="100"')+
+  '<label>'+t("Observed condition","Состояние при осмотре")+'<select name="storageCondition">'+
+   '<option value="unrecorded"'+chosen("storageCondition","unrecorded")+'>'+t("Not checked","Не проверено")+'</option>'+
+   '<option value="looks-okay"'+chosen("storageCondition","looks-okay")+'>'+t("Appears okay (not safety proof)","На вид в порядке (не доказательство безопасности)")+'</option>'+
+   '<option value="needs-review"'+chosen("storageCondition","needs-review")+'>'+t("Needs review (exclude from recipes)","Требует проверки (не учитывать в рецептах)")+'</option>'+
+  '</select></label>'+
+  labeledInput(t("Recorded temperature","Измеренная температура"),"storageTemp",value("storageTemp"),'inputmode="decimal" maxlength="12" placeholder="40"')+
+  '<label>'+t("Temperature unit","Единица температуры")+'<select name="storageTempUnit">'+
+   '<option value="F"'+(value("storageTempUnit")==="C"?"":" selected")+'>°F</option>'+
+   '<option value="C"'+(value("storageTempUnit")==="C"?" selected":"")+'>°C</option></select></label>'+
+  labeledInput(t("Relative humidity (%)","Относительная влажность (%)"),"storageHumidity",value("storageHumidity"),'type="number" min="0" max="100" step="0.1"')+
+  labeledInput(t("Last inspected","Последний осмотр"),"storageChecked",value("storageChecked"),'type="date"')+
+  labeledInput(t("Next inspection date","Дата следующего осмотра"),"storageCheckBy",value("storageCheckBy"),'type="date"')+
+  '</div><p class="chef-source-note">'+t(
+   "Enter observations yourself; nothing is measured automatically. Dates produce on-screen reminders only. Appearance, temperature and humidity do not guarantee food safety.",
+   "Записи вводятся вручную; измерения не выполняются автоматически. Даты дают напоминания только на экране. Внешний вид, температура и влажность не гарантируют безопасность еды.")+'</p></fieldset>';
+}
+function storageFlags(row){
+ const state=statusFor(row);
+ return (state.review?'<span class="chef-condition-warning">'+t("Needs review · excluded from recipes","Требует проверки · не учитывается в рецептах")+'</span>':"")+
+  (state.due?'<span class="chef-check-due">'+t("Inspection due","Пора проверить")+'</span>':
+   state.soon?'<span class="chef-check-soon">'+t("Check within 7 days","Проверить в течение 7 дней")+'</span>':"");
+}
+function storageOverview(all){
+ const onHand=all.filter(row=>row.available!==false&&Number(row.packages??1)>0);
+ const due=onHand.filter(row=>statusFor(row).due).length;
+ const review=onHand.filter(row=>statusFor(row).review).length;
+ const soon=onHand.filter(row=>statusFor(row).soon).length;
+ const options=[["all",t("All food","Все продукты")],["due",t("Inspections due","Пора проверить")],
+  ["review",t("Needs review","Требует проверки")]];
+ return '<section class="chef-storage-overview" aria-label="'+t("Storage inspection reminders","Напоминания об осмотре хранения")+'">'+
+  '<p><strong>'+t("Storage checks","Проверка хранения")+'</strong> · '+
+   t("Due: ","Пора проверить: ")+due+' · '+
+   t("Needs review: ","Требует проверки: ")+review+' · '+
+   t("Next 7 days: ","В следующие 7 дней: ")+soon+'</p>'+
+  '<div class="chef-storage-filters" role="group" aria-label="'+t("Storage filters","Фильтры хранения")+'">'+
+   options.map(([key,label])=>'<button type="button" data-chef-storage-filter="'+key+'" aria-pressed="'+
+    (storageFilter.kitchen===key)+'"'+(storageFilter.kitchen===key?' class="is-active"':'')+'>'+label+'</button>').join("")+'</div>'+
+  '<p class="chef-source-note">'+t(
+   "Reminder dates are optional and checked when the app opens; no push notifications are sent. An inspection is not proof that food is safe to eat.",
+   "Даты напоминаний необязательны и проверяются при открытии приложения; уведомления не отправляются. Осмотр не доказывает, что пища безопасна.")+'</p></section>';
+}
+
 function formHtml(section,row){
  const kitchen=section==="kitchen",record=row||{},value=k=>record[k]??"";
  const header='<form class="chef-store-form" data-chef-form="'+section+'"><input type="hidden" name="id" value="'+esc(value("id"))+'">'+
@@ -63,6 +117,7 @@ function formHtml(section,row){
  labeledInput(t("Date obtained","Дата покупки"),"obtained",value("obtained"),'type="date"')+
  labeledInput(t("Best by / expiry","Срок годности"),"expiry",value("expiry"),'type="date"')+'</div>';
  return header+
+ (kitchen?storageFields(record):"")+
  (kitchen?'<p class="chef-source-note">'+t("For recipe quantity checks, enter 500 g total or 250 g per package, for example. A package count alone does not prove a usable amount.",
  "Для проверки количества в рецептах укажите, например, всего 500 г или 250 г на упаковку. Число упаковок само по себе не подтверждает количество продукта.")+"</p>":"")+
  (kitchen?labeledInput(t("Recipe ingredient (optional)","Ингредиент для рецептов (необязательно)"),"ingredient",value("ingredient"),'maxlength="140" class="chef-full"'):"")+
@@ -77,9 +132,16 @@ function formHtml(section,row){
  '<p class="chef-form-status" role="status" data-chef-status="'+section+'"></p></form>';
 }
 function rowHtml(row,id){
- const flags=(isLow(row)?'<span class="chef-stock-warning">'+t("Low stock","Мало запасов")+'</span>':"")+
+ const flags=(id==="kitchen"?storageFlags(row):"")+(isLow(row)?'<span class="chef-stock-warning">'+t("Low stock","Мало запасов")+'</span>':"")+
   (expiryNotice(row.expiry)?'<span class="chef-expiry-warning">'+esc(expiryNotice(row.expiry))+'</span>':"");
  const description=[row.brand,row.size,row.amount,row.expiry?t("Best by","Срок")+": "+row.expiry:"",row.notes].filter(Boolean).map(esc).join(" · ");
+ const storageDetails=id==="kitchen"?[
+  row.storageSpot?t("Spot: ","Место: ")+row.storageSpot:"",
+  row.storageTemp?t("Recorded: ","Измерено: ")+row.storageTemp+" °"+(row.storageTempUnit||"F"):"",
+  row.storageHumidity!==""&&row.storageHumidity!=null?t("Humidity: ","Влажность: ")+row.storageHumidity+"%":"",
+  row.storageChecked?t("Last checked: ","Последний осмотр: ")+row.storageChecked:"",
+  row.storageCheckBy?t("Next check: ","Следующая проверка: ")+row.storageCheckBy:""
+ ].filter(Boolean).map(esc).join(" · "):"";
  const allocatedNote=row.sourceHarvestAllocation===true?
   '<p class="chef-source-note">'+t("Linked garden harvest allocation. Edit the allocation in Garden Planner; manually changing quantities here prevents automatic reposting.", 
   "Связанное распределение урожая. Измените распределение в планировщике; ручная правка количества здесь блокирует повторный перенос.")+'</p>':"";
@@ -95,9 +157,10 @@ function rowHtml(row,id){
  return '<article class="chef-store-item'+(row.available===false?" chef-unavailable":"")+'" data-chef-stock-item data-search="'+esc([row.name,row.brand,row.notes].join(" ").toLowerCase())+'">'+
  '<div><strong>'+esc(row.name)+'</strong><small>'+(id==="kitchen"?storageName(row.location)+" · ":"")+
  t("Packages","Упаковки")+': '+esc(row.packages??1)+' · '+(row.available!==false?t("On hand","В наличии"):t("Unavailable","Нет в наличии"))+'</small>'+
- (description?'<p>'+description+'</p>':"")+allocatedNote+drugNote+flags+'</div>'+
+ (description?'<p>'+description+'</p>':"")+(storageDetails?'<p class="chef-storage-detail">'+storageDetails+'</p>':"")+allocatedNote+drugNote+flags+'</div>'+
  '<div class="chef-item-buttons"><button type="button" data-chef-qty="add" data-chef-id="'+esc(row.id)+'" aria-label="'+t("Add one package","Добавить одну упаковку")+'">+1</button>'+
  '<button type="button" data-chef-qty="use" data-chef-id="'+esc(row.id)+'"'+(Number(row.packages)<=0?' disabled':'')+' aria-label="'+t("Use one package","Израсходовать одну упаковку")+'">−1</button>'+
+ (id==="kitchen"?'<button type="button" data-chef-inspect="'+esc(row.id)+'">'+t("Record check","Записать осмотр")+'</button>':"")+
  '<button type="button" data-chef-edit="'+esc(row.id)+'">'+t("Edit","Изменить")+'</button>'+
  '<button type="button" data-chef-remove="'+esc(row.id)+'">'+t("Remove","Удалить")+'</button></div></article>';
 }
