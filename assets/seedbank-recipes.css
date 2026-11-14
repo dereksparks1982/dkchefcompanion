@@ -75,3 +75,18 @@
 .rg-quantity-note{font-size:.75rem;line-height:1.5;margin:5px 0 0;color:#52715b}
 
 .rg-quantity-note.rg-quantity-short{color:#89462d}
+
+/* Optional yield adjustments. Measurements change, instructions remain original. */
+.rg-portion-panel{margin:10px 0 16px;padding:14px;border:1px solid #c6dac4;border-radius:12px;background:#f5faf3}
+.rg-portion-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.rg-portion-head>label{font-size:.84rem;font-weight:750;color:#24563a}
+.rg-portion-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.rg-portion-actions input{width:92px;min-height:43px;border-radius:8px;padding:8px 10px;border:1px solid #a6c0a5;background:#fff;font:inherit;color:#234f35}
+.rg-portion-actions button{min-height:43px}
+.rg-portion-actions button:disabled{opacity:.5;cursor:default}
+.rg-portion-note{font-size:.78rem;line-height:1.55;color:#466449;margin:10px 0 0}
+.rg-amount-scaled strong{color:#276342}
+.rg-original-amount{display:block;margin-top:4px;font-size:.72rem;color:#536d59;font-weight:400}
+.rg-portion-manual{display:block;margin-top:5px;font-size:.74rem;line-height:1.4;color:#8c5129;font-weight:700}
+.rg-cook-portion{font-size:.76rem;color:#4d6c56;margin:0}
+@media(max-width:550px){.rg-portion-head{display:grid;gap:9px}.rg-portion-actions{width:100%}.rg-portion-actions .rg-button{flex:1}}
