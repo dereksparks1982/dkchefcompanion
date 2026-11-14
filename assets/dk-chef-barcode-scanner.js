@@ -136,10 +136,7 @@ async function start(options){
      try{quagga.init(config,error=>error?reject(error):resolve());}
      catch(error){reject(error);}
     });
-    if(current!==session){
-     try{await quagga.stop();}catch(error){}
-     return;
-    }
+    if(current!==session)return; // A newer camera session owns Quagga; do not stop it.
     // A driver may accept the stream during init but fail at start().
     // Treat both phases as a capture attempt, not only init().
     session.detected=result=>{
@@ -194,7 +191,7 @@ async function start(options){
    });
    throw error;
   }
-  if(current!==session)await stop();
+  if(current!==session)return; // Never stop a newer camera session.
  }catch(error){
   if(current===session)await stop();
   throw error;
