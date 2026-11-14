@@ -165,13 +165,20 @@ function saveProvision(value){
    x.sourceHarvestId===linkedHarvest&&x.location===location&&x.id!==id))return false;
  let row=id?provisions().find(x=>x.id===id):null;
  if(row?.sourceHarvestAllocation===true&&location!==row.location)return false;
- const storageMeta=(location==="pantry"||location==="cellar")?
-  window.DKChefStorageChecks?.normalize(value,row||{})||{ok:true,fields:{}}:
-  {ok:true,fields:{}};
- if(!storageMeta.ok)return false;
  // Legacy inventory edits do not contain barcode fields. Preserve existing UPCs.
  const barcode=String(value.barcode??row?.barcode??"").replace(/\s+/g,"");
  if(barcode&&!/^\d{8,14}$/.test(barcode))return false;
+ // Check metadata before mutating stock. For repeated scans, inherit the
+ // existing matching item's storage observations, not blank form defaults.
+ const matchedStock=row||provisions().find(x=>x.location===location&&
+  (barcode?x.barcode===barcode:
+   x.key===key&&String(x.brand||"")===String(value.brand||"").trim()&&
+   String(x.size||"")===String(value.size||"").trim()));
+ const storageMeta=(location==="pantry"||location==="cellar")?
+  window.DKChefStorageChecks?.normalize(value,matchedStock||{})||{ok:true,fields:{}}:
+  {ok:true,fields:{}};
+ if(!storageMeta.ok)return false;
+
  if(row)row.packages=packages;
  if(!row){
   // Repeat scans add packages to the same barcode+storage entry.
