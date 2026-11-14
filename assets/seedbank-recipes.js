@@ -65,6 +65,8 @@ const tabs=[
  {id:"personal",en:"My Recipes",ru:"Мои рецепты"}
 ];
 let activeCategory=null,cookFilter="all";
+// Ephemeral portion targets: never saved to shared inventory or cloud backups.
+const portionTargets=Object.create(null);
 const ru=()=>document.documentElement.lang==="ru";
 const say=(en,rus)=>ru()?rus:en;
 const localized=(entity,field)=>ru()&&entity[field+"Ru"]?entity[field+"Ru"]:entity[field];
@@ -215,6 +217,48 @@ function recipeTabMarkup(){
  '<button type="button" class="rg-section-button'+(activeCategory===tab.id?' is-selected':'')+'" data-rg-section="'+tab.id+'" aria-pressed="'+(activeCategory===tab.id)+'">'+esc(ru()?tab.ru:tab.en)+'</button>').join("")+'</div>';
 }
 
+
+function portionInfo(recipe){return window.DKChefRecipeMatch?.yieldInfo(recipe)||null;}
+function portionTarget(recipe){
+ const info=portionInfo(recipe);
+ return info?(Number.isSafeInteger(portionTargets[recipe.id])?portionTargets[recipe.id]:info.base):null;
+}
+function portionFactor(recipe){
+ return portionInfo(recipe)?window.DKChefRecipeMatch.yieldFactor(recipe,portionTarget(recipe)):1;
+}
+function portionUnit(info){
+ if(!ru())return info.unit;
+ const names={servings:"порций",naan:"лепёшек наан",pita:"пит",pitas:"пит",
+  chapati:"чапати",rolls:"булочек",roll:"булочек",biscuits:"булочек",
+  biscuit:"булочек",wedges:"кусочков",wedge:"кусочков",loaf:"буханок",loaves:"буханок"};
+ return names[info.unit]||"шт.";
+}
+function portionControl(recipe){
+ const info=portionInfo(recipe);
+ if(!info)return "";
+ const target=portionTarget(recipe),changed=target!==info.base;
+ return '<div class="rg-portion-panel" role="group" aria-label="'+say("Adjust recipe yield","Изменить выход рецепта")+'">'+
+  '<div class="rg-portion-head"><label for="rgYieldTarget">'+say("Plan quantity","Планируемое количество")+
+  ' ('+esc(portionUnit(info))+')</label><div class="rg-portion-actions">'+
+  '<input id="rgYieldTarget" type="number" min="1" max="'+info.max+
+  '" step="1" inputmode="numeric" value="'+target+'">'+
+  '<button type="button" class="rg-button" data-rg-reset-yield'+(changed?"":" disabled")+'>'+
+  say("Original amount","Исходное количество")+'</button></div></div>'+
+  '<p class="rg-portion-note">'+say(
+   "Ingredient amounts and stock checks follow this yield where measurements are clear. Cooking times, pan sizes and unclear amounts are not scaled. No stock is deducted.",
+   "Количество ингредиентов и проверка запасов меняются только для понятных мер. Время приготовления, размеры форм и неясные количества не пересчитываются. Продукты не списываются.")+'</p></div>';
+}
+function ingredientAmount(ing,ratio){
+ const original=String(localized(ing,"amount")||"");
+ if(!original)return "";
+ if(ratio===1)return '<small class="rg-amount">'+esc(original)+'</small>';
+ const scaled=window.DKChefRecipeMatch?.scaledAmount(ing,ratio,ru()?"ru":"en");
+ if(scaled?.status!=="scaled")return '<small class="rg-amount">'+esc(original)+'</small>'+
+  '<small class="rg-portion-manual">'+say("Adjust manually for this yield.","Пересчитайте количество вручную.")+'</small>';
+ return '<small class="rg-amount rg-amount-scaled"><strong>'+esc(scaled.label)+'</strong>'+
+  '<span class="rg-original-amount">'+say("Original: ","Исходное: ")+esc(original)+'</span></small>';
+}
+
 function quantityText(q){
  if(!q||!["enough","short","unverified"].includes(q.status))return "";
  const units={g:say("g","г"),ml:say("mL","мл"),egg:say("eggs","яиц"),
@@ -227,10 +271,10 @@ function quantityText(q){
  return say("Quantity unverified. Some matching stock has no comparable unit.",
   "Количество не проверено. У части запасов нет сопоставимых единиц измерения.");
 }
-function recipeQuantityNote(ingredient){
+function recipeQuantityNote(ingredient,multiplier=1){
  const matcher=window.DKChefRecipeMatch;
  if(!matcher||!ingredient?.amount)return "";
- const q=matcher.assessQuantity(ingredient,provisions());
+ const q=matcher.assessQuantity(ingredient,provisions(),multiplier);
  const message=q.status==="not-specified"&&matcher.matches(ingredient,provisions()).length?
   say("Quantity not verified. Add a total amount or package size in Pantry & Root Cellar.",
    "Количество не проверено. Укажите общий объём или размер упаковки в кладовой и погребе."):quantityText(q);
@@ -241,7 +285,7 @@ function recipeQuantityNote(ingredient){
 function cookPlanner(recipes){
  const matcher=window.DKChefRecipeMatch;
  if(!matcher)return '<p class="rg-note">'+say("Recipe matching is unavailable. Reload the app.","Не удалось сопоставить рецепты. Обновите приложение.")+'</p>';
- const ranked=matcher.rank(recipes,provisions());
+ const ranked=matcher.rank(recipes,provisions(),portionFactor);
  const ready=ranked.filter(x=>x.complete).length;
  const near=ranked.filter(x=>x.near).length;
  const stocked=provisions().filter(matcher.isEdibleStock).length;
@@ -303,6 +347,7 @@ function render(){
  if(!recipes.some(r=>r.id===state.selected))state.selected="absinthe";
  const recipe=recipes.find(r=>r.id===state.selected);
  const selectedCategory=category(recipe);
+ const multiplier=portionFactor(recipe);
  if(!activeCategory){
   root.innerHTML=recipeTabMarkup()+'<p class="rg-note">'+say("Select a category to view recipes. All categories start closed.","Выберите раздел для просмотра рецептов. Все разделы изначально закрыты.")+'</p>';
   return;
