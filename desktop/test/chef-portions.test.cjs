@@ -93,3 +93,16 @@ test("both web routes stay scanner-singleton and quantity modules load in order"
  assert.doesNotThrow(()=>new Function(ui));
  assert.doesNotThrow(()=>new Function(source));
 });
+
+test("Russian amounts and planned yields use grammatical singular and plural forms",()=>{
+ const m=matcher();
+ assert.equal(m.scaledAmount({amount:"1 egg"},2,"ru").label,"2 яйца");
+ assert.equal(m.scaledAmount({amount:"2 eggs"},2.5,"ru").label,"5 яиц");
+ const h=app();
+ h.document.documentElement.lang="ru";h.click("section","bread");
+ h.change("2");h.click("section","cook");
+ assert.match(h.host.innerHTML,/2 порции/);
+ h.click("section","bread");
+ h.change("8");h.click("section","cook");
+ assert.match(h.host.innerHTML,/8 порций/);
+});
