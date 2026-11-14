@@ -123,6 +123,17 @@ function validate(data){
     row.barcode!=null&&row.barcode!==""&&!/^\d{8,14}$/.test(row.barcode)||
     typeof row.updatedAt!=="string"||Number.isNaN(Date.parse(row.updatedAt)))
     throw Error("Invalid food inventory item.");
+   if(row.sourceHarvestAllocation!=null){
+    const validId=typeof row.sourceHarvestId==="string"&&
+     /^[a-zA-Z0-9-]{1,100}$/.test(row.sourceHarvestId);
+    if(row.sourceHarvestAllocation!==true||!validId||
+      row.id!=="harvest-stock-"+row.sourceHarvestId+"-"+row.location||
+      !["pantry","cellar"].includes(row.location)||
+      typeof row.harvestAllocationPosted!=="number"||
+      !Number.isFinite(row.harvestAllocationPosted)||row.harvestAllocationPosted<=0||
+      !["lb","oz","kg","g","count","bunches"].includes(row.harvestAllocationUnit))
+     throw Error("Invalid posted harvest stock.");
+   }
    if(row.medicineInfo!=null){
     const info=row.medicineInfo;
     if(row.location!=="medicine"||!isObject(info)||
@@ -161,6 +172,24 @@ function validate(data){
   const section=data.workbench?.[key];
   if(section!=null&&(!Array.isArray(section)||section.length>3000||section.some(x=>!isObject(x))))
    throw Error("Invalid inventory section: "+key);
+ }
+ // Optional allocation ledger; older harvest records remain compatible.
+ for(const harvest of array(data.workbench?.harvests)){
+  if(harvest.allocations==null)continue;
+  const a=harvest.allocations,total=Number(harvest.amount),unit=String(harvest.unit||"");
+  if(!isObject(a)||!Number.isFinite(total)||total<=0||
+    !["lb","oz","kg","g","count","bunches"].includes(unit))
+   throw Error("Invalid harvest allocation.");
+  let sum=0;
+  for(const key of ["fresh","preserved","pantry","cellar"]){
+   const n=a[key]??0;
+   if(typeof n!=="number"||!Number.isFinite(n)||n<0||n>1e9||
+    (["count","bunches"].includes(unit)&&!Number.isSafeInteger(n)))
+    throw Error("Invalid harvest allocation.");
+   sum+=n;
+  }
+  if(sum>total+Math.max(1e-9,total*1e-9))
+   throw Error("Harvest allocation exceeds recorded yield.");
  }
  if(data.watering?.deletedRecords!=null){
   const deleted=data.watering.deletedRecords;
