@@ -237,3 +237,20 @@ test("a single camera ended event cannot trigger duplicate reopen requests",asyn
  assert.equal(disconnections,1);
  await decoder.stop();
 });
+
+test("explicitly selected camera is never replaced with browser-default or a different device",async()=>{
+ const {decoder,quagga}=harness();
+ const attempts=[];
+ quagga.init=(config,callback)=>{
+  attempts.push({...config.inputStream.constraints});
+  callback(Object.assign(new Error("Surface front camera busy"),{name:"NotReadableError"}));
+ };
+ await assert.rejects(()=>decoder.start({target,deviceId:"front-cam"}),error=>{
+  assert.equal(error.selectedDevice,"front-cam");
+  assert.equal(error.failures.length,4,"Four profiles keep the selected device");
+  return true;
+ });
+ assert.equal(attempts.length,4);
+ for(const constraints of attempts)assert.equal(constraints.deviceId?.exact||constraints.deviceId?.ideal,"front-cam");
+ assert.ok(attempts.every(constraints=>Object.keys(constraints).length>0));
+});
