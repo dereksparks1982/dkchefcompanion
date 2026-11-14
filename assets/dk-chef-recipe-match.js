@@ -185,9 +185,18 @@ function scaledAmount(ingredient,multiplier=1,language="en"){
  if(!parsed||!Number.isFinite(multiplier)||multiplier<=0||multiplier>4)
   return {status:"manual",original};
  if(language==="ru"){
-  const labels={g:"г",ml:"мл",clove:"зубчиков",egg:"яиц",can:"банок",leaf:"листьев",piece:"шт."};
-  const amount=parsed.amount*multiplier;
-  return {status:"scaled",label:prettyNumber(amount)+" "+(labels[parsed.unit]||""),original};
+  const forms={
+   clove:["зубчик","зубчика","зубчиков"],egg:["яйцо","яйца","яиц"],
+   can:["банка","банки","банок"],leaf:["лист","листа","листьев"],
+   piece:["шт.","шт.","шт."]
+  };
+  const value=parsed.amount*multiplier;
+  const rounded=Math.round(value*10)/10;
+  const number=Number(rounded.toFixed(1)).toLocaleString("ru-RU",{maximumFractionDigits:1});
+  const integer=Number.isInteger(value),last=Math.abs(value)%10,teen=Math.floor(Math.abs(value)%100);
+  const form=integer&&(teen<11||teen>14)?(last===1?0:last>=2&&last<=4?1:2):2;
+  const unit=parsed.unit==="g"?"г":parsed.unit==="ml"?"мл":forms[parsed.unit]?.[form]||"шт.";
+  return {status:"scaled",label:number+" "+unit,original};
  }
  const plural={cup:"cups",teaspoon:"teaspoons",tablespoon:"tablespoons",clove:"cloves",
   egg:"eggs",can:"cans",leaf:"leaves",ounce:"ounces",pound:"pounds",gram:"grams",
