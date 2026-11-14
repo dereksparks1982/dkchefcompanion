@@ -91,36 +91,42 @@ async function start(options){
  if(root.isSecureContext===false)
   throw Object.assign(new Error("Camera requires HTTPS"),{name:"SecurityError"});
  if(!options?.target)throw Error("Camera preview element missing");
- // Prefer the self-facing camera on desktops/Surface Pro; rear camera on phones.
- // A known Front Camera deviceId is more reliable than facingMode on Linux.
+ const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent||"");
  let chosen=options.deviceId||"";
- if(!chosen&&!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+ if(!chosen&&!mobile){
   try{
    const list=await devices();
    const front=list.find(x=>/\b(front|user.?facing|selfie)\b/i.test(x.label));
    if(front)chosen=front.deviceId;
-  }catch(error){/* Fall back to facingMode:user. */}
+  }catch(error){/* Browser defaults still work without enumeration. */}
  }
- const session={options,detected:null,processed:null,frames:0,recognized:false,holdUntil:0};
+ const session={options,detected:null,processed:null,frames:0,recognized:false,holdUntil:0,
+  disconnected:false};
  current=session;
- // Surface Pro / Firefox can report NotReadableError even with permission granted.
- // Quagga2 owns every attempt. Retry with lighter capture constraints rather
- // than requesting a separate custom media stream or blaming permissions.
  const config=configuration(options.target,chosen,navigator.userAgent);
  const profiles=[{label:"Preferred camera",constraints:config.inputStream.constraints}];
  if(chosen){
-  profiles.push({label:"Front camera · low resolution",
-    constraints:{deviceId:{exact:chosen},width:{ideal:640},height:{ideal:480}}});
-  profiles.push({label:"Front camera · device defaults",constraints:{deviceId:{ideal:chosen}}});
+  profiles.push({label:"Selected camera · 640×480",
+   constraints:{deviceId:{exact:chosen},width:{ideal:640},height:{ideal:480}}});
+  profiles.push({label:"Selected camera · no resolution request",
+   constraints:{deviceId:{ideal:chosen}}});
+  profiles.push({label:"Selected camera · 320×240",
+   constraints:{deviceId:{ideal:chosen},width:{ideal:320},height:{ideal:240}}});
  }else{
-  profiles.push({label:"Camera · low resolution",
-    constraints:{facingMode:config.inputStream.constraints.facingMode,width:{ideal:640},height:{ideal:480}}});
+  profiles.push({label:"Camera · 640×480",
+   constraints:{facingMode:config.inputStream.constraints.facingMode,width:{ideal:640},height:{ideal:480}}});
+  profiles.push({label:"Camera · 320×240",
+   constraints:{facingMode:config.inputStream.constraints.facingMode,width:{ideal:320},height:{ideal:240}}});
  }
+ // Never switch away from a camera explicitly chosen by the user.
+ // In automatic mode, browser defaults are the last resort on Linux.
  if(!options.deviceId)profiles.push({label:"Browser camera defaults",constraints:{}});
+ const index=Number.isSafeInteger(options.profileStartIndex)?Math.max(0,options.profileStartIndex):0;
+ const failed=[];
  try{
   devices().then(list=>{if(current===session)options.onCameras?.(list,chosen);}).catch(()=>{});
   let ready=false,lastError=null;
-  for(let i=0;i<profiles.length;i++){
+  for(let i=index;i<profiles.length;i++){
    if(current!==session)return;
    const profile=profiles[i];
    config.inputStream.constraints=profile.constraints;
@@ -130,42 +136,65 @@ async function start(options){
      try{quagga.init(config,error=>error?reject(error):resolve());}
      catch(error){reject(error);}
     });
-    ready=true;break;
+    if(current!==session){
+     try{await quagga.stop();}catch(error){}
+     return;
+    }
+    // A driver may accept the stream during init but fail at start().
+    // Treat both phases as a capture attempt, not only init().
+    session.detected=result=>{
+     if(current!==session||session.recognized||Date.now()<session.holdUntil)return;
+     const barcode=normalize(result?.codeResult?.code,result?.codeResult?.format);
+     if(!barcode)return;
+     session.recognized=true;
+     options.onCode?.(barcode);
+    };
+    session.processed=()=>{
+     if(current!==session||session.recognized)return;
+     session.frames++;
+     if(session.frames===1)options.onProgress?.("live");
+     else if(session.frames===35)options.onProgress?.("searching");
+     else if(session.frames===115||session.frames%200===0)options.onProgress?.("hint");
+    };
+    quagga.onDetected(session.detected);
+    quagga.onProcessed?.(session.processed);
+    await Promise.resolve(quagga.start());
+    const track=quagga.CameraAccess?.getActiveTrack?.();
+    if(track?.readyState==="ended")
+     throw Object.assign(new Error("Camera stream ended during startup"),{name:"NotReadableError"});
+    if(track&&current===session){
+     options.onActiveCamera?.(track.label||"",track.getSettings?.()||{});
+     track.addEventListener?.("ended",()=>{
+      if(current===session&&!session.disconnected){
+       session.disconnected=true;
+       options.onProgress?.("disconnected");
+      }
+     });
+    }
+    ready=true;
+    break;
    }catch(error){
     lastError=error;
-    // Ensure Quagga2 releases any partially opened camera before retry.
+    failed.push({profile:profile.label,name:String(error?.name||"Error"),message:String(error?.message||"").slice(0,160)});
+    options.onFailure?.(failed[failed.length-1]);
+    // Remove callbacks and release a partially initialized or started stream
+    // before a lower-resolution retry. Quagga2 owns the camera throughout.
+    try{if(session.detected)quagga.offDetected?.(session.detected);}catch(ignored){}
+    try{if(session.processed)quagga.offProcessed?.(session.processed);}catch(ignored){}
+    session.detected=null;session.processed=null;session.frames=0;
     try{await quagga.stop();}catch(releaseError){}
-    const retryable=/NotReadable|Overconstrained|AbortError|NotFound|TypeError/i.test(String(error?.name||""));
-    if(!retryable)break;
+    const kind=String(error?.name||"");
+    if(/NotAllowed|PermissionDenied|SecurityError/.test(kind))break;
    }
   }
-  if(!ready)throw Object.assign(lastError||new Error("Could not open camera"),{
-   attempted:profiles.map(profile=>profile.label),
-   selectedDevice:chosen
-  });
-  if(current!==session)return;
-  session.detected=result=>{
-   if(current!==session||session.recognized||Date.now()<session.holdUntil)return;
-   const barcode=normalize(result?.codeResult?.code,result?.codeResult?.format);
-   if(!barcode)return;
-   session.recognized=true;
-   options.onCode?.(barcode);
-  };
-  session.processed=()=>{
-   if(current!==session||session.recognized)return;
-   session.frames++;
-   if(session.frames===1)options.onProgress?.("live");
-   else if(session.frames===35)options.onProgress?.("searching");
-   else if(session.frames===115||session.frames%200===0)options.onProgress?.("hint");
-  };
-  quagga.onDetected(session.detected);
-  quagga.onProcessed?.(session.processed);
-  quagga.start();
-  const track=quagga.CameraAccess?.getActiveTrack?.();
-  if(track&&current===session)options.onActiveCamera?.(track.label||"",track.getSettings?.()||{});
-  track?.addEventListener?.("ended",()=>{
-   if(current===session)options.onProgress?.("disconnected");
-  });
+  if(!ready){
+   const error=Object.assign(lastError||new Error("Could not open camera"),{
+    attempted:profiles.slice(index).map(profile=>profile.label),
+    failures:failed,selectedDevice:chosen
+   });
+   throw error;
+  }
+  if(current!==session)await stop();
  }catch(error){
   if(current===session)await stop();
   throw error;
