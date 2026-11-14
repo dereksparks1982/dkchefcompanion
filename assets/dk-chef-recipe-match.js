@@ -60,12 +60,12 @@ function suggestion(ingredient,records){
  }
  return null;
 }
-function evaluate(recipe,records){
+function evaluate(recipe,records,multiplier=1){
  const ingredients=Array.isArray(recipe?.ingredients)?recipe.ingredients:[];
  const details=ingredients.map(ing=>{
   const stock=matches(ing,records);
   return {ingredient:ing,ready:stock.length>0,stocks:stock,
-   quantity:assessQuantity(ing,records),suggestion:stock.length?null:suggestion(ing,records)};
+   quantity:assessQuantity(ing,records,multiplier),suggestion:stock.length?null:suggestion(ing,records)};
  });
  const ready=details.filter(x=>x.ready).length,missing=details.filter(x=>!x.ready);
  return {recipe,ready,total:details.length,missing,details,
@@ -76,10 +76,10 @@ function evaluate(recipe,records){
   near:missing.length>0&&missing.length<=2&&ready>0,
   coverage:details.length?ready/details.length:0};
 }
-function rank(recipes,records){
+function rank(recipes,records,factors=null){
  return (Array.isArray(recipes)?recipes:[])
   .filter(recipe=>recipe?.ingredients?.length&&recipe.family!=="Historical botanical checklist")
-  .map(recipe=>evaluate(recipe,records))
+  .map(recipe=>evaluate(recipe,records,typeof factors==="function"?factors(recipe):1))
   .sort((a,b)=>Number(b.complete)-Number(a.complete)||
     a.missing.length-b.missing.length||b.coverage-a.coverage||
     String(a.recipe.name||"").localeCompare(String(b.recipe.name||"")));
@@ -126,13 +126,15 @@ function parseQuantity(value){
   rest===u||rest.startsWith(u+" ")||rest.startsWith(u+",")||rest.startsWith(u+";")||rest.startsWith(u+"("));
  if(!known)return null;
  const [unit,factor]=units[known];
- return {amount:count*factor,unit,original:String(value)};
+ return {amount:count*factor,unit,original:String(value),count,displayUnit:known};
 }
-function assessQuantity(ingredient,records){
+function assessQuantity(ingredient,records,multiplier=1){
  const stocked=matches(ingredient,records);
  if(!stocked.length)return {status:"not-on-hand"};
  const target=parseQuantity(ingredient?.amount);
  if(!target)return {status:"not-specified"};
+ const ratio=Number.isFinite(multiplier)&&multiplier>0&&multiplier<=4?multiplier:1;
+ const needed=target.amount*ratio;
  let measured=0,unknown=0;
  for(const row of stocked){
   const explicit=String(row.amount??"").trim();
@@ -141,10 +143,59 @@ function assessQuantity(ingredient,records){
   if(!found||found.unit!==target.unit||!Number.isSafeInteger(packages)||packages<=0){unknown++;continue;}
   measured+=found.amount*(explicit?1:packages);
  }
- const sufficient=measured+Math.max(0.000001,target.amount*1e-8)>=target.amount;
+ const sufficient=measured+Math.max(0.000001,needed*1e-8)>=needed;
  return {status:sufficient?"enough":unknown?"unverified":"short",
-  unit:target.unit,required:target.amount,measured,unknown};
+  unit:target.unit,required:needed,measured,unknown};
 }
 
-root.DKChefRecipeMatch=Object.freeze({normalize,alternatives,isEdibleStock,stockKey,matches,suggestion,evaluate,rank,parseQuantity,assessQuantity});
+
+// Scaling is an in-memory planning projection, not an inventory mutation.
+// Ambiguous yields ("Serves 4–6", "Makes about ...") are deliberately excluded.
+function yieldInfo(recipe){
+ const raw=String(recipe?.serves||"").trim();
+ const serves=raw.match(/^Serves\s+([1-9]\d?)\s*$/i);
+ if(serves)return {base:Number(serves[1]),unit:"servings",max:Math.min(48,Number(serves[1])*4)};
+ const makes=raw.match(/^Makes\s+([1-9]\d?)\s+(naan|pitas?|chapati|rolls?|biscuits?|wedges?|loaves?|loaf)(?:\s*\([^)]*\))?\s*$/i);
+ if(!makes)return null;
+ const base=Number(makes[1]),unit=makes[2].toLowerCase();
+ return {base,unit,max:Math.min(48,base*4)};
+}
+function yieldFactor(recipe,target){
+ const info=yieldInfo(recipe);
+ if(!info)return 1;
+ const amount=Number(target);
+ return Number.isSafeInteger(amount)&&amount>=1&&amount<=info.max?amount/info.base:1;
+}
+function prettyNumber(value){
+ const whole=Math.floor(value+1e-9),rem=value-whole;
+ const fractions=[
+  [1/8,"⅛"],[1/6,"1/6"],[1/4,"¼"],[1/3,"⅓"],[3/8,"⅜"],
+  [1/2,"½"],[5/8,"⅝"],[2/3,"⅔"],[3/4,"¾"],[5/6,"5/6"],[7/8,"⅞"]
+ ];
+ const nearby=fractions.find(([n])=>Math.abs(n-rem)<0.001);
+ if(nearby)return whole?whole+nearby[1]:nearby[1];
+ if(Math.abs(rem)<0.001)return String(whole);
+ return String(Number(value.toFixed(3)));
+}
+function scaledAmount(ingredient,multiplier=1,language="en"){
+ const original=String(ingredient?.amount||"").trim();
+ if(!original)return {status:"missing",original};
+ if(multiplier===1)return {status:"original",label:language==="ru"?String(ingredient?.amountRu||original):original,original};
+ const parsed=parseQuantity(original);
+ if(!parsed||!Number.isFinite(multiplier)||multiplier<=0||multiplier>4)
+  return {status:"manual",original};
+ if(language==="ru"){
+  const labels={g:"г",ml:"мл",clove:"зубчиков",egg:"яиц",can:"банок",leaf:"листьев",piece:"шт."};
+  const amount=parsed.amount*multiplier;
+  return {status:"scaled",label:prettyNumber(amount)+" "+(labels[parsed.unit]||""),original};
+ }
+ const plural={cup:"cups",teaspoon:"teaspoons",tablespoon:"tablespoons",clove:"cloves",
+  egg:"eggs",can:"cans",leaf:"leaves",ounce:"ounces",pound:"pounds",gram:"grams",
+  liter:"liters",litre:"litres",pint:"pints",quart:"quarts",piece:"pieces"};
+ const quantity=parsed.count*multiplier;
+ const unit=quantity===1?parsed.displayUnit:(plural[parsed.displayUnit]||parsed.displayUnit);
+ return {status:"scaled",label:prettyNumber(quantity)+" "+unit,original};
+}
+
+root.DKChefRecipeMatch=Object.freeze({normalize,alternatives,isEdibleStock,stockKey,matches,suggestion,evaluate,rank,parseQuantity,assessQuantity,yieldInfo,yieldFactor,scaledAmount});
 })(window);
