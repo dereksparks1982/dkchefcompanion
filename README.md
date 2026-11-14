@@ -166,3 +166,14 @@ The **Cook from Pantry** finder now distinguishes matched ingredient names from 
 For Pantry & Root Cellar food, **Total amount on hand** means the usable total across all packages (e.g. `500 g`). If no total is entered, **Package size (each)** (e.g. `250 g`) is multiplied by the stored package count. The engine compares compatible mass (g, kg, oz, lb), volume (mL, L, tsp, tbsp, cups, fl oz, pints, quarts) and identical counted units (eggs, cloves, cans, leaves, pieces). Incompatible units, ranges, vague quantities and package counts alone remain unverified. No guessed conversions between mass and volume. Best-by dates do not automatically determine food safety.
 
 Viewing, opening, or ranking recipes **never consumes stock**. Existing inventories, seeds, the one Product Scanner, Google Drive account authorizations, storage keys, sync rules and backup format remain unchanged. No required data migration.
+
+
+### Optional recipe portions and batch yields (2026-11-13)
+
+In the **Recipe Guide**, straightforward yields such as **Serves 4**, **Makes 8 naan**, or **Makes 12 rolls** now offer an optional numeric **Plan quantity** control. The app recalculates reliably measured ingredient amounts and checks the scaled quantities against Pantry & Root Cellar stock. It also remembers the chosen yield for the current browsing session when you return to **Cook from Pantry**. **Original amount** restores the recipe's starting yield.
+
+This feature is intentionally conservative. Recipes without a clear numeric yield (for example, **Serves 4–6**, approximate jar yields, historical checklists and user-created recipes without yields) are not automatically resized. Ingredients with imprecise amounts such as **1 medium onion** stay in the original form with a visible **adjust manually** notice. The original quantity is shown alongside every scaled ingredient for context. Oven temperature, baking tin sizes, cooking times, food safety instructions, and preparation directions are **not** automatically modified. A cook should review these details when changing batch sizes.
+
+Portion selections are transient and **not persisted**. Recipe content and user-added recipes remain unchanged, and the controls **never consume pantry stock**. English and Russian presentation, the existing single barcode scanner, the combined Pantry & Root Cellar, local backups, Google Drive sync, and all previous records remain compatible. No new account authorization, schema version, required field, or personal inventory disclosure was introduced.
+
+**Testing:** Focused portion, fraction, fallback, localized-render, read-only stock and regression coverage lives in `desktop/test/chef-portions.test.cjs`. Existing application tests are run using `node --test desktop/test/*.test.cjs`; GitHub Actions are not triggered for each source change.
