@@ -70,3 +70,11 @@
 .chef-medicine-verify small{font-size:.74rem;line-height:1.45;color:#526a79}
 .chef-medicine-verify a{color:#155e88;font-weight:750;text-decoration:underline;text-underline-offset:2px}
 .chef-medicine-verify a[hidden]{display:none}
+
+/* Desktop Quagga2 camera troubleshooting. Nothing is uploaded automatically. */
+.chef-station-diagnostics{margin:9px 0;border:1px solid #deb98b;border-radius:9px;background:#fffaef;color:#634723;padding:10px 12px}
+.chef-station-diagnostics[hidden]{display:none!important}
+.chef-station-diagnostics summary{cursor:pointer;font-weight:800;font-size:.8rem;line-height:1.6}
+.chef-station-diagnostics pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.75rem;line-height:1.6;margin:9px 0 0;max-height:280px;overflow:auto;color:#604e34}
+.chef-station-diagnostics:focus-within{outline:2px solid #b37b2d;outline-offset:2px}
+html[lang="ru"] .chef-station-diagnostics{background:#fff7f6;border-color:#dab5c0}

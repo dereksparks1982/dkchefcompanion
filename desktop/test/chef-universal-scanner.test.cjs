@@ -11,7 +11,8 @@ function harness(product={found:true,name:"Green Giant Sweet Peas",brand:"Green 
  const more=["chefScanTitle","chefScanIntro","chefScanOne","chefScanMuteText","chefScanCameraLabel",
   "chefScanAutomatic","chefScanBarcodeLabel","chefScanNameLabel","chefScanBrandLabel",
   "chefScanSizeLabel","chefScanDestinationLabel","chefScanCountLabel","chefScanIngredientLabel","chefScanSaveHelp","chefScanSources",
-  "chefFDABox","chefFDATitle","chefFDAStatus","chefFDADetails","chefFDALabel","chefFDANotice"];
+  "chefFDABox","chefFDATitle","chefFDAStatus","chefFDADetails","chefFDALabel","chefFDANotice",
+ "chefScanDiagnostics","chefScanDiagnosticsLabel","chefScanDiagnosticsText"];
  const map=new Map();
  for(const id of ids.concat(more))map.set(id,{
   id,value:"",textContent:"",innerHTML:"",hidden:false,checked:false,listeners:{},
@@ -166,4 +167,26 @@ test("medicine lookup miss never invents NDC or blocks saving a retail product",
  h.click("chefScanAdd");
  assert.equal(h.events.saved[0].medicineInfo,undefined);
  assert.equal(h.events.saved[0].name,"Pepcid AC");
+});
+
+test("Surface disconnect advances to a new capture profile instead of replaying the failed profile",async()=>{
+ const h=harness();h.click("chefScanStart");await flush();
+ h.events.camera.onAttempt("Preferred camera",1,4);
+ h.events.camera.onProgress("disconnected");
+ await flush();
+ assert.equal(h.events.starts,2);
+ assert.equal(h.events.camera.profileStartIndex,1);
+ h.events.camera.onAttempt("Selected camera · 640×480",2,4);
+ h.events.camera.onProgress("disconnected");
+ await flush();
+ assert.equal(h.events.camera.profileStartIndex,2);
+});
+test("terminal Surface webcam failures keep local diagnostics and camera selection available",async()=>{
+ const h=harness();h.click("chefScanStart");await flush();
+ h.events.camera.onAttempt("Browser camera defaults",4,4);
+ h.events.camera.onProgress("disconnected");await flush();
+ assert.equal(h.map.get("chefScanDiagnostics").hidden,false);
+ assert.match(h.map.get("chefScanDiagnosticsText").textContent,/Video stream ended/);
+ assert.equal(h.map.get("chefScanStart").hidden,false);
+ assert.equal(h.map.get("chefScanCameraRow").hidden,false);
 });

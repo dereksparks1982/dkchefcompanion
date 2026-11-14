@@ -151,10 +151,10 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
  for(const page of ["index.html","docs/index.html"]){
   const html=read(page);
   const quagga=html.indexOf("assets/vendor/quagga2.min.js");
-  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-stream2");
+  const bridge=html.indexOf("assets/dk-chef-barcode-scanner.js?v=20261113-surface3");
   const app=html.indexOf("assets/dk-chef-provisions-ui.js?v=20261113-medicine1");
   const product=html.indexOf("assets/dk-chef-product-lookup.js?v=20261113-medicine1");
-  const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-medicine1");
+  const station=html.indexOf("assets/dk-chef-universal-scanner.js?v=20261113-surface3");
   const medicine=html.indexOf("assets/dk-chef-medicine-lookup.js?v=20261113-medicine1");
   assert.ok(quagga>0&&bridge>quagga&&medicine>bridge&&product>medicine&&app>product&&station>app,page);
  }
@@ -162,4 +162,78 @@ test("both deployed routes use the direct Quagga2 integration",()=>{
  assert.match(read("README.md"),/Quagga2 direct live-camera integration/);
  assert.match(read("sw.js"),/"assets\/dk-chef-product-lookup.js"/);
  assert.match(read("sw.js"),/"assets\/dk-chef-universal-scanner.js"/);
+});
+
+test("Surface driver failures during start() advance to a lower-resolution Quagga2 profile",async()=>{
+ const {decoder,quagga}=harness();
+ const configs=[];let starts=0;
+ const initial=quagga.start.bind(quagga);
+ quagga.init=(config,callback)=>{configs.push(config.inputStream.constraints);callback(null);};
+ quagga.start=()=>{
+  starts++;
+  if(starts===1)throw Object.assign(new Error("Driver failed after init"),{name:"NotReadableError"});
+  initial();
+ };
+ const seen=[];
+ await decoder.start({target,onAttempt:(label,i)=>seen.push([label,i])});
+ assert.equal(starts,2);
+ assert.equal(configs[1].width.ideal,640);
+ assert.equal(quagga.stopped,1,"Failed start must release its partial stream");
+ assert.equal(seen[1][1],2);
+ await decoder.stop();
+});
+test("Surface driver offers 320px and automatic browser defaults if init keeps failing",async()=>{
+ const {decoder,quagga}=harness();
+ const configs=[];
+ quagga.init=(config,callback)=>{
+  configs.push({...config.inputStream.constraints});
+  if(configs.length<=3)return callback(Object.assign(new Error("Unavailable"),{name:"NotReadableError"}));
+  callback(null);
+ };
+ await decoder.start({target});
+ assert.equal(configs.length,4,"Automatic Surface capture should reach browser defaults");
+ assert.equal(Object.keys(configs[3]).length,0);
+ await decoder.stop();
+});
+test("startup with profileStartIndex skips previously disconnected camera profiles",async()=>{
+ const {decoder,quagga}=harness();
+ const seen=[];
+ await decoder.start({target,profileStartIndex:1,onAttempt:(label,i)=>seen.push(i)});
+ assert.deepEqual(seen,[2]);
+ assert.equal(quagga.config.inputStream.constraints.width.ideal,640);
+ await decoder.stop();
+});
+test("already ended Surface track retries instead of claiming a live camera",async()=>{
+ const {decoder,quagga}=harness();
+ let starts=0;
+ quagga.start=()=>{starts++;};
+ quagga.CameraAccess.getActiveTrack=()=>({
+  readyState:starts===1?"ended":"live",addEventListener(){},getSettings:()=>({})
+ });
+ await decoder.start({target});
+ assert.equal(starts,2);
+ assert.equal(quagga.config.inputStream.constraints.width.ideal,640);
+ await decoder.stop();
+});
+test("terminal failures include local per-profile diagnostic details",async()=>{
+ const {decoder,quagga}=harness();
+ quagga.init=(config,callback)=>callback(Object.assign(new Error("Busy video input"),{name:"NotReadableError"}));
+ await assert.rejects(()=>decoder.start({target}),error=>{
+  assert.equal(error.name,"NotReadableError");
+  assert.ok(error.failures?.length>=4);
+  assert.match(error.failures[0].profile,/camera/i);
+  assert.equal(error.failures[0].name,"NotReadableError");
+  return true;
+ });
+});
+test("a single camera ended event cannot trigger duplicate reopen requests",async()=>{
+ const {decoder,quagga}=harness();
+ let listener=null,disconnections=0;
+ quagga.CameraAccess.getActiveTrack=()=>({
+  readyState:"live",addEventListener(type,fn){if(type==="ended")listener=fn;},getSettings:()=>({})
+ });
+ await decoder.start({target,onProgress:step=>{if(step==="disconnected")disconnections++;}});
+ listener();listener();
+ assert.equal(disconnections,1);
+ await decoder.stop();
 });
