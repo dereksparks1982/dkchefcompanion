@@ -46,3 +46,20 @@
 /* Official drug label references are separate from food/recipe inventory. */
 .chef-store-item .chef-regulatory-note{margin:7px 0 0;font-size:.79rem;line-height:1.5;color:#345668;background:#eff6fa;border:1px solid #d6e4eb;border-radius:7px;padding:7px}
 .chef-regulatory-note a{color:#225d85;text-decoration:underline;text-underline-offset:2px}
+
+/* Food storage checks: optional manual observations and on-screen reminders. */
+.chef-storage-fields{margin:0;padding:13px;border:1px solid #cdddc9;border-radius:10px;min-width:0;display:grid;gap:9px;background:#f8fbf6}
+.chef-storage-fields legend{font-size:.84rem;font-weight:800;color:#275f43;padding:0 6px}
+.chef-storage-fields>.chef-store-grid{min-width:0}
+.chef-storage-overview{display:grid;gap:10px;padding:12px;border:1px solid #c4d9c1;border-radius:10px;background:#f7faf4}
+.chef-storage-overview>p:first-child{margin:0;font-size:.84rem;line-height:1.6;color:#28553c}
+.chef-storage-filters{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.chef-storage-filters button{border:1px solid #bad0b8;border-radius:8px;padding:8px 11px;background:#fff;color:#29543c;min-height:37px;font:inherit;font-size:.8rem;font-weight:750;cursor:pointer}
+.chef-storage-filters button.is-active{background:#2a644a;color:#fff;border-color:#2a644a}
+.chef-storage-detail{line-height:1.5}
+.chef-condition-warning,.chef-check-due,.chef-check-soon{display:inline-block;margin:5px 6px 0 0;border:1px solid #e0ae91;background:#fff1e6;color:#904a23;border-radius:7px;padding:4px 7px;font-size:.74rem;font-weight:760}
+.chef-check-due{background:#fff0e9;border-color:#dca9a0;color:#913c34}
+.chef-check-soon{background:#fef7e6;border-color:#e2cb92;color:#7b5e22}
+html[lang="ru"] .chef-storage-overview,html[lang="ru"] .chef-storage-fields{background:#fff8f8;border-color:#e5cbd0}
+html[lang="ru"] .chef-storage-filters button.is-active{background:#92334b;border-color:#92334b}
+@media(max-width:660px){.chef-storage-overview{padding:10px}.chef-storage-filters button{flex:1}}

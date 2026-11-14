@@ -24,6 +24,7 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 ### Food, recipes and traditional knowledge
 
 - **Harvest allocation:** divide each recorded harvest among fresh use, preservation, Pantry and Root Cellar, see the unallocated balance, and explicitly post linked storage quantities without double counting.
+- **Storage inspections:** optionally record shelf/bin, observed condition, temperature, humidity and next-inspection date. Due dates produce on-screen reminders; foods flagged for review are excluded from recipe suggestions until checked.
 - **Pantry & Root Cellar:** one collapsible section and one shared inventory, with Pantry and Root Cellar as selectable storage locations. Keep ordinary staples, packaged foods, harvested produce and suitable preserves with optional amounts, package counts, dates, brands, barcodes and storage notes. Duplicate scans increase an existing matching package count. Record a harvest into storage without automatically reducing the original harvest record.
 - **Barcode food identification:** Quagga2-powered live grocery-barcode scanning for UPC/EAN products, with a desktop camera picker and manual entry everywhere. Decoding works offline; identifying the product uses Open Food Facts online. Confirm the recognized food and its generic ingredient before saving.
 - **Recipe Guide:** measured, step-by-step bilingual recipes. The **On hand** checkbox is shared across recipes and linked to real Pantry/Root Cellar items, not seed ownership. Old per-recipe availability marks are migrated once into the shared kitchen inventory, retaining saved personal recipes.
@@ -45,7 +46,7 @@ The **combined Pantry & Root Cellar inventory**, shared recipe ingredients, basi
 
 | Future improvement | Scope |
 | --- | --- |
-| **More storage detail** | Condition checks, storage environment and optional reminders for perishable foods. |
+| **Storage checks & reminders** | Implemented: manual temperature/humidity readings, shelf/bin records, optional review dates, due/review filters and clear on-screen warnings. No background notifications. |
 | **Precise recipe stock math** | Conservative quantity comparison and optional serving/batch scaling are implemented. Future work can add explicitly confirmed consumption. Opening recipes never deducts stock. |
 | **Harvest allocation ledger** | Implemented: divide a harvest into fresh use, preservation, Pantry and Root Cellar, track remaining quantity, and explicitly post linked food stock without duplicate entries. |
 
@@ -186,3 +187,13 @@ Portion selections are transient and **not persisted**. Recipe content and user-
 **Saving an allocation never increases food stock**. After saving, explicitly choose **Post to inventory** for the Pantry or Root Cellar. Each harvest/location pair uses a stable linked item ID in `recipeGuide.provisions`, so reposting the same amount is idempotent; a later confirmed post updates that amount rather than adding another package. Setting a posted allocation to zero and confirming removes only its linked food item. Older manually copied harvest entries block posting until reconciled, and manually edited linked stock is protected against silent overwrites. The original pantry inventory can still be edited independently; when manual edits conflict, reconcile them before reposting. All user accounts, data keys, backup format, existing seed records, and Drive folder settings remain unchanged.
 
 The allocation ledger is **bookkeeping**, not a food-safety recommendation. Quantities assigned to preservation do not certify that they were safely processed; follow tested methods. Because allocation changes and inventory posting are separate explicit steps, always review linked stock after changing a plan. Restoring backups or merging devices may yield an older posted stock amount until you choose to synchronize it from the current harvest allocation.
+
+### Storage inspections and optional check reminders (2026-11-13)
+
+**Pantry & Root Cellar** now supports optional storage observations on individual food items: a shelf/bin/container location, a manual temperature reading (°F or °C), relative humidity, an observed condition, date last inspected and a self-selected date for the next inspection. These are **records**, not sensor readings, automatic food-safety assessments, or a certification that food is edible.
+
+The **Storage checks** summary appears above the food inventory, with filters for **All food**, **Inspections due** and **Needs review**. Due and upcoming counts are calculated when the app opens using the local calendar date. A **Record check** shortcut opens the existing item form and fills the inspection date with today; it does not silently decide that food looks good or change the saved record until the user saves. Check dates are **optional**. There are **no background timers, notifications, or reminders sent outside the app**.
+
+When an item is marked **Needs review**, Cook from Pantry excludes it from ingredient matches and substitution suggestions until the user changes that condition. This is a conservative choice, not a conclusion that an item is spoiled. The existing best-by and low-stock warnings remain in place. Recorded temperature and humidity are presented **without invented safety thresholds**; follow recognized food-safety guidance for storage decisions.
+
+The new fields are optional additions to existing `recipeGuide.provisions.items[]` entries. Existing storage keys, imported records, Google Drive merge/backups, UPCs, old harvest links, the single top-of-page barcode scanner, and the Russian/English interfaces remain compatible. Repeated barcode scans retain previously entered inspection details rather than clearing them. Medicine Cabinet and Household Supplies are unchanged.
