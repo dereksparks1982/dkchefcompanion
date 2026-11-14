@@ -877,9 +877,9 @@ $("#wbHarvestList").addEventListener("submit",event=>{
   notice(ru?"Распределение не сохранено: ошибка количества или превышен урожай.":
    "Allocation not saved: invalid quantity or allocations exceed the harvest.");return;
  }
- const old=JSON.stringify(row);
+ const index=state.harvests.indexOf(row),old=JSON.parse(JSON.stringify(row));
  row.allocations=next.allocations;row.updatedAt=changed();
- if(!persist()){Object.assign(row,JSON.parse(old));return;}
+ if(!persist()){state.harvests[index]=old;return;}
  renderHarvests();
  notice(ru?"Распределение сохранено. Запасы не изменились.":"Allocation saved; inventory unchanged.");
 });

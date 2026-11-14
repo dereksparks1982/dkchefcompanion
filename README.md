@@ -46,7 +46,7 @@ The **combined Pantry & Root Cellar inventory**, shared recipe ingredients, basi
 | --- | --- |
 | **More storage detail** | Condition checks, storage environment and optional reminders for perishable foods. |
 | **Precise recipe stock math** | First-stage conservative checks now compare compatible recorded food amounts. Future work can support serving scaling and optional, confirmed consumption. Opening recipes never deducts stock. |
-| **More detailed harvest allocations** | Account for a harvest divided among fresh use, preservation, Pantry and Root Cellar, rather than just copying its details. |
+| **Harvest allocation ledger** | Implemented: divide a harvest into fresh use, preservation, Pantry and Root Cellar, track remaining quantity, and explicitly post linked food stock without duplicate entries. |
 
 The goal remains: **know what you have, what you are growing, where your food is stored, and what you can make with it.**
 
@@ -177,3 +177,11 @@ This feature is intentionally conservative. Recipes without a clear numeric yiel
 Portion selections are transient and **not persisted**. Recipe content and user-added recipes remain unchanged, and the controls **never consume pantry stock**. English and Russian presentation, the existing single barcode scanner, the combined Pantry & Root Cellar, local backups, Google Drive sync, and all previous records remain compatible. No new account authorization, schema version, required field, or personal inventory disclosure was introduced.
 
 **Testing:** Focused portion, fraction, fallback, localized-render, read-only stock and regression coverage lives in `desktop/test/chef-portions.test.cjs`. Existing application tests are run using `node --test desktop/test/*.test.cjs`; GitHub Actions are not triggered for each source change.
+
+### Harvest allocation and linked storage (2026-11-13)
+
+**Garden Planner → Harvest records** now includes an optional allocation ledger for each harvest. You can assign quantities to **Fresh use**, **For preservation**, **Pantry** and **Root Cellar**, all in the original harvest unit (lb, oz, kg, g, count or bunches). It shows the **unassigned balance** and rejects negative quantities, excessive allocations, or fractional values for counted harvests. Original harvest records remain immutable history of what was picked; allocations are stored as optional fields on those records, so old backups and the existing Google Drive workbench merge continue to work.
+
+**Saving an allocation never increases food stock**. After saving, explicitly choose **Post to inventory** for the Pantry or Root Cellar. Each harvest/location pair uses a stable linked item ID in `recipeGuide.provisions`, so reposting the same amount is idempotent; a later confirmed post updates that amount rather than adding another package. Setting a posted allocation to zero and confirming removes only its linked food item. Older manually copied harvest entries block posting until reconciled, and manually edited linked stock is protected against silent overwrites. The original pantry inventory can still be edited independently; when manual edits conflict, reconcile them before reposting. All user accounts, data keys, backup format, existing seed records, and Drive folder settings remain unchanged.
+
+The allocation ledger is **bookkeeping**, not a food-safety recommendation. Quantities assigned to preservation do not certify that they were safely processed; follow tested methods. Because allocation changes and inventory posting are separate explicit steps, always review linked stock after changing a plan. Restoring backups or merging devices may yield an older posted stock amount until you choose to synchronize it from the current harvest allocation.

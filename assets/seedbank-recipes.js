@@ -160,6 +160,9 @@ function saveProvision(value){
   !Number.isSafeInteger(threshold)||threshold<0||threshold>999999)return false;
  const old=JSON.stringify(state.provisions),now=new Date().toISOString();
  const id=String(value.id||"");
+ const linkedHarvest=String(value.sourceHarvestId||"");
+ if(linkedHarvest&&provisions().some(x=>x.sourceHarvestAllocation===true&&
+   x.sourceHarvestId===linkedHarvest&&x.location===location&&x.id!==id))return false;
  let row=id?provisions().find(x=>x.id===id):null;
  // Legacy inventory edits do not contain barcode fields. Preserve existing UPCs.
  const barcode=String(value.barcode??row?.barcode??"").replace(/\s+/g,"");
