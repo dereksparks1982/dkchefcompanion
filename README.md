@@ -23,6 +23,7 @@ This project began as **DK Seed Bank**, but the vision has grown well beyond a s
 
 ### Food, recipes and traditional knowledge
 
+- **Harvest allocation:** divide each recorded harvest among fresh use, preservation, Pantry and Root Cellar, see the unallocated balance, and explicitly post linked storage quantities without double counting.
 - **Pantry & Root Cellar:** one collapsible section and one shared inventory, with Pantry and Root Cellar as selectable storage locations. Keep ordinary staples, packaged foods, harvested produce and suitable preserves with optional amounts, package counts, dates, brands, barcodes and storage notes. Duplicate scans increase an existing matching package count. Record a harvest into storage without automatically reducing the original harvest record.
 - **Barcode food identification:** Quagga2-powered live grocery-barcode scanning for UPC/EAN products, with a desktop camera picker and manual entry everywhere. Decoding works offline; identifying the product uses Open Food Facts online. Confirm the recognized food and its generic ingredient before saving.
 - **Recipe Guide:** measured, step-by-step bilingual recipes. The **On hand** checkbox is shared across recipes and linked to real Pantry/Root Cellar items, not seed ownership. Old per-recipe availability marks are migrated once into the shared kitchen inventory, retaining saved personal recipes.
@@ -45,7 +46,7 @@ The **combined Pantry & Root Cellar inventory**, shared recipe ingredients, basi
 | Future improvement | Scope |
 | --- | --- |
 | **More storage detail** | Condition checks, storage environment and optional reminders for perishable foods. |
-| **Precise recipe stock math** | First-stage conservative checks now compare compatible recorded food amounts. Future work can support serving scaling and optional, confirmed consumption. Opening recipes never deducts stock. |
+| **Precise recipe stock math** | Conservative quantity comparison and optional serving/batch scaling are implemented. Future work can add explicitly confirmed consumption. Opening recipes never deducts stock. |
 | **Harvest allocation ledger** | Implemented: divide a harvest into fresh use, preservation, Pantry and Root Cellar, track remaining quantity, and explicitly post linked food stock without duplicate entries. |
 
 The goal remains: **know what you have, what you are growing, where your food is stored, and what you can make with it.**
