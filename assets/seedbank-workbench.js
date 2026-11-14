@@ -221,8 +221,7 @@ host.innerHTML=
  '<label>Garden space<input name="place" maxlength="100" placeholder="Bed / greenhouse"></label>'+
  '<label class="wb-span">Linked planting (optional)<select name="plantingId" id="wbHarvestPlanting"><option value="">No linked planting</option></select></label>'+
  '<label class="wb-span">Quality and notes<input name="notes" maxlength="240" placeholder="Taste, pest damage, would grow again…"></label>'+
- '<button type="submit">Record harvest</button></form>'+
- '<p class="wb-note">'+(document.documentElement.lang==="ru"?'Распределяйте урожай ниже. Сохранение распределения не меняет запасы; отправьте выделенные продукты в кладовую или погреб отдельно.':'Allocate each harvest below. Saving the plan does not add food to inventory; post Pantry or Root Cellar amounts separately.')+'</p>'+
+ '<button type="submit">Record harvest</button></form>'+ 
  '<div id="wbHarvestList"></div></div></details>'+
  '<details class="wb-panel" id="wb-saved"><summary>🌾 Seeds saved from your plants</summary><div class="wb-panel-body">'+
  '<form id="wbSavedForm" class="wb-form"><label class="wb-span">Parent variety'+formSelect("seedKey")+'</label>'+

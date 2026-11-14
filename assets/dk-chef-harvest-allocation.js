@@ -10,6 +10,7 @@ function validAmount(value){
 }
 function inspect(harvest,allocation=harvest?.allocations||{}){
  if(!harvest||!validAmount(Number(harvest.amount))||Number(harvest.amount)<=0||
+    (COUNT_UNITS.has(harvest.unit)&&!Number.isSafeInteger(Number(harvest.amount)))||
     !["lb","oz","kg","g","count","bunches"].includes(harvest.unit))
   return {ok:false,reason:"invalid-harvest"};
  if(!allocation||typeof allocation!=="object"||Array.isArray(allocation))

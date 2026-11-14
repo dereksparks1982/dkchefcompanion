@@ -178,6 +178,7 @@ function validate(data){
   if(harvest.allocations==null)continue;
   const a=harvest.allocations,total=Number(harvest.amount),unit=String(harvest.unit||"");
   if(!isObject(a)||!Number.isFinite(total)||total<=0||
+    (["count","bunches"].includes(unit)&&!Number.isSafeInteger(total))||
     !["lb","oz","kg","g","count","bunches"].includes(unit))
    throw Error("Invalid harvest allocation.");
   let sum=0;

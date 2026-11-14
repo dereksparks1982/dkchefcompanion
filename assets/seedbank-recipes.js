@@ -164,6 +164,7 @@ function saveProvision(value){
  if(linkedHarvest&&provisions().some(x=>x.sourceHarvestAllocation===true&&
    x.sourceHarvestId===linkedHarvest&&x.location===location&&x.id!==id))return false;
  let row=id?provisions().find(x=>x.id===id):null;
+ if(row?.sourceHarvestAllocation===true&&location!==row.location)return false;
  // Legacy inventory edits do not contain barcode fields. Preserve existing UPCs.
  const barcode=String(value.barcode??row?.barcode??"").replace(/\s+/g,"");
  if(barcode&&!/^\d{8,14}$/.test(barcode))return false;
