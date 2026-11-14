@@ -323,6 +323,8 @@ function cookPlanner(recipes){
     '<small>'+esc(labels[category(recipe)]||labels.kitchen)+'</small></div>'+
     '<strong class="rg-cook-score">'+score.ready+' / '+score.total+'</strong></div>'+
     '<p class="rg-cook-state">'+status+'</p>'+
+    (portionInfo(recipe)?'<p class="rg-cook-portion">'+say("Planned yield: ","Планируемый выход: ")+
+      portionTarget(recipe)+' '+esc(portionUnit(portionInfo(recipe)))+'</p>':'')+
 '<p class="rg-cook-quantity">'+say("Measured enough: ","По меркам хватает: ")+score.measuredEnough+
  ' · '+say("Measured short: ","По меркам мало: ")+score.measuredShort+
  ' · '+say("Check amount: ","Уточнить количество: ")+score.quantityUnverified+'</p>'+
@@ -365,9 +367,12 @@ function render(){
  const missing=rows.filter(r=>!r.ready);
  const newSeed=rows.filter(r=>r.ing.type==="garden"&&!r.found.length&&!r.ready);
  const extras=rows.filter(r=>r.ing.type==="pantry"&&!r.ready);
+ const quantityScore=window.DKChefRecipeMatch?.evaluate(recipe,provisions(),multiplier);
  const readySummary=ready.length===rows.length?
-  say("All listed ingredients on hand. Confirm quantities, freshness and suitability before cooking.",
-   "Все перечисленные ингредиенты есть. Перед приготовлением проверьте количество, свежесть и пригодность продуктов."):
+  (quantityScore?.measuredShort?say("All ingredient names are present, but measured stock is insufficient for this quantity.",
+     "Все ингредиенты есть, но измеренного запаса не хватает для выбранного количества."):
+   say("All listed ingredients on hand. Confirm quantities, freshness and suitability before cooking.",
+     "Все перечисленные ингредиенты есть. Перед приготовлением проверьте количество, свежесть и пригодность продуктов.")):
   say("Missing ingredients: ","Не хватает ингредиентов: ")+missing.length+".";
  root.innerHTML=recipeTabMarkup()+
   '<div class="rg-controls"><label for="rg-recipe">'+say("Choose a recipe","Выберите рецепт")+'<select id="rg-recipe">'+categoryRecipes.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===recipe.id?" selected":"")+'>'+esc(localized(r,"name"))+'</option>').join("")+'</select></label>'+
@@ -375,16 +380,17 @@ function render(){
   '<p class="rg-note">'+esc(recipe.family||"Personal recipe")+'</p>'+
   '<h3 class="rg-title">'+esc(localized(recipe,"name"))+'</h3><p class="rg-subtitle">'+esc(localized(recipe,"intro")||"Compare each ingredient with your seed inventory and pantry.")+'</p>'+
   (recipe.serves?'<p class="rg-yield"><strong>'+say("Yield: ","Выход: ")+'</strong>'+esc(localized(recipe,"serves"))+'</p>':"")+
+  portionControl(recipe)+
   '<div class="rg-metrics"><div class="rg-metric"><strong>'+available.length+" / "+botanical.length+'</strong>'+say("Seed packets recorded (not food)","Есть семена (не пищевые продукты)")+'</div>'+
   '<div class="rg-metric"><strong>'+ready.length+" / "+rows.length+'</strong>'+say("Ingredients on hand","Ингредиенты в наличии")+'</div>'+
   '<div class="rg-metric"><strong>'+missing.length+'</strong>'+say("Still missing","Не хватает")+'</div></div>'+
   '<div class="rg-list">'+rows.map(({ing,found,ready})=>
-   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(localized(ing,"name"))+(ing.amount?'<small class="rg-amount">'+esc(localized(ing,"amount"))+'</small>':"")+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> '+say("On hand","В наличии")+'</label></div>'+
+   '<div class="rg-item'+(ready?" is-ready":"")+'"><div class="rg-topline"><span class="rg-ingredient">'+esc(localized(ing,"name"))+ingredientAmount(ing,multiplier)+'</span><label class="rg-check"><input type="checkbox" data-rg-ready="'+esc(ing.id)+'"'+(ready?" checked":"")+'> '+say("On hand","В наличии")+'</label></div>'+
    '<div class="rg-state '+(ready||found.length?"found":"missing")+'">'+(ready?say("✓ Ingredient on hand","✓ Ингредиент в наличии"):
   ing.type==="pantry"?say("Not marked on hand","Не отмечено в запасах"):
   found.length?say("Seeds recorded; edible ingredient not confirmed","Семена есть; пищевой ингредиент не подтверждён"):
   say("No matching seed recorded","Нет подходящих семян"))+'</div>'+
-   recipeQuantityNote(ing)+
+   recipeQuantityNote(ing,multiplier)+
    (found.length?'<p class="rg-matches">Your seed records: '+esc(found.join(", "))+'</p>':"")+
    (ing.note?'<p class="rg-detail">'+esc(ing.note)+'</p>':"")+'</div>'
   ).join("")+'</div>'+
@@ -406,7 +412,15 @@ function render(){
 }
 root.addEventListener("change",event=>{
  const target=event.target;
- if(target.id==="rg-recipe"){state.selected=target.value;persist();render();return;}
+ if(target.id==="rgYieldTarget"){
+   const recipe=all().find(r=>r.id===state.selected),info=portionInfo(recipe);
+   const targetPortions=Number(target.value);
+   if(info&&target.value.trim()&&Number.isSafeInteger(targetPortions)&&targetPortions>=1&&targetPortions<=info.max)
+    portionTargets[recipe.id]=targetPortions;
+   else if(info)delete portionTargets[recipe.id];
+   render();return;
+  }
+  if(target.id==="rg-recipe"){state.selected=target.value;persist();render();return;}
  if(target.hasAttribute("data-rg-ready")){
   const recipe=all().find(r=>r.id===state.selected);
   const ing=recipe?.ingredients?.find(i=>i.id===target.getAttribute("data-rg-ready"));
@@ -414,6 +428,9 @@ root.addEventListener("change",event=>{
  }
 });
 root.addEventListener("click",event=>{
+ if(event.target.closest?.("[data-rg-reset-yield]")){
+  delete portionTargets[state.selected];render();return;
+ }
  const open=event.target.closest?.("[data-rg-open-recipe]");
  if(open){
   const recipe=all().find(r=>r.id===open.getAttribute("data-rg-open-recipe"));
