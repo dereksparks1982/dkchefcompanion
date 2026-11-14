@@ -185,7 +185,11 @@ async function start(options){
    }
   }
   if(!ready){
-   const error=Object.assign(lastError||new Error("Could not open camera"),{
+   // Quagga backends sometimes return a text error, not an Error instance.
+   // Wrap it before attaching diagnostics so failure reporting never crashes.
+   const error=lastError&&typeof lastError==="object"?lastError:
+    new Error(String(lastError||"Could not open camera"));
+   Object.assign(error,{
     attempted:profiles.slice(index).map(profile=>profile.label),
     failures:failed,selectedDevice:chosen
    });
