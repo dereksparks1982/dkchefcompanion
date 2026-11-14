@@ -173,6 +173,12 @@ function render(id){
  const store=stores.find(x=>x.id===id);if(!store)return;
  const host=$("#"+store.host);if(!host)return;
  const all=items(id),edit=all.find(row=>row.id===editing[id]);
+ const shown=id==="kitchen"&&storageFilter.kitchen!=="all"?
+  all.filter(row=>{
+   const check=statusFor(row);
+   return row.available!==false&&Number(row.packages??1)>0&&
+    (storageFilter.kitchen==="due"?check.due:check.review);
+  }):all;
  const desc=id==="kitchen"?
   t("One shared food inventory. Pantry and Root Cellar are storage locations, not separate tabs. Your existing records remain in their original locations.",
     "Единый учёт продуктов. Кладовая и погреб — места хранения, а не разные вкладки. Записи остаются на своих местах."):
@@ -183,10 +189,13 @@ function render(id){
  t("On hand","В наличии")+': <strong>'+all.filter(x=>x.available!==false).length+'</strong> · '+
  t("Low stock","Мало запасов")+': <strong>'+all.filter(isLow).length+'</strong> · '+
  t("Expiry warnings","Сроки годности")+': <strong>'+all.filter(x=>expiryNotice(x.expiry)).length+'</strong></div>'+
+ (id==="kitchen"?storageOverview(all):"")+
  '<label class="chef-inventory-search">'+t("Search inventory","Поиск в запасах")+
  '<input type="search" data-chef-search value="'+esc(searches[id])+'" placeholder="'+t("Find product or brand…","Найти товар или марку…")+'"></label>'+
- '<div class="chef-store-list">'+(all.length?all.map(row=>rowHtml(row,id)).join(""):
- '<p class="chef-empty">'+t("No items recorded. Use the scanner above or add items manually.","Нет записей. Используйте сканер вверху или добавьте товар вручную.")+'</p>')+'</div>'+
+ '<div class="chef-store-list">'+(shown.length?shown.map(row=>rowHtml(row,id)).join(""):
+ '<p class="chef-empty">'+(all.length?
+ t("No food matches the selected filter.","Нет продуктов по выбранному фильтру."):
+ t("No items recorded. Use the scanner above or add items manually.","Нет записей. Используйте сканер вверху или добавьте товар вручную."))+'</p>')+'</div>'+
  '<h3 class="chef-store-heading">'+t(edit?"Edit inventory item":"Add inventory item",edit?"Изменить товар":"Добавить товар")+'</h3>'+
  formHtml(id,edit)+
  '<p class="chef-source-note">'+t("Barcodes are read only by the single Product Scanner above; there is no camera or barcode form here.","Штрихкоды считываются только одним сканером вверху. В этой форме нет камеры или поля штрихкода.")+'</p>';
@@ -206,6 +215,21 @@ for(const store of stores){
   searches[id]=event.target.value;applySearch(host,id);
  });
  host.addEventListener("click",event=>{
+  const filter=event.target.closest?.("[data-chef-storage-filter]");
+  if(filter&&id==="kitchen"){
+   const name=filter.dataset.chefStorageFilter;
+   if(["all","due","review"].includes(name))storageFilter.kitchen=name;
+   render(id);return;
+  }
+  const inspect=event.target.closest?.("[data-chef-inspect]");
+  if(inspect&&id==="kitchen"){
+   storageFilter.kitchen="all";editing[id]=inspect.dataset.chefInspect;render(id);
+   const form=host.querySelector("[data-chef-form]");
+   if(form?.elements?.storageChecked)
+    form.elements.storageChecked.value=window.DKChefStorageChecks?.today()||new Date().toISOString().slice(0,10);
+   form?.scrollIntoView?.({block:"nearest",behavior:"smooth"});
+   return;
+  }
   const step=event.target.closest?.("[data-chef-qty]");
   if(step){
    const row=items(id).find(item=>item.id===step.dataset.chefId);
