@@ -221,7 +221,9 @@ host.innerHTML=
  '<label>Garden space<input name="place" maxlength="100" placeholder="Bed / greenhouse"></label>'+
  '<label class="wb-span">Linked planting (optional)<select name="plantingId" id="wbHarvestPlanting"><option value="">No linked planting</option></select></label>'+
  '<label class="wb-span">Quality and notes<input name="notes" maxlength="240" placeholder="Taste, pest damage, would grow again…"></label>'+
- '<button type="submit">Record harvest</button></form><div id="wbHarvestList"></div></div></details>'+
+ '<button type="submit">Record harvest</button></form>'+
+ '<p class="wb-note">'+(document.documentElement.lang==="ru"?'Распределяйте урожай ниже. Сохранение распределения не меняет запасы; отправьте выделенные продукты в кладовую или погреб отдельно.':'Allocate each harvest below. Saving the plan does not add food to inventory; post Pantry or Root Cellar amounts separately.')+'</p>'+
+ '<div id="wbHarvestList"></div></div></details>'+
  '<details class="wb-panel" id="wb-saved"><summary>🌾 Seeds saved from your plants</summary><div class="wb-panel-body">'+
  '<form id="wbSavedForm" class="wb-form"><label class="wb-span">Parent variety'+formSelect("seedKey")+'</label>'+
  '<label>Seed harvest date<input type="date" name="date" required></label>'+
@@ -799,14 +801,118 @@ document.addEventListener("click",event=>{
 });
 $("#wbHarvestForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
 $("#wbSavedForm [name=seedKey]").addEventListener("change",refreshPlantingLinks);
+
+function harvestPosted(row,location){
+ const id=window.DKChefHarvestAllocation?.stockId(row.id,location);
+ return id?window.DKSeedBankRecipes?.provisions?.().items.find(p=>p.id===id)||null:null;
+}
+function harvestAllocationCard(row){
+ const ledger=window.DKChefHarvestAllocation;
+ if(!ledger)return "";
+ const ru=document.documentElement.lang==="ru",t=(en,russian)=>ru?russian:en;
+ const plan=ledger.inspect(row),a=plan.ok?plan.allocations:{fresh:0,preserved:0,pantry:0,cellar:0};
+ const fields=[
+  ["fresh",t("Fresh use","Свежий урожай")],
+  ["preserved",t("For preservation","Для заготовок")],
+  ["pantry",t("Pantry","Кладовая")],
+  ["cellar",t("Root Cellar","Погреб")]
+ ];
+ const step=["count","bunches"].includes(row.unit)?"1":"any";
+ const form=fields.map(([field,label])=>'<label>'+esc(label)+
+  '<input type="number" name="'+field+'" min="0" step="'+step+'" max="'+esc(row.amount)+
+  '" value="'+esc(a[field])+'" required></label>').join("");
+ const summary=plan.ok?
+  t("Allocated: ","Распределено: ")+ledger.amountText(plan.allocated,row.unit)+
+  " · "+t("Unassigned: ","Не распределено: ")+ledger.amountText(plan.remaining,row.unit):
+  t("Allocation invalid; check the amounts.","Ошибка распределения; проверьте количество.");
+ function postedRow(location,label){
+  const stock=harvestPosted(row,location),amount=plan.ok?plan.allocations[location]:0;
+  if(!stock&&!amount)return "";
+  const quantity=ledger.amountText(amount,row.unit);
+  const matches=stock?.sourceHarvestAllocation===true&&stock.sourceHarvestId===row.id&&
+   stock.amount===quantity&&stock.packages===1&&stock.available===true;
+  return '<div class="wb-harvest-stock-row"><span>'+esc(label)+' · '+esc(quantity)+
+   ' · '+t("Inventory: ","В запасах: ")+esc(stock?.amount||t("Not posted","Не внесено"))+
+   (matches?" ✓":stock?" ⚠":"")+'</span>'+
+   (plan.ok?'<button type="button" class="wb-small" data-wb-post-harvest="'+esc(row.id)+
+    '" data-wb-post-location="'+location+'">'+
+    t(stock?"Update linked stock":"Post to inventory",stock?"Обновить запись":"Добавить в запасы")+
+    '</button>':"")+'</div>';
+ }
+ return '<div class="wb-harvest-allocation">'+
+  '<form data-wb-allocation-form="'+esc(row.id)+'"><strong>'+
+  t("Allocate harvest","Распределить урожай")+'</strong>'+
+  '<div class="wb-harvest-allocation-grid">'+form+'</div>'+
+  '<p class="wb-harvest-balance'+(plan.ok?"":" wb-harvest-error")+'">'+esc(summary)+'</p>'+
+  '<button type="submit" class="wb-small">'+t("Save allocation","Сохранить распределение")+'</button></form>'+
+  '<div class="wb-harvest-stock-links">'+
+   postedRow("pantry",t("Pantry","Кладовая"))+
+   postedRow("cellar",t("Root Cellar","Погреб"))+'</div>'+
+  '<p class="wb-note">'+t("Fresh and preserved shares are planning notes only. Posting updates inventory only after confirmation; later allocation changes require a separate stock update.",
+    "Свежий урожай и заготовки учитываются только в плане. Запасы обновляются после подтверждения; после изменений распределения повторно обновите запасы.")+
+  '</p></div>';
+}
 function renderHarvests(){
  $("#wbHarvestList").innerHTML=state.harvests.length?state.harvests.slice().reverse().map(r=>{
-  const p=item(r.seedKey);
+  const p=item(r.seedKey),ru=document.documentElement.lang==="ru";
   return '<div class="wb-record"><strong>'+esc(p?.name||r.seedKey)+'</strong> · '+esc(r.date)+' · '+number(r.amount)+' '+esc(r.unit)+
-  ' · '+esc(r.place||"location unspecified")+linkedPlantingLabel(r.plantingId)+(r.notes?'<p>'+esc(r.notes)+'</p>':'')+
-  ' <button type="button" class="wb-small" data-wb-delete="harvests" data-id="'+esc(r.id)+'">Remove</button></div>';
- }).join(""):'<p class="wb-empty">No harvests recorded yet.</p>';
+   ' · '+esc(r.place||(ru?"место не указано":"location unspecified"))+
+   linkedPlantingLabel(r.plantingId)+(r.notes?'<p>'+esc(r.notes)+'</p>':'')+
+   harvestAllocationCard(r)+
+   ' <button type="button" class="wb-small" data-wb-delete="harvests" data-id="'+esc(r.id)+'">'+
+   (ru?"Удалить урожай":"Remove harvest")+'</button></div>';
+ }).join(""):'<p class="wb-empty">'+(document.documentElement.lang==="ru"?"Записей урожая пока нет.":"No harvests recorded yet.")+'</p>';
 }
+$("#wbHarvestList").addEventListener("submit",event=>{
+ const form=event.target;
+ if(!form.matches?.("[data-wb-allocation-form]"))return;
+ event.preventDefault();
+ const row=state.harvests.find(h=>h.id===form.dataset.wbAllocationForm);
+ const ledger=window.DKChefHarvestAllocation,ru=document.documentElement.lang==="ru";
+ if(!row||!ledger)return;
+ const entries=new FormData(form),values={};
+ for(const field of ledger.BUCKETS)values[field]=String(entries.get(field)??"");
+ const next=ledger.inspect(row,values);
+ if(!next.ok){
+  notice(ru?"Распределение не сохранено: ошибка количества или превышен урожай.":
+   "Allocation not saved: invalid quantity or allocations exceed the harvest.");return;
+ }
+ const old=JSON.stringify(row);
+ row.allocations=next.allocations;row.updatedAt=changed();
+ if(!persist()){Object.assign(row,JSON.parse(old));return;}
+ renderHarvests();
+ notice(ru?"Распределение сохранено. Запасы не изменились.":"Allocation saved; inventory unchanged.");
+});
+$("#wbHarvestList").addEventListener("click",event=>{
+ const button=event.target.closest?.("[data-wb-post-harvest]");
+ if(!button)return;
+ const harvest=state.harvests.find(r=>r.id===button.dataset.wbPostHarvest);
+ const location=button.dataset.wbPostLocation,ledger=window.DKChefHarvestAllocation;
+ const plan=harvest&&ledger?.inspect(harvest),ru=document.documentElement.lang==="ru";
+ if(!plan?.ok||!["pantry","cellar"].includes(location))return;
+ const amount=ledger.amountText(plan.allocations[location],harvest.unit);
+ const place=location==="pantry"?(ru?"кладовая":"Pantry"):(ru?"погреб":"Root Cellar");
+ if(!window.confirm(ru?
+  "Обновить запасы ("+place+") до "+amount+"? При нуле связанная запись будет удалена.":
+  "Update "+place+" inventory to "+amount+"? Zero removes the linked stock record."))return;
+ const result=window.DKSeedBankRecipes?.postHarvestAllocation?.(harvest.id,location);
+ const errors={
+  "already-linked":[
+   "This harvest already has a manual stock entry here. Reconcile it in Pantry & Root Cellar to avoid double counting.",
+   "Этот урожай уже перенесён вручную. Проверьте запись в кладовой и погребе, чтобы избежать двойного учёта."],
+  "stock-edited":[
+   "The linked stock was manually changed. Reconcile it in Pantry & Root Cellar before updating.",
+   "Связанная запись изменена вручную. Проверьте её в кладовой и погребе перед обновлением."],
+  "save-failed":["Inventory could not be saved.","Не удалось сохранить запасы."]
+ };
+ if(!result?.ok){
+  const message=errors[result?.reason]||["Could not post this allocation.","Не удалось перенести распределённый урожай."];
+  notice(message[ru?1:0]);return;
+ }
+ renderHarvests();
+ notice(ru?"Запасы обновлены: "+place+" · "+amount:"Inventory updated: "+place+" · "+amount);
+});
+document.addEventListener("dkchef:provisions-changed",renderHarvests);
 $("#wbSavedForm").elements.date.value=today();
 $("#wbSavedForm").addEventListener("submit",event=>{
  event.preventDefault();const f=event.currentTarget,v=new FormData(f);
@@ -861,7 +967,10 @@ document.addEventListener("click",event=>{
  if(list==="lots"&&record.origin==="catalog"){
   notice("Existing catalog packets should be archived, not permanently removed, so the original variety count stays accurate.");return;
  }
- if(!window.confirm("Remove this "+list+" record?"))return;
+ if(list==="harvests"&&window.DKSeedBankRecipes?.provisions?.().items.some(p=>p.sourceHarvestAllocation===true&&p.sourceHarvestId===record.id)){
+   notice(document.documentElement.lang==="ru"?"Сначала удалите связанные запасы в кладовой и погребе.":"Remove linked Pantry & Root Cellar stock first.");return;
+  }
+  if(!window.confirm("Remove this "+list+" record?"))return;
  state[list]=state[list].filter(x=>x.id!==btn.dataset.id);
   recordDeletion(list,btn.dataset.id);
  persist();renderAll();
