@@ -226,12 +226,22 @@ function portionTarget(recipe){
 function portionFactor(recipe){
  return portionInfo(recipe)?window.DKChefRecipeMatch.yieldFactor(recipe,portionTarget(recipe)):1;
 }
-function portionUnit(info){
+function portionUnit(info,count=null){
  if(!ru())return info.unit;
- const names={servings:"порций",naan:"лепёшек наан",pita:"пит",pitas:"пит",
-  chapati:"чапати",rolls:"булочек",roll:"булочек",biscuits:"булочек",
-  biscuit:"булочек",wedges:"кусочков",wedge:"кусочков",loaf:"буханок",loaves:"буханок"};
- return names[info.unit]||"шт.";
+ const names={
+  servings:["порция","порции","порций"],naan:["лепёшка наан","лепёшки наан","лепёшек наан"],
+  pita:["пита","питы","пит"],pitas:["пита","питы","пит"],
+  chapati:["чапати","чапати","чапати"],
+  rolls:["булочка","булочки","булочек"],roll:["булочка","булочки","булочек"],
+  biscuits:["булочка","булочки","булочек"],biscuit:["булочка","булочки","булочек"],
+  wedges:["кусочек","кусочка","кусочков"],wedge:["кусочек","кусочка","кусочков"],
+  loaf:["буханка","буханки","буханок"],loaves:["буханка","буханки","буханок"]
+ };
+ const forms=names[info.unit];
+ if(!forms)return "шт.";
+ if(count===null)return forms[2];
+ const n=Math.abs(Number(count)),last=n%10,teen=n%100;
+ return forms[teen>=11&&teen<=14?2:last===1?0:last>=2&&last<=4?1:2];
 }
 function portionControl(recipe){
  const info=portionInfo(recipe);
@@ -324,7 +334,7 @@ function cookPlanner(recipes){
     '<strong class="rg-cook-score">'+score.ready+' / '+score.total+'</strong></div>'+
     '<p class="rg-cook-state">'+status+'</p>'+
     (portionInfo(recipe)?'<p class="rg-cook-portion">'+say("Planned yield: ","Планируемый выход: ")+
-      portionTarget(recipe)+' '+esc(portionUnit(portionInfo(recipe)))+'</p>':'')+
+      portionTarget(recipe)+' '+esc(portionUnit(portionInfo(recipe),portionTarget(recipe)))+'</p>':'')+
 '<p class="rg-cook-quantity">'+say("Measured enough: ","По меркам хватает: ")+score.measuredEnough+
  ' · '+say("Measured short: ","По меркам мало: ")+score.measuredShort+
  ' · '+say("Check amount: ","Уточнить количество: ")+score.quantityUnverified+'</p>'+
